@@ -4,8 +4,11 @@
     Author     : Caio
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<fmt:setLocale value="${sessionScope.appLocale}"/>
+<fmt:setBundle basename="messages"/>
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="${empty sessionScope.appLocale ? 'en' : sessionScope.appLocale.toLanguageTag()}">
     <head>
         <title>UFF | ${param.title}</title>
         <meta charset="UTF-8">
@@ -24,6 +27,9 @@
     </head>
 
     <body>
+        <fmt:message key="navigation.account" var="accountLabel"/>
+        <fmt:message key="navigation.cart" var="cartLabel"/>
+        <fmt:message key="navigation.search" var="searchLabel"/>
         <%
             // mostra se tiver msg
             if (session.getAttribute("msg") != null) {
@@ -69,17 +75,26 @@
                 <!-- Pesquisa -->
                 <div class="consulta-header">
                     <form id="pesquisa" method="POST" action="produtos">
-                        <input name="pesquisa" type="search" placeholder="Buscar..." required>
+                        <input name="pesquisa" type="search" placeholder="${searchLabel}" required>
                     </form>
                 </div>
                 <!-- Minha Conta -->
                 <div class="login-header">
-                    <a href="usuario"><img alt="Minha Conta" src="img/my-account.png" width="20" style="vertical-align: middle"></a>
+                    <a href="usuario"><img alt="${accountLabel}" src="img/my-account.png" width="20" style="vertical-align: middle"></a>
                 </div>
                 <!-- Carrinho -->
                 <div class="carrinho-header">
-                    <a href="carrinho"><img alt="Meu Carrinho" src="img/cart.png" width="25" style="vertical-align: middle"></a>
+                    <a href="carrinho"><img alt="${cartLabel}" src="img/cart.png" width="25" style="vertical-align: middle"></a>
                 </div>
+                <form method="post" action="language" class="language-switcher">
+                    <label for="locale"><fmt:message key="language.label"/></label>
+                    <select id="locale" name="locale" onchange="this.form.submit()">
+                        <option value="en" ${sessionScope.appLocale.language == 'en' ? 'selected' : ''}><fmt:message key="language.english"/></option>
+                        <option value="pt-BR" ${sessionScope.appLocale.toLanguageTag() == 'pt-BR' ? 'selected' : ''}><fmt:message key="language.brazilianPortuguese"/></option>
+                        <option value="es" ${sessionScope.appLocale.language == 'es' ? 'selected' : ''}><fmt:message key="language.spanish"/></option>
+                        <option value="pt-PT" ${sessionScope.appLocale.toLanguageTag() == 'pt-PT' ? 'selected' : ''}><fmt:message key="language.portuguese"/></option>
+                    </select>
+                </form>
             </div>
         </header>
         <!-- Pra impedir de ficar elementos em cima do header -->

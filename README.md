@@ -1,46 +1,89 @@
-# Loja Virtual
-UFF - Trabalho feito em grupo para a matéria de Desenvolvimento Web e melhorado para matéria de Qualidade e Testes
+# e-store
 
-# Requisitos do Professor
-* Fazer uma loja virtual completa com carrinho de compras usando APENAS as tecnologias estudadas durante o curso (HTML, CSS, Javascript, JSP, Servlets, MVC, MySQL, XAMPP, Netbeans 8.2)
-* Com as características
-  * Usuários e gerenciamento de suas contas
-  * Cadastro de produtos (um usuário administrador pode inserir, alterar ou remover produtos)
-  * Navegação de produtos (5 produtos por página com paginação)
-  * Carrinho de compras com usuário requerido apenas no fechamento da compra
-  * Ranking ou estrelas para os produtos
-  * Avaliações dos usuários desses produtos
-  * Lista de produtos favoritos por usuário
+A Java web storefront for browsing and searching products, managing an account, saving favorites, reviewing products, and completing purchases through a shopping cart.
 
-# Como rodar o projeto...
-## Docker
-1. Rode `cp .env.example .env && docker-compose up --build -d`
-  * Para acompanhar os logs de criação do container maven, execute o seguinte comando: `docker logs --tail 50 -f e_store_mvn` 
-2. Aguarde o container startar
-3. Acesse http://localhost:8181 e verifique se está funcionando
-## Padrão
-1. Configure seu arquivo `.env`, pode copiar o .env.example para usar como template `cp .env.example .env`
-2. Restaure o dump .sql em um banco de dados mysql 5.6, o dump pode ser encontrado em https://github.com/caiowbarros/Loja-Virtual/blob/master/database/dump/dump.sql
-3. Rode `rm -R target -f && cp .env.local .env && mvn package` para buildar o projeto
-4. Rode `java -jar target/dependency/webapp-runner.jar --port $PORT target/loja-1.0.1.war` para testar seu projeto, trocando o `$PORT` pela porta que você tiver definido no .env na variável PORT
-5. Acesse http://localhost:`$PORT` e verifique se está funcionando
-# Api
-## Documentação
-* [CLIQUE AQUI PARA VER A DOCUMENTAÇÃO DA API NO POSTMAN](https://documenter.getpostman.com/view/13081554/U16bvUBT)
-* [CLIQUE AQUI PARA IR ATÉ O ARQUIVO ONDE ENCONTRA-SE A COLLECTION DO POSTMAN PARA SER IMPORTADA NO SEU POSTMAN](https://github.com/caiowbarros/Loja-Virtual/blob/master/Loja.postman_collection.json)
+The current application is a legacy Java 8, JSP/Servlet, Maven WAR project backed by MySQL. Its design is being improved in small, behavior-preserving steps. See the [specifications](specs/README.md) for observed behavior and target requirements, and [TODO.md](TODO.md) for known gaps.
 
-# PiTest
-* O PIT é um sistema de teste de mutação de última geração, fornecendo cobertura de teste padrão ouro para Java e jvm.
-* O que é teste de mutação?
-  * O teste de mutação é conceitualmente muito simples.
-  * Falhas (ou mutações) são propagadas automaticamente em seu código e, em seguida, seus testes são executados. Se seus testes falharem, a mutação é morta; se seus testes passarem, a mutação sobreviveu.
-  * A qualidade dos seus testes pode ser avaliada pela porcentagem de mutações eliminadas.
-  * Colocando de outra forma - o PIT executa seus testes de unidade em versões modificadas automaticamente do código do seu aplicativo. Quando o código do aplicativo muda, ele deve produzir resultados diferentes e fazer com que os testes de unidade falhem. Se um teste de unidade não falhar nessa situação, isso pode indicar um problema com o conjunto de testes.
-  * A cobertura de teste tradicional (ou seja, linha, instrução, ramificação, etc.) mede apenas qual código é executado por seus testes. Ele não verifica se seus testes são realmente capazes de detectar falhas no código executado. Portanto, ele só é capaz de identificar códigos que definitivamente não foram testados.
-  * Os exemplos mais extremos do problema são testes sem asserções. Felizmente, eles são incomuns na maioria das bases de código. Muito mais comum é o código que é apenas parcialmente testado por seu conjunto. Uma suíte que testa apenas parcialmente o código ainda pode executar todas as suas ramificações.
-  * Como ele é realmente capaz de detectar se cada afirmação foi testada de forma significativa, o teste de mutação é o padrão ouro contra o qual todos os outros tipos de cobertura são medidos.
-## Como gerar o relatório
-* Para rodar o PiTest, execute o seguinte comando após já ter buildado o projeto:
+## Features
+
+- Product catalog with categories, search, filters, and pagination.
+- Customer accounts, administrator role, and address management.
+- Anonymous and account-owned carts, cart updates, and checkout.
+- Product ratings and user favorites.
+- Servlet JSON endpoints for products, users, and categories.
+- Session language selection for English, Brazilian Portuguese, Spanish, and European Portuguese. Translation coverage is in progress.
+
+## Requirements
+
+- Docker Desktop or Docker Engine with the Docker Compose plugin.
+- Ports `8181` and `3306` available by default. Configure different ports in `.env` if needed.
+
+Docker supplies Maven and Java inside the application container, so a local JDK and Maven installation are not required for the recommended workflow.
+
+## Start locally
+
+From a POSIX shell (`sh`), run this single command from the repository root:
+
+   ```sh
+   cp .env.example .env && docker compose up
+   ```
+
+Then open [http://localhost:8181](http://localhost:8181).
+
+Compose waits for MySQL health, builds the WAR, runs the Maven test lifecycle, and starts the web application. The first run initializes the database from `database/dump`. The database volume persists across restarts.
+
+Useful commands:
+
 ```sh
+docker compose logs -f app database
+docker compose down
+docker compose down -v
+docker compose run --rm app mvn -B verify
+```
+
+`docker compose down -v` deletes the development database volume. The checked-in SQL dump is legacy schema and sample data. Use only non-sensitive local credentials in `.env`; `.env` is ignored by Git. Compose exposes MySQL on the configured host port for local database tools.
+
+## Configuration
+
+Copy `.env.example` to `.env` and change ports or local database credentials as needed. Compose configures the app to reach MySQL by its service name. For a Java process running directly on the host, use `jdbc:mysql://localhost:3306/e_store?useSSL=false&serverTimezone=UTC` as `MYSQL_CONNECTION_STRING` and provide `MYSQL_USER` and `MYSQL_PASSWORD`.
+
+## Run without Docker
+
+Install a JDK compatible with the Java 8 source target and Maven, start compatible MySQL, import `database/dump/dump.sql`, and copy `.env.local` to `.env` so the application loads the host database settings. Then run:
+
+```sh
+mvn clean verify
+java -jar target/dependency/webapp-runner.jar --port 8181 target/loja-1.0.1.war
+```
+
+This legacy runtime path is provided for maintenance; Docker Compose is the supported local setup.
+
+## Tests and quality
+
+```sh
+mvn test
+mvn verify
 mvn org.pitest:pitest-maven:mutationCoverage
 ```
+
+The current database-backed tests expect a populated MySQL database and mutate its data. Do not point them at valuable data. See [architecture and quality requirements](specs/architecture-quality.md) and [the tracked testing gaps](TODO.md).
+
+## Repository map
+
+```text
+src/main/java/       Servlet endpoints, services, DTOs, and MySQL data access
+src/main/webapp/     JSP pages, styles, and static images
+src/main/resources/  Locale message bundles
+src/test/            JUnit and Cucumber tests
+database/            Legacy MySQL initialization dump and configuration
+specs/               Feature and architecture specifications by specialty
+agents/              AI-agnostic contribution workflow and skill
+```
+
+## API
+
+The existing Postman collection is [`Loja.postman_collection.json`](Loja.postman_collection.json). See [specs/api.md](specs/api.md) for the route inventory and target contract. API error and authentication contracts still need standardization.
+
+## Contributing
+
+Use English for source code, comments, technical docs, and tests. Keep user-facing translations in locale bundles. For every behavior change, update the matching spec, add tests at the appropriate boundaries, and update the backlog. Aim to keep files below 300 lines. Read [AGENTS.md](AGENTS.md), [agents/README.md](agents/README.md), and the relevant specialty spec before making a change.

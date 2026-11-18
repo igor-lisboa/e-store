@@ -15,10 +15,17 @@ import br.uff.loja.infrastructure.data.ProdutoData;
 
 public class ProdutoService implements IProdutoService {
 
-    private IProdutoData produtoData;
+    private final IProdutoData produtoData;
 
     public ProdutoService() {
-        produtoData = new ProdutoData();
+        this(new ProdutoData());
+    }
+
+    public ProdutoService(IProdutoData produtoData) {
+        if (produtoData == null) {
+            throw new IllegalArgumentException("Product data dependency is required.");
+        }
+        this.produtoData = produtoData;
     }
 
     @Override

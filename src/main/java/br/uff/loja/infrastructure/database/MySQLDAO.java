@@ -106,8 +106,20 @@ public class MySQLDAO {
         if (this.conn != null && !this.conn.isClosed()) {
             return;
         }
-        Dotenv dotenv = Dotenv.load();
-        this.conn = DriverManager.getConnection(dotenv.get("MYSQL_CONNECTION_STRING"));
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        String url = setting(dotenv, "MYSQL_CONNECTION_STRING", "jdbc:mysql://localhost:3306/e_store?useSSL=false&serverTimezone=UTC");
+        String user = setting(dotenv, "MYSQL_USER", "e_store");
+        String password = setting(dotenv, "MYSQL_PASSWORD", "123456");
+        this.conn = DriverManager.getConnection(url, user, password);
+    }
+
+    private String setting(Dotenv dotenv, String name, String fallback) {
+        String environmentValue = System.getenv(name);
+        if (environmentValue != null && !environmentValue.trim().isEmpty()) {
+            return environmentValue;
+        }
+        String fileValue = dotenv.get(name);
+        return fileValue == null || fileValue.trim().isEmpty() ? fallback : fileValue;
     }
 
     public void fechaConexao() throws SQLException {
