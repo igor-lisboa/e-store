@@ -1,5 +1,7 @@
 package br.uff.store.steps.stepDefinition;
 
+import java.math.BigDecimal;
+
 import br.uff.store.application.StoreServices;
 
 import static org.junit.Assert.assertEquals;
@@ -18,8 +20,8 @@ public class ProductStepDefinition {
     private Integer productId;
 
     @Given("a product named {string} priced at {double} with category {string}")
-    public void productDetails(String name, Double price, String category) {
-        input = new ProductDTO(null, name, price, "Scenario product", "img/ps4.jpg",
+    public void productDetails(String name, double price, String category) {
+        input = new ProductDTO(null, name, BigDecimal.valueOf(price), "Scenario product", "img/ps4.jpg",
                 ProductCategory.valueOf(category).getId(), 0);
     }
 

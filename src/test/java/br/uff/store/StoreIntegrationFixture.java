@@ -1,5 +1,7 @@
 package br.uff.store;
 
+import java.math.BigDecimal;
+
 import br.uff.store.application.StoreServices;
 import br.uff.store.core.dtos.AddressDTO;
 import br.uff.store.core.dtos.CartDTO;
@@ -21,7 +23,7 @@ public abstract class StoreIntegrationFixture extends IsolatedMySqlTest {
     protected final ISaleService sales = StoreServices.sales();
     protected final IReviewService reviews = StoreServices.reviews();
 
-    protected ProductDTO createProduct(String name, double price, int stock) throws Exception {
+    protected ProductDTO createProduct(String name, BigDecimal price, int stock) throws Exception {
         products.insertProduct(new ProductDTO(null, name, price, "Integration fixture", "img/ps4.jpg", 5, stock));
         ProductDTO created = products.listAdminProducts().stream().filter(product -> name.equals(product.getName()))
                 .findFirst().orElseThrow(() -> new AssertionError("Created product was not persisted."));

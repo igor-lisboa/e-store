@@ -25,3 +25,7 @@
 ## Open questions
 
 - Review edits are not supported; confirm whether users should be able to change a review.
+
+## Decided requirements (pending implementation)
+
+- Customers may edit and delete their own product reviews (decision 10C). Ownership is checked on every change, and no other customer can modify or remove a review.

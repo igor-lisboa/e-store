@@ -1,5 +1,7 @@
 package br.uff.store.core.interfaces.services;
 
+import java.math.BigDecimal;
+
 import java.util.List;
 
 import br.uff.store.core.dtos.CartDTO;
@@ -23,7 +25,7 @@ public interface ICartService {
 
     public Boolean isValidActiveCart(Integer id, Integer userId) throws StoreException;
 
-    public Double getCartTotal(Integer id) throws StoreException;
+    public BigDecimal getCartTotal(Integer id) throws StoreException;
 
     public Integer productQuantityInCart(Integer id, Integer productId) throws StoreException;
 }

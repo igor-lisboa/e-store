@@ -1,5 +1,7 @@
 package br.uff.store.core.dtos;
 
+import java.math.BigDecimal;
+
 import java.util.List;
 
 public class ProductFilterDTO extends BaseDTO {
@@ -7,8 +9,8 @@ public class ProductFilterDTO extends BaseDTO {
     private Integer pageNumber;
     private Integer pageSize;
     private String search;
-    private Double minimumPrice;
-    private Double maximumPrice;
+    private BigDecimal minimumPrice;
+    private BigDecimal maximumPrice;
     private Boolean favoritesOnly;
     private Integer userId;
     private Boolean newReleasesOnly;
@@ -43,11 +45,11 @@ public class ProductFilterDTO extends BaseDTO {
         return search;
     }
 
-    public Double getMaximumPrice() {
+    public BigDecimal getMaximumPrice() {
         return maximumPrice;
     }
 
-    public Double getMinimumPrice() {
+    public BigDecimal getMinimumPrice() {
         return minimumPrice;
     }
 
@@ -79,11 +81,11 @@ public class ProductFilterDTO extends BaseDTO {
         this.search = search;
     }
 
-    public void setMaximumPrice(Double maximumPrice) {
+    public void setMaximumPrice(BigDecimal maximumPrice) {
         this.maximumPrice = maximumPrice;
     }
 
-    public void setMinimumPrice(Double minimumPrice) {
+    public void setMinimumPrice(BigDecimal minimumPrice) {
         this.minimumPrice = minimumPrice;
     }
 

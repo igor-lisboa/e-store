@@ -1,5 +1,7 @@
 package br.uff.store.application.api;
 
+import java.math.BigDecimal;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -15,7 +17,7 @@ public class ApiSerializationTest {
 
     @Test
     public void productResponseUsesEnglishPropertyNames() {
-        ProductDTO product = new ProductDTO(4, "Console", 299.0, "Game console", "img/ps4.jpg", 5, 10);
+        ProductDTO product = new ProductDTO(4, "Console", new BigDecimal("299.00"), "Game console", "img/ps4.jpg", 5, 10);
         product.setCategory("Consoles");
 
         JsonObject json = gson.toJsonTree(product).getAsJsonObject();

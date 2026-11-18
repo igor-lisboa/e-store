@@ -1,5 +1,7 @@
 package br.uff.store;
 
+import java.math.BigDecimal;
+
 import br.uff.store.core.dtos.AddressDTO;
 import br.uff.store.core.dtos.CartDTO;
 import br.uff.store.core.dtos.PaginationDTO;
@@ -21,7 +23,7 @@ public class LegacyStoreIntegrationCheckoutTest extends StoreIntegrationFixture 
         assertEquals(cart.getId(), order.getCartId());
         assertEquals(address.getId(), order.getAddressId());
         assertEquals(Integer.valueOf(2), order.getUserId());
-        assertEquals(998.00, order.getTotalPrice(), 0.001);
+        assertEquals(new BigDecimal("998.00"), order.getTotalPrice());
         assertEquals(Integer.valueOf(98), products.findProductById(1).getQuantity());
         assertEquals(Integer.valueOf(2), carts.listCartProducts(order.getCartId()).get(0).getQuantity());
     }

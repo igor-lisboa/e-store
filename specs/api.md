@@ -4,7 +4,8 @@
 
 - Servlet endpoints exist for products, users, and categories under `/api`.
 - Product lookup serializes a product DTO as JSON. Swagger UI is served at `/swagger/` and the OpenAPI 3.0.3 contract at `/swagger/openapi.json`.
-- User lookup requires a signed-in session. Customers can read only their own account; administrators can list and read accounts.
+- `GET /api/products/{productId}` returns availability only to anonymous and customer callers; administrators receive exact quantity (decision 1B, pending implementation). The current behavior returns exact quantity to everyone.
+- `GET /api/products/` lists every product with stock quantities and descriptions; it requires an administrator session (401 when signed out, 403 for customers). Single-product lookup stays public until decision 1B is implemented.
 - User API errors use a generic JSON error object and do not serialize exceptions.
 - All API error responses use an `error` string. Product/account lookups return 404 for absent records, while infrastructure failures remain generic 500 errors. API versioning remains pending.
 - JSON properties are English, including product `name`, `price`, `description`, `image`, `categoryId`, `quantity`, `category`, and account `name`, `email`, `roleId`. Java DTO fields and accessors also use English names.

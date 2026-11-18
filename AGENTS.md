@@ -20,3 +20,5 @@
 - Apply `agents/skills/maintain-openapi/SKILL.md` whenever a change affects API routing, inputs, JSON serialization, validation, auth, or error responses. Use `agents/swagger-maintainer.md` as the API review checklist, including changes in services that alter endpoint behavior.
 - Never commit `.env`, credentials, customer data, or production dumps.
 - Inspect the diff, report checks actually run, and name blocked checks with reasons. Do not claim unverified results.
+
+- When a change needs the user's decision, number each question (1, 2, 3). Give each question's choices as lettered options (A, B, C). Under each option, list its pros and cons as bullet points, and mark one option "(Recommended)" when you have a recommendation. Do not leave decisions as unnumbered prose.

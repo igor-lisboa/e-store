@@ -39,3 +39,8 @@
 
 - Registration and password-reset flows are not clearly specified by the current tests.
 - Define supported password policy and account recovery requirements before implementation.
+
+## Decided requirements
+
+- Passwords set on account creation or replaced on edit must have at least 8 characters (decision 11A). No other composition rules apply. Accounts that keep their password on edit are not re-checked, and existing hashes are not rewritten by this rule.
+- Dormant accounts with legacy password hashes are reset by a forced email reset on their next sign-in attempt (decision 4A). Pending: no email delivery provider exists yet.

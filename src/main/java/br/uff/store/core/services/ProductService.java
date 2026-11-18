@@ -1,5 +1,8 @@
 package br.uff.store.core.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import java.util.List;
 
 import br.uff.store.core.dtos.ProductFilterDTO;
@@ -13,6 +16,9 @@ import br.uff.store.core.interfaces.data.IProductData;
 import br.uff.store.core.interfaces.services.IProductService;
 
 public class ProductService implements IProductService {
+
+    /** Matches the DECIMAL(11,2) product price column. */
+    private static final BigDecimal MAXIMUM_PRICE = new BigDecimal("999999999.99");
 
     private final IProductData productData;
 
@@ -76,11 +82,11 @@ public class ProductService implements IProductService {
             throw new StoreException("Product filters are required.");
         }
         InputRules.page(filter.getPageSize(), filter.getPageNumber());
-        Double minimum = filter.getMinimumPrice();
-        Double maximum = filter.getMaximumPrice();
+        BigDecimal minimum = filter.getMinimumPrice();
+        BigDecimal maximum = filter.getMaximumPrice();
         validatePriceBound(minimum);
         validatePriceBound(maximum);
-        if (minimum != null && maximum != null && minimum > maximum) {
+        if (minimum != null && maximum != null && minimum.compareTo(maximum) > 0) {
             throw new StoreException("Minimum price cannot exceed maximum price.");
         }
         return productData.listStorefrontProducts(filter);
@@ -109,15 +115,20 @@ public class ProductService implements IProductService {
         InputRules.requiredText(product.getDescription(), 255, "Product description");
         InputRules.requiredText(product.getImage(), 4000000, "Product image");
         InputRules.positiveId(product.getCategoryId(), "Category ID");
-        Double price = product.getPrice();
-        if (price == null || !Double.isFinite(price) || price < 0 || price > 999999999.99) {
-            throw new StoreException("Price must be a finite, non-negative amount within the supported range.");
+        BigDecimal rounded = product.getPrice() == null ? null : product.getPrice().setScale(2, RoundingMode.HALF_UP);
+        if (!isValidPrice(rounded)) {
+            throw new StoreException("Price must be a non-negative amount within the supported range.");
         }
+        product.setPrice(rounded);
     }
 
-    private void validatePriceBound(Double value) throws StoreException {
-        if (value != null && (!Double.isFinite(value) || value < 0)) {
-            throw new StoreException("Price filters must be finite and non-negative.");
+    private static boolean isValidPrice(BigDecimal price) {
+        return price != null && price.signum() >= 0 && price.compareTo(MAXIMUM_PRICE) <= 0;
+    }
+
+    private void validatePriceBound(BigDecimal value) throws StoreException {
+        if (value != null && value.signum() < 0) {
+            throw new StoreException("Price filters must be non-negative.");
         }
     }
 }

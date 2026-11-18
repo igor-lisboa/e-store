@@ -1,5 +1,7 @@
 package br.uff.store.core.dtos;
 
+import java.math.BigDecimal;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,7 @@ public class SaleDTO extends BaseDTO {
 
     private Integer id;
     private Integer cartId;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
     private Date createdAt;
     private Integer addressId;
     private Integer userId;
@@ -22,7 +24,7 @@ public class SaleDTO extends BaseDTO {
     public SaleDTO(Map<String, Object> sale) {
         this.setId(Integer.valueOf(String.valueOf(sale.get("id"))));
         this.setCartId(Integer.valueOf(String.valueOf(sale.get("cartId"))));
-        this.setTotalPrice(Double.valueOf(String.valueOf(sale.get("totalPrice"))));
+        this.setTotalPrice(new BigDecimal(String.valueOf(sale.get("totalPrice"))));
         this.setCreatedAt(DtoValues.date(sale.get("createdAt")));
         this.setAddressId(Integer.valueOf(String.valueOf(sale.get("addressId"))));
         this.setUserId(Integer.valueOf(String.valueOf(sale.get("userId"))));
@@ -60,7 +62,7 @@ public class SaleDTO extends BaseDTO {
         return id;
     }
 
-    public Double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
@@ -84,7 +86,7 @@ public class SaleDTO extends BaseDTO {
         this.id = id;
     }
 
-    public void setTotalPrice(Double totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 

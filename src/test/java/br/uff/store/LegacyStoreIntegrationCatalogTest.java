@@ -1,5 +1,7 @@
 package br.uff.store;
 
+import java.math.BigDecimal;
+
 import br.uff.store.application.StoreServices;
 import br.uff.store.core.dtos.CategoryDTO;
 import br.uff.store.core.dtos.FeaturedProductDTO;
@@ -16,10 +18,10 @@ import static org.junit.Assert.*;
 public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
     @Test
     public void createdProductRetainsSubmittedDetails() throws Exception {
-        ProductDTO product = createProduct("Integration console", 12.50, 7);
+        ProductDTO product = createProduct("Integration console", new BigDecimal("12.50"), 7);
         ProductDTO saved = products.findProductById(product.getId());
         assertEquals("Integration console", saved.getName());
-        assertEquals(12.50, saved.getPrice(), 0.001);
+        assertEquals(new BigDecimal("12.50"), saved.getPrice());
         assertEquals("Integration fixture", saved.getDescription());
         assertEquals(Integer.valueOf(5), saved.getCategoryId());
         assertEquals(Integer.valueOf(7), saved.getQuantity());
@@ -29,11 +31,11 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
     public void editChangesDetailsWithoutResettingStock() throws Exception {
         ProductDTO product = products.findProductById(1);
         product.setName("Updated console");
-        product.setPrice(42.25);
+        product.setPrice(new BigDecimal("42.25"));
         products.updateProductById(1, product);
         ProductDTO saved = products.findProductById(1);
         assertEquals("Updated console", saved.getName());
-        assertEquals(42.25, saved.getPrice(), 0.001);
+        assertEquals(new BigDecimal("42.25"), saved.getPrice());
         assertEquals(Integer.valueOf(100), saved.getQuantity());
     }
 
@@ -54,15 +56,15 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
 
     @Test
     public void priceFilterIncludesBoundariesAndExcludesOtherPrices() throws Exception {
-        ProductDTO lower = createProduct("Lower boundary", 20.10, 1);
-        ProductDTO upper = createProduct("Upper boundary", 28.80, 1);
-        createProduct("Below boundary", 20.09, 1);
-        createProduct("Above boundary", 28.81, 1);
+        ProductDTO lower = createProduct("Lower boundary", new BigDecimal("20.10"), 1);
+        ProductDTO upper = createProduct("Upper boundary", new BigDecimal("28.80"), 1);
+        createProduct("Below boundary", new BigDecimal("20.09"), 1);
+        createProduct("Above boundary", new BigDecimal("28.81"), 1);
         ProductFilterDTO filter = new ProductFilterDTO();
         filter.setPageNumber(1);
         filter.setPageSize(10);
-        filter.setMinimumPrice(20.10);
-        filter.setMaximumPrice(28.80);
+        filter.setMinimumPrice(new BigDecimal("20.10"));
+        filter.setMaximumPrice(new BigDecimal("28.80"));
         List<Integer> ids = products.listStorefrontProducts(filter).getItems().stream()
                 .map(ProductListDTO::getId).collect(Collectors.toList());
         assertEquals(2, ids.size());
@@ -72,8 +74,8 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
 
     @Test
     public void featuredProductsPreferStockAndRespectThreeItemLimit() throws Exception {
-        ProductDTO featured = createProduct("High stock", 10.00, 500);
-        ProductDTO unavailable = createProduct("No stock", 10.00, 0);
+        ProductDTO featured = createProduct("High stock", new BigDecimal("10.00"), 500);
+        ProductDTO unavailable = createProduct("No stock", new BigDecimal("10.00"), 0);
         List<FeaturedProductDTO> result = products.listFeaturedProducts();
         assertEquals(3, result.size());
         assertEquals(featured.getId(), result.get(0).getId());

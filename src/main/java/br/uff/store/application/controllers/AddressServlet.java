@@ -24,8 +24,12 @@ public class AddressServlet extends HttpServlet {
     private final Helper helper;
 
     public AddressServlet() {
-        helper = new Helper();
-        addressService = StoreServices.addresses();
+        this(StoreServices.addresses(), new Helper());
+    }
+
+    AddressServlet(IAddressService addressService, Helper helper) {
+        this.addressService = addressService;
+        this.helper = helper;
     }
 
     /**

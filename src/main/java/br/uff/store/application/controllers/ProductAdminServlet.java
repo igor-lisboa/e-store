@@ -31,10 +31,15 @@ public class ProductAdminServlet extends HttpServlet {
     private final Helper helper;
 
     public ProductAdminServlet() {
-        helper = new Helper();
-        productService = StoreServices.products();
-        categoryService = StoreServices.categories();
-        userService = StoreServices.users();
+        this(StoreServices.products(), StoreServices.categories(), StoreServices.users(), new Helper());
+    }
+
+    ProductAdminServlet(IProductService productService, ICategoryService categoryService,
+            IUserService userService, Helper helper) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+        this.userService = userService;
+        this.helper = helper;
     }
 
     /**
@@ -90,7 +95,7 @@ public class ProductAdminServlet extends HttpServlet {
                         ProductDTO productDto = new ProductDTO(
                             sel,
                             request.getParameter("name"),
-                            Double.valueOf(request.getParameter("price")),
+                            helper.tryParseDecimal(request.getParameter("price")),
                             request.getParameter("description"),
                             request.getParameter("src"),
                             helper.tryParseInteger(request.getParameter("categoryId")),

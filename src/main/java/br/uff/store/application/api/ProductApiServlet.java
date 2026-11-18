@@ -4,38 +4,37 @@ import br.uff.store.application.StoreServices;
 
 import br.uff.store.core.dtos.ProductDTO;
 import br.uff.store.core.interfaces.services.IProductService;
-import br.uff.store.core.services.ProductService;
+import br.uff.store.core.interfaces.services.IUserService;
 import br.uff.store.core.exceptions.ResourceNotFoundException;
+import br.uff.store.infrastructure.shared.Helper;
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/api/products/*")
 public class ProductApiServlet extends HttpServlet {
     private final IProductService productService;
+    private final IUserService userService;
+    private final Helper helper;
 
     public ProductApiServlet() {
-        this(StoreServices.products());
+        this(StoreServices.products(), StoreServices.users(), new Helper());
     }
 
-    ProductApiServlet(IProductService productService) {
+    ProductApiServlet(IProductService productService, IUserService userService, Helper helper) {
         this.productService = productService;
+        this.userService = userService;
+        this.helper = helper;
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
         if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
-            try {
-                List<ProductDTO> products = productService.listAdminProducts();
-                ApiResponses.writeJson(response, products);
-            } catch (Exception exception) {
-                ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                        "The request could not be completed.");
-            }
+            listAllProducts(request, response);
             return;
         }
 
@@ -49,6 +48,25 @@ public class ProductApiServlet extends HttpServlet {
             ApiResponses.writeJson(response, product);
         } catch (ResourceNotFoundException missing) {
             ApiResponses.writeError(response, HttpServletResponse.SC_NOT_FOUND, "Product was not found.");
+        } catch (Exception exception) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "The request could not be completed.");
+        }
+    }
+
+    private void listAllProducts(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        Integer activeUserId = session == null ? null : helper.tryParseInteger(String.valueOf(session.getAttribute("userId")));
+        if (activeUserId == null) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required.");
+            return;
+        }
+        try {
+            if (!Boolean.TRUE.equals(userService.isAdmin(activeUserId))) {
+                ApiResponses.writeError(response, HttpServletResponse.SC_FORBIDDEN, "Administrator access is required.");
+                return;
+            }
+            ApiResponses.writeJson(response, productService.listAdminProducts());
         } catch (Exception exception) {
             ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "The request could not be completed.");

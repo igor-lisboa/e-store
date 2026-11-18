@@ -16,3 +16,5 @@ Read and follow the root `AGENTS.md`, `README.md`, the relevant `specs/` files, 
 - Use versioned migrations for tables, seeds, views, procedures, and triggers. Never use a database dump to initialize the application.
 - Update specifications, documentation, and the backlog with code changes. Report checks actually run and any verification blockers.
 - For API routes, inputs, serialized responses, validation, authentication/authorization, or errors, follow `agents/skills/maintain-openapi/SKILL.md` (also exposed at `.github/skills/maintain-openapi/SKILL.md`). Review with `agents/swagger-maintainer.md`, update Swagger in the same change, and run contract validation plus relevant request/serialization tests.
+
+- When a change needs the user's decision, number each question (1, 2, 3). Give each question's choices as lettered options (A, B, C). Under each option, list its pros and cons as bullet points, and mark one option "(Recommended)" when you have a recommendation. Do not leave decisions as unnumbered prose.

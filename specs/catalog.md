@@ -4,7 +4,7 @@
 
 - The home page shows a limited set of products selected for the banner.
 - The catalog supports product search, category and subcategory selection, special filters, and pagination.
-- The servlet configures five items per page.
+- The storefront shows 20 items per page by default. An optional `pageSize` query parameter accepts 1–100; a missing or out-of-range value uses 20.
 - Product administration supports listing, creation, updates, deletion, and stock changes.
 - Product categories are stored in a parent/child hierarchy. The seed data has PlayStation, Xbox, and Wii roots with accessory, console, and game children.
 - Product images are represented by a URL or data string in the current database model.
@@ -16,7 +16,7 @@
 - Page size and page bounds must be validated by the application layer.
 - Only authorized administrators may create, update, delete, or adjust product stock.
 - Product name, price, description, category, and image input must be validated before persistence.
-- Names/descriptions are required and bounded to 255 characters. Images are required and capped at 4,000,000 characters. Prices must be finite, non-negative, and fit `DECIMAL(11,2)`; stock increments are positive. Paging accepts 1–100 items with a positive page number and a non-overflowing offset. Price filter bounds must be finite, non-negative, and ordered.
+- Names/descriptions are required and bounded to 255 characters. Images are required and capped at 4,000,000 characters. Prices are `BigDecimal` amounts rounded half-up to two decimal places before persistence; the rounded value must be non-negative and at most 999,999,999.99 to fit `DECIMAL(11,2)`; stock increments are positive. Paging accepts 1–100 items with a positive page number and a non-overflowing offset. Price filter bounds must be non-negative and ordered.
 - A product cannot be purchased beyond available stock.
 
 ## Acceptance checks
@@ -27,5 +27,9 @@
 
 ## Open questions
 
-- Is the five-item page size a fixed product requirement or a current UI choice?
-- Should out-of-stock products remain visible in the catalog?
+- Resolved: the page size is 20 by default with an optional `pageSize` parameter (decision 9C). Out-of-stock products stay visible and marked unavailable (decision 2A, pending implementation).
+
+## Decided requirements (pending implementation)
+
+- Single-product API (decision 1B): anonymous and customer callers see only whether a product is available. Administrators see the exact stock quantity. The current public API returns exact quantity.
+- Out-of-stock products (decision 2A): stay listed and show as unavailable on the storefront, the product page, and the featured list. The current listing query excludes products with zero stock.

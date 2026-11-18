@@ -10,9 +10,9 @@
     <jsp:param name="title" value="Cart"/>
 </jsp:include>
 <%
-    double totalPrice = 0;
+    java.math.BigDecimal totalPrice = java.math.BigDecimal.ZERO;
     if (request.getAttribute("totalPrice") != null) {
-        totalPrice = Double.parseDouble(request.getAttribute("totalPrice").toString());
+        totalPrice = new java.math.BigDecimal(request.getAttribute("totalPrice").toString());
     }
 
     List<CartItemDTO> items = new ArrayList<CartItemDTO>();

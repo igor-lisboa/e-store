@@ -9,3 +9,5 @@ Use English consistently for filenames, directories, packages, classes, interfac
 Follow SOLID and Clean Architecture. Prefer simple code a junior developer can understand, use good coding practices, and keep files below 300 lines. Use English endpoints and links. Manage schema, seeds, and routines through versioned migrations.
 
 Follow the repository-wide instructions in [`AGENTS.md`](AGENTS.md). Read `README.md`, `TODO.md`, and the relevant specialty specification under `specs/` before changing behavior. Keep code and technical documentation in English, update specifications and tests with behavior changes, and report verification accurately.
+
+- When a change needs the user's decision, number each question (1, 2, 3). Give each question's choices as lettered options (A, B, C). Under each option, list its pros and cons as bullet points, and mark one option "(Recommended)" when you have a recommendation. Do not leave decisions as unnumbered prose.

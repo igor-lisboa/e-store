@@ -1,5 +1,7 @@
 package br.uff.store.core.services;
 
+import java.math.BigDecimal;
+
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -121,7 +123,7 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public Double getCartTotal(Integer id) throws StoreException {
+    public BigDecimal getCartTotal(Integer id) throws StoreException {
         return cartData.getCartTotal(id);
     }
 

@@ -22,7 +22,7 @@
         address = (AddressDTO) request.getAttribute("addresses");
     }
 
-    double totalPrice = Double.parseDouble(session.getAttribute("totalPrice").toString());
+    java.math.BigDecimal totalPrice = new java.math.BigDecimal(session.getAttribute("totalPrice").toString());
 %>
 
 <jsp:include page="header.jsp">

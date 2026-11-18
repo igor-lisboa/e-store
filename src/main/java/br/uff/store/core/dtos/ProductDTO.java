@@ -1,12 +1,14 @@
 package br.uff.store.core.dtos;
 
+import java.math.BigDecimal;
+
 import java.util.Map;
 
 public class ProductDTO extends BaseDTO {
 
     private Integer id;
     private String name;
-    private Double price;
+    private BigDecimal price;
     private String description;
     private String image;
     private Integer categoryId;
@@ -61,11 +63,11 @@ public class ProductDTO extends BaseDTO {
         return name;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -79,14 +81,14 @@ public class ProductDTO extends BaseDTO {
 
     public ProductDTO() {
         this.setName("");
-        this.setPrice(0.0);
+        this.setPrice(BigDecimal.ZERO);
         this.setDescription("");
     }
 
     public ProductDTO(Map<String, Object> product) {
         this.setId(Integer.valueOf(String.valueOf(product.get("id"))));
         this.setName(String.valueOf(product.get("name")));
-        this.setPrice(Double.valueOf(String.valueOf(product.get("price"))));
+        this.setPrice(new BigDecimal(String.valueOf(product.get("price"))));
         this.setDescription(String.valueOf(product.get("description")));
         this.setImage(String.valueOf(product.get("image")));
         this.setCategory(String.valueOf(product.get("category")));
@@ -94,7 +96,7 @@ public class ProductDTO extends BaseDTO {
         this.setQuantity(Integer.valueOf(String.valueOf(product.get("quantity"))));
     }
 
-    public ProductDTO(Integer id, String name, Double price, String description, String image, Integer categoryId, Integer quantity) {
+    public ProductDTO(Integer id, String name, BigDecimal price, String description, String image, Integer categoryId, Integer quantity) {
         this.setId(id);
         this.setName(name);
         this.setPrice(price);

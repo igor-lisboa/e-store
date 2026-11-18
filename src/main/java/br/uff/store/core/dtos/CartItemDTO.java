@@ -1,5 +1,7 @@
 package br.uff.store.core.dtos;
 
+import java.math.BigDecimal;
+
 import java.util.Map;
 
 public class CartItemDTO extends BaseDTO {
@@ -9,10 +11,10 @@ public class CartItemDTO extends BaseDTO {
     private String name;
     private String description;
     private String image;
-    private Double price;
+    private BigDecimal price;
     private Integer availableStock;
     private Integer quantity;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     public CartItemDTO() {
     }
@@ -23,10 +25,10 @@ public class CartItemDTO extends BaseDTO {
         this.setName(String.valueOf(cartProduct.get("name")));
         this.setDescription(String.valueOf(cartProduct.get("description")));
         this.setImage(String.valueOf(cartProduct.get("image")));
-        this.setPrice(Double.valueOf(String.valueOf(cartProduct.get("price"))));
+        this.setPrice(new BigDecimal(String.valueOf(cartProduct.get("price"))));
         this.setAvailableStock(Integer.valueOf(String.valueOf(cartProduct.get("availableStock"))));
         this.setQuantity(Integer.valueOf(String.valueOf(cartProduct.get("quantity"))));
-        this.setTotalPrice(Double.valueOf(String.valueOf(cartProduct.get("totalPrice"))));
+        this.setTotalPrice(new BigDecimal(String.valueOf(cartProduct.get("totalPrice"))));
     }
 
     public void setProductId(Integer productId) {
@@ -53,11 +55,11 @@ public class CartItemDTO extends BaseDTO {
         return name;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public Double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
@@ -85,11 +87,11 @@ public class CartItemDTO extends BaseDTO {
         this.name = name;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public void setTotalPrice(Double totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 

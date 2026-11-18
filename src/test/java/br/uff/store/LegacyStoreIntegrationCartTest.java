@@ -1,5 +1,7 @@
 package br.uff.store;
 
+import java.math.BigDecimal;
+
 import br.uff.store.core.dtos.CartDTO;
 import br.uff.store.core.dtos.CartItemDTO;
 import br.uff.store.core.dtos.PaginationDTO;
@@ -19,7 +21,7 @@ public class LegacyStoreIntegrationCartTest extends StoreIntegrationFixture {
         List<CartItemDTO> items = carts.listCartProducts(cart.getId());
         assertEquals(1, items.size());
         assertEquals(Integer.valueOf(2), items.get(0).getQuantity());
-        assertEquals(998.00, carts.getCartTotal(cart.getId()), 0.001);
+        assertEquals(new BigDecimal("998.00"), carts.getCartTotal(cart.getId()));
         assertEquals(Integer.valueOf(100), products.findProductById(1).getQuantity());
     }
 
@@ -31,7 +33,7 @@ public class LegacyStoreIntegrationCartTest extends StoreIntegrationFixture {
         List<CartItemDTO> items = carts.listCartProducts(cart.getId());
         assertEquals(1, items.size());
         assertEquals(Integer.valueOf(2), items.get(0).getProductId());
-        assertEquals(399.00, carts.getCartTotal(cart.getId()), 0.001);
+        assertEquals(new BigDecimal("399.00"), carts.getCartTotal(cart.getId()));
     }
 
     @Test
@@ -41,7 +43,7 @@ public class LegacyStoreIntegrationCartTest extends StoreIntegrationFixture {
                 () -> carts.changeProductQuantity(cart.getId(), 1, 101));
         assertEquals("Requested quantity exceeds available stock.", failure.getMessage());
         assertEquals(Integer.valueOf(2), carts.productQuantityInCart(cart.getId(), 1));
-        assertEquals(998.00, carts.getCartTotal(cart.getId()), 0.001);
+        assertEquals(new BigDecimal("998.00"), carts.getCartTotal(cart.getId()));
     }
 
     @Test
@@ -78,6 +80,6 @@ public class LegacyStoreIntegrationCartTest extends StoreIntegrationFixture {
             visited.add(result.getItems().get(0).getProductId());
         }
         assertEquals(Arrays.asList(1, 2, 3), visited.stream().sorted().collect(Collectors.toList()));
-        assertEquals(1097.00, carts.getCartTotal(cart.getId()), 0.001);
+        assertEquals(new BigDecimal("1097.00"), carts.getCartTotal(cart.getId()));
     }
 }

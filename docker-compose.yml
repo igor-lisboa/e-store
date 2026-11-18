@@ -53,10 +53,13 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-123456}"]
+      # The password is read from the container environment, not the command line, and the
+      # start period covers first-run data directory initialization on slower CI runners.
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      start_period: 60s
+      retries: 30
 
 volumes:
   mysql-data-v8:

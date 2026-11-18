@@ -8,6 +8,8 @@ import br.uff.store.core.interfaces.services.IUserService;
 import java.util.List;
 
 public class UserService implements IUserService {
+    private static final int MINIMUM_PASSWORD_LENGTH = 8;
+
     private final IUserData userData;
     private final IPasswordHasher passwordHasher;
 
@@ -98,10 +100,21 @@ public class UserService implements IUserService {
         }
         if (user.getId() != null) {
             InputRules.positiveId(user.getId(), "User ID");
-        } else if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            throw new StoreException("A password is required for new accounts.");
         }
+        validatePassword(user);
         user.setName(user.getName().trim());
         user.setEmail(user.getEmail().trim());
+    }
+
+    /** New accounts need a password; any password set, now or on update, must have at least eight characters. */
+    private void validatePassword(UserDTO user) throws StoreException {
+        String password = user.getPassword();
+        if (user.getId() == null && (password == null || password.isEmpty())) {
+            throw new StoreException("A password is required for new accounts.");
+        }
+        boolean changesPassword = user.getId() == null || (password != null && !password.trim().isEmpty());
+        if (changesPassword && password.length() < MINIMUM_PASSWORD_LENGTH) {
+            throw new StoreException("Password must be at least 8 characters.");
+        }
     }
 }

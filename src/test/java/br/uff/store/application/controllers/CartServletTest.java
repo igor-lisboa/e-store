@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import java.math.BigDecimal;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +38,7 @@ public class CartServletTest {
         when(request.getContextPath()).thenReturn("");
         when(request.getRequestDispatcher("pages/cart.jsp")).thenReturn(mock(RequestDispatcher.class));
         when(cartService.listCartProducts(22)).thenReturn(Collections.emptyList());
-        when(cartService.getCartTotal(22)).thenReturn(0.0);
+        when(cartService.getCartTotal(22)).thenReturn(BigDecimal.ZERO);
     }
 
     @Test

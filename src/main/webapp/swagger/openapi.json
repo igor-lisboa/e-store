@@ -30,7 +30,7 @@
         "tags": [
           "Products"
         ],
-        "summary": "List products",
+        "summary": "List all products (administrators only)",
         "responses": {
           "200": {
             "description": "Successful request.",
@@ -44,6 +44,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
           },
           "500": {
             "$ref": "#/components/responses/Error500"

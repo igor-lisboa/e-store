@@ -30,3 +30,8 @@
 ## Open questions
 
 - The local baseline is MySQL 8.4.13 and Flyway 9.22.3. Existing-database adoption still requires backup, schema comparison, and explicit review. The new Compose volume preserves any old MySQL 5.7 volume rather than opening it with a different server version.
+
+## Decided requirements
+
+- Production starts from the versioned migrations with no legacy data adoption (decision 3A).
+- Money columns are `DECIMAL(11,2)`. Application code rounds prices half-up to two decimal places before persistence (decision 13B).

@@ -1,12 +1,14 @@
 package br.uff.store.core.dtos;
 
+import java.math.BigDecimal;
+
 import java.util.Map;
 
 public class ProductListDTO extends BaseDTO {
 
     private Integer id;
     private String name;
-    private Double price;
+    private BigDecimal price;
     private String image;
     private String category;
 
@@ -34,11 +36,11 @@ public class ProductListDTO extends BaseDTO {
         return name;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -56,7 +58,7 @@ public class ProductListDTO extends BaseDTO {
     public ProductListDTO(Map<String, Object> product) {
         this.setId(Integer.valueOf(String.valueOf(product.get("id"))));
         this.setName(String.valueOf(product.get("name")));
-        this.setPrice(Double.valueOf(String.valueOf(product.get("price"))));
+        this.setPrice(new BigDecimal(String.valueOf(product.get("price"))));
         this.setImage(String.valueOf(product.get("image")));
         this.setCategory(String.valueOf(product.get("category")));
     }
@@ -64,7 +66,7 @@ public class ProductListDTO extends BaseDTO {
     public ProductListDTO(
             Integer id,
             String name,
-            Double price,
+            BigDecimal price,
             String image,
             String category
     ) {

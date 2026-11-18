@@ -1,5 +1,6 @@
 package br.uff.store.infrastructure.shared;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -63,9 +64,9 @@ public class Helper implements IHelper {
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale));
     }
 
-    public Double tryParseDouble(String intStr) {
+    public BigDecimal tryParseDecimal(String intStr) {
         try {
-            return Double.valueOf(intStr);
+            return new BigDecimal(intStr);
         } catch (Exception ec) {
             return null;
         }

@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import java.math.BigDecimal;
+
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -38,11 +40,18 @@ public class ProductsServlet extends HttpServlet {
     private static final String XBOXSTR = "xbox";
     private static final String WIISTR = "wii";
     private static final String PRODUCT_PAGE = "productPage";
+    private static final int DEFAULT_PAGE_SIZE = 20;
     private static final String MAXPAGSTR = "maxPage";
 
     public ProductsServlet() {
         helper = new Helper();
         productService = StoreServices.products();
+    }
+
+    /** Uses the optional pageSize query value when it is within 1-100; otherwise the storefront default. */
+    static int resolvePageSize(String requested) {
+        Integer size = new Helper().tryParseInteger(requested);
+        return size != null && size >= 1 && size <= 100 ? size : DEFAULT_PAGE_SIZE;
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -51,7 +60,7 @@ public class ProductsServlet extends HttpServlet {
 
         try {
             ProductFilterDTO filter = new ProductFilterDTO();
-            filter.setPageSize(5);
+            filter.setPageSize(resolvePageSize(request.getParameter("pageSize")));
             filter.setPageNumber(1);
 
             if (request.getParameter(SEARCH_KEY) != null) {
@@ -178,7 +187,7 @@ public class ProductsServlet extends HttpServlet {
             }
 
             if (request.getParameter("price_min") != null) {
-                Double priceMin = helper.tryParseDouble(request.getParameter("price_min"));
+                BigDecimal priceMin = helper.tryParseDecimal(request.getParameter("price_min"));
                 if (priceMin != null) {
                     session.setAttribute("priceMin", priceMin);
                     filter.setMinimumPrice(priceMin);
@@ -186,7 +195,7 @@ public class ProductsServlet extends HttpServlet {
             }
 
             if (request.getParameter("price_max") != null) {
-                Double priceMax = helper.tryParseDouble(request.getParameter("price_max"));
+                BigDecimal priceMax = helper.tryParseDecimal(request.getParameter("price_max"));
                 if (priceMax != null) {
                     session.setAttribute("priceMax", priceMax);
                     filter.setMaximumPrice(priceMax);

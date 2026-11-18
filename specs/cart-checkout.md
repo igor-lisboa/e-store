@@ -32,3 +32,10 @@
 
 - Define cart expiry and whether anonymous carts merge into an existing account cart.
 - Confirm payment-provider and order-cancellation scope; no payment integration is evident in the current source.
+
+## Decided requirements (pending implementation)
+
+- Anonymous cart (decision 5C): on sign-in, the anonymous cart merges into the account cart. Anonymous carts expire after inactivity; the period is proposed as 30 days and must be confirmed. Cross-session recovery uses a signed opaque token only if it is added.
+- Payment and delivery (decision 6): checkout depends on provider-agnostic ports in core. Each vendor is an adapter. Persisted payment and delivery data must be provider-neutral: provider name, external reference, status, amounts, delivery method, tracking code, address snapshot, and a reference to the raw vendor response. The local demo is the only adapter until a vendor is chosen.
+- Cancellation (decision 7B): customers may cancel an order before fulfillment, and its stock is restored. Refunds apply only after a payment adapter exists.
+- Order lines (decision 8A): each sale line stores the product name, unit price, and quantity at checkout, so order history does not change when product prices change.

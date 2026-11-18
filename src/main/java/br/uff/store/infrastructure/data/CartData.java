@@ -1,5 +1,7 @@
 package br.uff.store.infrastructure.data;
 
+import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,11 +202,11 @@ public class CartData implements ICartData {
     }
 
     @Override
-    public Double getCartTotal(Integer id) throws StoreException {
+    public BigDecimal getCartTotal(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
             String totalPrice = String.valueOf(this.mysqlDAO.scalar("totalPrice", "SELECT sum(p.price * c.quantity) AS totalPrice FROM carts_products c LEFT JOIN products p ON (c.product_id = p.id) WHERE c.cart_id=? GROUP BY c.cart_id", "", bind));
-            return Double.valueOf(totalPrice.equals("null") ? "0" : totalPrice);
+            return new BigDecimal(totalPrice.equals("null") ? "0" : totalPrice);
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }

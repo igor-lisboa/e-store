@@ -1,5 +1,7 @@
 package br.uff.store.core.interfaces.data;
 
+import java.math.BigDecimal;
+
 import java.util.List;
 
 import br.uff.store.core.dtos.CartDTO;
@@ -43,5 +45,5 @@ public interface ICartData {
 
     public void updateProductQuantity(Integer id, Integer productId, Integer newQuantity) throws StoreException;
 
-    public Double getCartTotal(Integer id) throws StoreException;
+    public BigDecimal getCartTotal(Integer id) throws StoreException;
 }
