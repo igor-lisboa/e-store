@@ -32,7 +32,7 @@
 
 ## Acceptance checks
 
-- CI and local commands run the same unit and integration suites.
+- Local commands run the unit and integration suites; no hosted CI workflow is defined.
 - E2E smoke journeys cover sign-in, catalog, cart, and checkout.
 - Changes to a feature update its spec, tests, and translation keys.
 - Track any remaining >300-line files in the backlog until split safely.

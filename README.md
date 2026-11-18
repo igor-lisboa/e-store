@@ -97,7 +97,7 @@ python scripts/run_browser_smoke.py
 
 The runner starts and stops its own local Tomcat. Smoke tests cover CSRF/session boundaries, all four locale selections, local redirect restrictions, Swagger rendering, and guest API denial. To include database shopping and administrator journeys, set `STORE_DATABASE_E2E=1`, point `MYSQL_CONNECTION_STRING`, `MYSQL_USER`, and `MYSQL_PASSWORD` to the disposable migrated test schema, and set `ALLOW_DEMO_CHECKOUT=true`. Repeat with `false` to verify forged completion cannot change stock. These journeys add unique fixtures; reset with the MySQL profile between independent runs. `STORE_JAVA` selects a Java executable; `STORE_BROWSER_CHANNEL=msedge` optionally uses installed Edge.
 
-CI defines repository/OpenAPI checks, migration apply/validate/reapply, default/MySQL/legacy suites, both browser modes, and report uploads. Local Java/MySQL/Edge verification is recorded in [WORK_LOG.md](WORK_LOG.md). Full Docker Compose execution and the hosted CI run remain unverified on this workstation because Docker is unavailable.
+The repository has no hosted CI workflow. Verification runs locally: repository and OpenAPI checks, migration apply/validate/reapply, default/MySQL/legacy suites, and both browser modes. The commands and results are recorded in [WORK_LOG.md](WORK_LOG.md).
 
 ## API and languages
 

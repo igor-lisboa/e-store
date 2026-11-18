@@ -8,7 +8,7 @@ GitHub Copilot follows [`.github/copilot-instructions.md`](../.github/copilot-in
 
 The [maintain-openapi skill](skills/maintain-openapi/SKILL.md) applies to API route, input, response, validation, authentication/authorization, and error changes. Discovery entry points live in `.agents/skills`, `.claude/skills`, and `.github/skills`. The shared [Swagger maintainer review role](swagger-maintainer.md) checks the implementation against the contract. Keep instructions in the canonical skill; the discovery files point to it.
 
-OpenAPI validation runs in CI, but cannot prove runtime behavior matches the document. Request and serialization tests, plus runtime checks when available, provide that evidence.
+OpenAPI validation runs locally through `scripts/validate_openapi.py`, but cannot prove runtime behavior matches the document. Request and serialization tests, plus runtime checks when available, provide that evidence.
 
 ## Feature workflow
 

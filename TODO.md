@@ -51,7 +51,7 @@ Use [WORK_LOG.md](WORK_LOG.md) for the latest verified checkpoint and exact resu
 - [x] Expand common page labels across four locales and format BRL currency/order/review dates using the selected locale.
 - [x] Verify locale bundle key completeness, formatting, allowlist behavior, and representative browser switching across all four locales.
 - [x] Add JaCoCo line/branch reports without claiming full coverage or introducing an arbitrary threshold.
-- [x] Define CI for static/OpenAPI checks, MySQL migrations, default/MySQL/legacy tests, browser demo-enabled/disabled journeys, and report uploads. Hosted execution remains unverified.
+- [x] Define verification for static/OpenAPI checks, MySQL migrations, default/MySQL/legacy tests, and browser demo-enabled/disabled journeys. The GitHub Actions workflow was removed at the user's request.
 - [x] Keep maintained Java/JSP/CSS/Python/specification files below 300 lines; split account styles by responsibility.
 - [x] Provide one-command `sh scripts/start.sh`, pinned MySQL/Flyway, persistent volumes, documented local reset, and synthetic local accounts.
 - [x] Monetary values use `BigDecimal` end to end in product, cart, sale, and filter DTOs. Prices round half-up to two decimal places before persistence, and the rounded value must fit `DECIMAL(11,2)` (decision 13B). Default suite: 107 tests pass with unit tests for rounding and bounds; the legacy MySQL money assertions have compiled but not run.
@@ -62,7 +62,7 @@ Use [WORK_LOG.md](WORK_LOG.md) for the latest verified checkpoint and exact resu
 ## Blocked or deferred decisions (work around these)
 
 - [ ] Execute full Compose startup, migration ordering, browser tests, and shutdown. Docker Desktop is now available on this workstation: the `database` service became healthy, `migrate migrate`, `migrate validate`, and re-apply succeeded, and the MySQL and legacy Maven suites passed against the Compose database. Still unverified: the `app` service, browser suites against Compose, and Linux and macOS startup. The hosted CI database failure was caused by `skip-character-set-client-handshake` in `database/mycustom.cnf`; MySQL 8.4 rejects that removed option and aborts. Linux runners load the file, while Windows Docker Desktop ignores the world-writable bind mount, which hid the failure locally. The option is removed; the next hosted run must confirm it.
-- [ ] Run the hosted CI workflow and address platform-specific issues; local checks cannot establish the hosted result.
+
 - [ ] Choose the payment and delivery vendors that plug into the provider-agnostic checkout ports (decision 6). The ports themselves are a backlog task above.
 - [ ] Choose an email delivery provider for the dormant-account reset (decision 4A).
 - [ ] Decide production deployment target (decision 12C: keep local-only for now). Still required: supported runtime lifecycle, observability, backups, secret management, and retention.

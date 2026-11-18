@@ -54,7 +54,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
     healthcheck:
       # The password is read from the container environment, not the command line, and the
-      # start period covers first-run data directory initialization on slower CI runners.
+      # start period covers first-run data directory initialization on slower machines.
       test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
       interval: 5s
       timeout: 5s
