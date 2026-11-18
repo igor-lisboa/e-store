@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Product ID."
+    },
+    "name": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "format": "double",
+      "description": "Price in BRL."
+    },
+    "description": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string",
+      "description": "Image URL, local path, or data URI."
+    },
+    "categoryId": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Category ID."
+    },
+    "quantity": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Available stock."
+    },
+    "category": {
+      "type": "string"
+    }
+  }
+}

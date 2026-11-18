@@ -10,7 +10,7 @@
 
 ## Current implementation
 
-Compose runs Maven/Java 8 and MySQL 5.7, publishes the app and database ports, mounts the existing SQL dump, and waits for a database health check. This is a development environment, not a hardened production deployment.
+Compose runs Maven/Java 8 and MySQL 5.7, publishes the app and database ports, and waits for database health before Flyway applies migrations. The application starts after migrations succeed. Run `sh scripts/start.sh` from the repository root; the script preserves existing `.env` settings. This is a development environment, not a hardened production deployment.
 
 ## Acceptance checks
 

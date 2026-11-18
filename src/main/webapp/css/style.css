@@ -148,7 +148,7 @@ footer {
     margin-right: 20px;
 }
 
-/* Carrinho */
+/* Cart */
 .carrinho-header {
     display: inline-block;
     padding-right: 200px;
@@ -249,7 +249,7 @@ footer {
     background-image: url('https://i.pinimg.com/originals/bc/c0/86/bcc0860537b4030e6e62fa0a38ef907b.jpg')
 }
 
-/* Produto */
+/* Product */
 .produto {
     margin: 20px;
     background-color: #FFF;

@@ -3,12 +3,18 @@
 ## Observed behavior
 
 - Servlet endpoints exist for products, users, and categories under `/api`.
-- Product lookup serializes a product DTO as JSON. A Postman collection is included at the repository root.
+- Product lookup serializes a product DTO as JSON. Swagger UI is served at `/swagger/` and the OpenAPI 3.0.3 contract at `/swagger/openapi.json`.
 - User lookup requires a signed-in session. Customers can read only their own account; administrators can list and read accounts.
 - User API errors use a generic JSON error object and do not serialize exceptions.
-- Product and category API routes still need a consistent documented error schema and API versioning.
+- All API error responses use an `error` string. Resource-not-found responses still use generic 500 errors; dedicated 404 handling and API versioning remain pending.
+- JSON properties are English, including product `name`, `price`, `description`, `image`, `categoryId`, `quantity`, `category`, and account `name`, `email`, `roleId`. Internal legacy DTO identifiers do not define the public names.
+- Swagger UI is bundled as a WebJar and loads the local OpenAPI document; it does not depend on a runtime CDN. The setup follows the [Swagger UI installation guide](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/).
 
 ## Requirements
+
+Public routes use English. The API routes are `/api/products/*`, `/api/categories/*`, and `/api/users/*`. Browser routes are `/`, `/products`, `/product`, `/product-admin`, `/account`, `/addresses`, `/cart`, `/checkout`, `/reviews`, and `/language`. Legacy Portuguese route names are removed. Clients must update bookmarked URLs and API requests.
+
+Browser parameters include `productId`, `addProductId`, `quantity`, `search`, `selectedId`, `addressId`, `page`, and `history`. Action values include `save`, `delete`, `register`, `addStock`, `submitReview`, `confirmCart`, `continueShopping`, `removeProduct`, `changeQuantity`, `continuePayment`, `paymentSuccess`, and `paymentFailure`.
 
 - Document each route, method, input, response, status code, authentication requirement, and error shape.
 - Validate path and query parameters and return client errors for malformed input.
@@ -20,8 +26,8 @@
 
 - Unit tests cover request validation and response mapping.
 - Integration tests exercise routes with a real servlet container and disposable database.
-- API contract tests validate the published Postman/OpenAPI examples against responses.
+- API contract tests validate the OpenAPI document and its references, with response serialization tests for English JSON properties.
 
 ## Open questions
 
-- Decide API versioning, authentication mechanism, and whether the existing Postman collection is the supported contract.
+- Decide API versioning and dedicated not-found response handling. OpenAPI is the supported API documentation; session authentication is currently required for user endpoints.

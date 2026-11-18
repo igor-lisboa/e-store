@@ -7,7 +7,7 @@ services:
     command: >
       sh -c "mvn -B clean package
       && java -jar target/dependency/webapp-runner.jar
-      --port ${MVN_PORT:-8181} target/loja-1.0.1.war"
+      --port ${MVN_PORT:-8181} target/e-store-1.0.1.war"
     volumes:
       - ./:/workspace
       - maven-cache:/root/.m2
@@ -17,6 +17,22 @@ services:
       MYSQL_CONNECTION_STRING: jdbc:mysql://database:3306/${MYSQL_DATABASE:-e_store}?useSSL=false&serverTimezone=UTC
       MYSQL_USER: ${MYSQL_USER:-e_store}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  migrate:
+    image: flyway/flyway:9.22.3
+    command: migrate
+    volumes:
+      - ./database/migrations:/flyway/sql/schema:ro
+      - ./database/dev-seeds:/flyway/sql/dev:ro
+    environment:
+      FLYWAY_URL: jdbc:mysql://database:3306/${MYSQL_DATABASE:-e_store}?useSSL=false&allowPublicKeyRetrieval=true
+      FLYWAY_USER: ${MYSQL_USER:-e_store}
+      FLYWAY_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql/schema,filesystem:/flyway/sql/dev
+      FLYWAY_CLEAN_DISABLED: "true"
     depends_on:
       database:
         condition: service_healthy
@@ -29,7 +45,6 @@ services:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./database/dump:/docker-entrypoint-initdb.d:ro
       - ./database/mycustom.cnf:/etc/mysql/conf.d/custom.cnf:ro
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-e_store}

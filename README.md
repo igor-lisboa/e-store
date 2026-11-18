@@ -25,12 +25,12 @@ Docker supplies Maven and Java inside the application container, so a local JDK 
 From a POSIX shell (`sh`), run this single command from the repository root:
 
    ```sh
-   cp .env.example .env && docker compose up
+   sh scripts/start.sh
    ```
 
 Then open [http://localhost:8181](http://localhost:8181).
 
-Compose waits for MySQL health, builds the WAR, runs the Maven test lifecycle, and starts the web application. The first run initializes the database from `database/dump`. The database volume persists across restarts.
+Compose waits for MySQL health, runs Flyway migrations, builds the WAR, runs unit tests, and starts the web application. Migrations create the tables, catalog view, checkout procedure, stock trigger, and reference data. Local fixtures add sample accounts and products. The database volume persists across restarts.
 
 Useful commands:
 
@@ -41,7 +41,7 @@ docker compose down -v
 docker compose run --rm app mvn -B verify
 ```
 
-`docker compose down -v` deletes the development database volume. The checked-in SQL dump is legacy schema and sample data. Use only non-sensitive local credentials in `.env`; `.env` is ignored by Git. Compose exposes MySQL on the configured host port for local database tools.
+`docker compose down -v` deletes the development database volume. Use only non-sensitive local credentials in `.env`; `.env` is ignored by Git. Compose exposes MySQL on the configured host port for local database tools. See [database/README.md](database/README.md) for migrations, existing databases, and local seed accounts.
 
 ## Configuration
 
@@ -49,11 +49,11 @@ Copy `.env.example` to `.env` and change ports or local database credentials as 
 
 ## Run without Docker
 
-Install a JDK compatible with the Java 8 source target and Maven, start compatible MySQL, import `database/dump/dump.sql`, and copy `.env.local` to `.env` so the application loads the host database settings. Then run:
+Install Java 8, Maven, MySQL, and Flyway 9.22.3. Run Flyway against an empty database using `database/migrations` as its location (also include `database/dev-seeds` for development fixtures). Copy `.env.local` to `.env` so the application loads the host database settings. Then run:
 
 ```sh
 mvn clean verify
-java -jar target/dependency/webapp-runner.jar --port 8181 target/loja-1.0.1.war
+java -jar target/dependency/webapp-runner.jar --port 8181 target/e-store-1.0.1.war
 ```
 
 This legacy runtime path is provided for maintenance; Docker Compose is the supported local setup.
@@ -63,10 +63,14 @@ This legacy runtime path is provided for maintenance; Docker Compose is the supp
 ```sh
 mvn test
 mvn verify
+docker compose run --rm app mvn -B -Plegacy-integration test
+python scripts/test_repository_contracts.py
+python -m pip install -r scripts/requirements.txt
+python scripts/validate_openapi.py
 mvn org.pitest:pitest-maven:mutationCoverage
 ```
 
-The current database-backed tests expect a populated MySQL database and mutate its data. Do not point them at valuable data. See [architecture and quality requirements](specs/architecture-quality.md) and [the tracked testing gaps](TODO.md).
+`mvn test` runs isolated tests. The `legacy-integration` profile runs the older database-backed tests and Cucumber features separately; they expect populated MySQL and mutate its data. They still need fixture isolation and reconciliation with current behavior. Do not point them at valuable data. Repository checks cover migration dependencies, seed hashes, view destinations, routes, and Java file sizes. CI runs unit tests and migration apply/validate/reapply checks. See [architecture and quality requirements](specs/architecture-quality.md) and [the tracked testing gaps](TODO.md).
 
 ## Repository map
 
@@ -75,14 +79,14 @@ src/main/java/       Servlet endpoints, services, DTOs, and MySQL data access
 src/main/webapp/     JSP pages, styles, and static images
 src/main/resources/  Locale message bundles
 src/test/            JUnit and Cucumber tests
-database/            Legacy MySQL initialization dump and configuration
+database/            Versioned Flyway migrations, local seeds, and MySQL configuration
 specs/               Feature and architecture specifications by specialty
 agents/              AI-agnostic contribution workflow and skill
 ```
 
 ## API
 
-The existing Postman collection is [`Loja.postman_collection.json`](Loja.postman_collection.json). See [specs/api.md](specs/api.md) for the route inventory and target contract. API error and authentication contracts still need standardization.
+Open [Swagger UI](http://localhost:8181/swagger/) after starting the app. The OpenAPI document is served at `/swagger/openapi.json`. Swagger assets are packaged in the WAR, so the documentation needs no external CDN at runtime. Sign in at `/account` in the same browser to try protected user endpoints; listing users requires an administrator. JSON response properties use English names such as `name`, `price`, `categoryId`, and `roleId`. See [specs/api.md](specs/api.md) for the contract and known gaps.
 
 ## Contributing
 

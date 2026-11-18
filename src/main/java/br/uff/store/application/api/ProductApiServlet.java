@@ -1,0 +1,65 @@
+package br.uff.store.application.api;
+
+import br.uff.store.core.dtos.ProductDTO;
+import br.uff.store.core.interfaces.services.IProductService;
+import br.uff.store.core.services.ProductService;
+import java.io.IOException;
+import java.util.List;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/api/products/*")
+public class ProductApiServlet extends HttpServlet {
+    private final IProductService produtoService;
+
+    public ProductApiServlet() {
+        this(new ProductService());
+    }
+
+    ProductApiServlet(IProductService produtoService) {
+        this.produtoService = produtoService;
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
+            try {
+                List<ProductDTO> products = produtoService.listaProductsAdm();
+                ApiResponses.writeJson(response, products);
+            } catch (Exception exception) {
+                ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "The request could not be completed.");
+            }
+            return;
+        }
+
+        Integer productId = parseProductId(pathInfo);
+        if (productId == null) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_BAD_REQUEST, "A valid product ID is required.");
+            return;
+        }
+        try {
+            ProductDTO product = produtoService.encontraProductPorId(productId);
+            ApiResponses.writeJson(response, product);
+        } catch (Exception exception) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "The request could not be completed.");
+        }
+    }
+
+    private Integer parseProductId(String pathInfo) {
+        String value = pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
+        if (value.isEmpty() || value.contains("/")) {
+            return null;
+        }
+        try {
+            int productId = Integer.parseInt(value);
+            return productId > 0 ? productId : null;
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+}

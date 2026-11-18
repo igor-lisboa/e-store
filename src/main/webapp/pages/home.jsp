@@ -6,11 +6,11 @@ and open the template in the editor.
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
-<%@page import="br.uff.loja.core.dtos.ProdutoHomeDTO"%>
+<%@page import="br.uff.store.core.dtos.FeaturedProductDTO"%>
 <%
-    List<ProdutoHomeDTO> jogosVitrine = new ArrayList<ProdutoHomeDTO>();
+    List<FeaturedProductDTO> jogosVitrine = new ArrayList<FeaturedProductDTO>();
     if (request.getAttribute("jogosVitrine") != null) {
-        jogosVitrine = (List<ProdutoHomeDTO>) request.getAttribute("jogosVitrine");
+        jogosVitrine = (List<FeaturedProductDTO>) request.getAttribute("jogosVitrine");
     }
 %>
 <!-- Header -->
@@ -24,11 +24,11 @@ and open the template in the editor.
 <div class="slideshow-container">
     <!-- Full-width images with caption text -->
     <%
-        for (ProdutoHomeDTO produto : jogosVitrine) {
+        for (FeaturedProductDTO produto : jogosVitrine) {
     %>
     <div class="mySlides fade">
         <div style="width:100%;height:600px;background: url('<%= produto.getImagem()%>') no-repeat center center;background-size: auto;background-size: cover;">&nbsp;</div>
-        <div class="text" onclick="location.href = 'produto?produtoId=<%= produto.getId()%>';">Adquira o Produto</div>
+        <div class="text" onclick="location.href = 'product?productId=<%= produto.getId()%>';">Adquira o Product</div>
     </div>
     <%
         }
@@ -90,15 +90,15 @@ and open the template in the editor.
 <div class="sec-container">
     <div class="sec-img">
         <img alt="Playstation" src="img/ps4.jpg">
-        <div class="img-btn"><a href="produtos?categoryId=1">Playstation</a></div>
+        <div class="img-btn"><a href="products?categoryId=1">Playstation</a></div>
     </div>
     <div class="sec-img">
         <img alt="Xbox" src="img/xone.jpg">
-        <div class="img-btn"><a href="produtos?categoryId=2">Xbox</a></div>
+        <div class="img-btn"><a href="products?categoryId=2">Xbox</a></div>
     </div>
     <div class="sec-img">
         <img alt="Wii" src="img/wii.jpg">
-        <div class="img-btn"><a href="produtos?categoryId=3">Wii</a></div>
+        <div class="img-btn"><a href="products?categoryId=3">Wii</a></div>
     </div>
 </div>
 

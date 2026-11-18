@@ -1,0 +1,148 @@
+<%-- 
+    Document   : produto-cadastro
+    Created on : 02/10/2019, 02:09:04
+    Author     : HP
+--%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="br.uff.store.core.dtos.CategoryDTO"%>
+<%@page import="java.util.List"%>
+<%@page import="br.uff.store.core.dtos.ProductDTO"%>
+<%@page import="br.uff.store.core.enums.UserRole"%>
+<%
+    // se n usuario n for adm retorna p ProductsController
+    if (!session.getAttribute("userRole").equals(UserRole.ADM.getId())) {
+        response.sendRedirect("account?redirect=products");
+    }
+
+    ProductDTO produto = new ProductDTO();
+    if (request.getAttribute("product") != null) {
+        produto = (ProductDTO) request.getAttribute("product");
+    } else {
+        response.sendRedirect("product-admin");
+        return;
+    }
+
+    List<CategoryDTO> categorias = new ArrayList<CategoryDTO>();
+    if (request.getAttribute("categorias") != null) {
+        categorias = (List<CategoryDTO>) request.getAttribute("categorias");
+    }
+
+    String sel = request.getParameter("selectedId");
+%>
+<!-- Header -->
+<jsp:include page="header.jsp">
+    <jsp:param name="title" value="Cadastro de Products"/>
+</jsp:include>
+
+<div class="produto-main-container">
+
+    <div class="produto-left-container">
+
+        <h2>Product</h2>
+        <form method="post" action="product-admin">
+
+            <ul class="form-style-1">
+                <li>
+                    <label>Nome </label>
+                    <input value="<%= produto.getNome()%>" class="field-long" name="name" required type="text" maxlength="255" />
+                </li>
+                <li>
+                    <label>Preço </label>
+                    <input value="<%= produto.getPreco()%>" class="field-long" name="price" required type="number" max="5000" min="0.01" step="0.01" maxlength="255" />
+                </li>
+                <li>
+                    <label>Descrição </label>
+                    <textarea class="field-long field-textarea" name="description" required maxlength="255"><%= produto.getDescricao()%></textarea>
+                </li>
+                <li>
+                    <label>Category </label>
+                    <select required name="categoryId">
+                        <% for (CategoryDTO categoria : categorias) {%>
+                        <option <%= (produto.getCategoryId() == categoria.getId() ? "selected" : "")%> value="<%= categoria.getId()%>"><%= categoria.getNome()%></option>
+                        <% } %>
+                    </select>
+                </li>
+                <li>
+                    <label>Imagem </label><input name="img" id="img" accept="image/*" <% if (sel.equals("")) { %>required<% }%> type="file"/>
+                    <input value="<%= produto.getImagem()%>" style="display:none;" name="src" readonly type="text"/>
+                </li>
+                <li class="center">
+                    <button name="action" formnovalidate value="clear">Voltar</button>
+                    <button type="submit" name="action" value="save">Gravar</button>
+                    <% if (!sel.equals("")) { %>
+                    <button type="submit" name="action" value="delete" formnovalidate onclick="return confirm('Tem certeza que deseja excluir esse produto?');false;">Apagar</button>
+                    <% }%>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <div class="produto-right-container">
+
+        <h2>Prévia da Imagem</h2>
+        <div class="previa-img">
+            <img alt="Imagem do Product" id="prev"/>
+        </div>
+
+        <% if (!sel.equals("")) { %>
+        <form action="product-admin" method="post">
+            <ul class="form-style-1" style="margin-left: 31px;">
+                <li>
+                    <label>Quantidade a entrar no estoque </label>
+                    <input name="quantity" min="1" required type="number" maxlength="11" class="field-divided">
+                </li>
+                <li class="center">
+                    <button type="submit" name="action" value="addStock">Inserir</button>
+                </li>
+            </ul>
+        </form>
+        <% }%>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        // qnd a pag esta carregada set prev
+        setPrevBySrcInput();
+    }
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+    async function fileToBase64(seletor) {
+        const file = document.querySelector(seletor).files[0];
+        const src = await toBase64(file);
+        return src;
+    }
+
+    document.querySelector('#img').addEventListener('change', function () {
+        var maxAllowedSize = 1 * 1024 * 1024;
+        if (this.files[0].size > maxAllowedSize) {
+            alert("Arquivo grande demais, selecione outro menor!");
+            this.value = "";
+        } else {
+            atualizaImg();
+        }
+
+    }, false);
+
+    async function atualizaImg() {
+        const src = await fileToBase64('#img');
+        setValue('[name=src]', src);
+        setPrevBySrcInput();
+    }
+
+    function setValue(seletor, value) {
+        document.querySelector(seletor).value = String(value);
+    }
+
+    function setPrevBySrcInput() {
+        document.querySelector('#prev').src = document.querySelector('[name=src]').value;
+    }
+</script>
+<!-- Footer -->
+<jsp:include page="footer.jsp"></jsp:include>

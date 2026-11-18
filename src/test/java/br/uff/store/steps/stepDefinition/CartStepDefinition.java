@@ -1,0 +1,44 @@
+package br.uff.store.steps.stepDefinition;
+
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
+
+import org.junit.Assert;
+
+import br.uff.store.core.dtos.CartDTO;
+import br.uff.store.core.interfaces.services.ICartService;
+import br.uff.store.core.services.CartService;
+
+public class CartStepDefinition {
+    Integer carrinhoId;
+    Integer usuarioId;
+    String ip;
+    CartDTO carrinhoRetorno;
+    String exMsg = "";
+
+    ICartService carrinhoService = new CartService();
+
+    @Dado("sistema pega as variaveis {int}, {int} e {int} pra recuperar o carrinho")
+    public void sistema_pega_as_variaveis_e_pra_recuperar_o_carrinho(Integer int1, Integer int2, Integer int3) {
+        this.carrinhoId = (int1.equals(0) ? null : int1);
+        this.usuarioId = (int2.equals(0) ? null : int2);
+        this.ip = String.valueOf(int3);
+    }
+
+    @Quando("usuario solicita o carrinho")
+    public void usuario_solicita_o_carrinho() {
+        try {
+            carrinhoRetorno = carrinhoService.recuperaCartAtivo(this.carrinhoId, this.usuarioId, this.ip);
+        } catch (Exception e) {
+            exMsg = e.getMessage();
+        }
+    }
+
+    @Entao("recebo o carrinho criado ou recuperado com o usuario {int}")
+    public void recebo_o_carrinho_criado_ou_recuperado_com_o_usuario(Integer int1) {
+        Integer esperado = (int1.equals(0) ? null : int1);
+        Assert.assertEquals(carrinhoRetorno.getUserId(), esperado);
+
+    }
+}

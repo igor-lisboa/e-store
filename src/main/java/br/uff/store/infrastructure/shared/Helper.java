@@ -1,0 +1,45 @@
+package br.uff.store.infrastructure.shared;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import br.uff.store.core.interfaces.shared.IHelper;
+
+public class Helper implements IHelper {
+
+    public Date convertStringToDate(String format, String date) {
+        try {
+            return new SimpleDateFormat(format).parse(date);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String convertDateToString(String format, Date date) {
+        try {
+            return new SimpleDateFormat(format).format(date);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Integer tryParseInteger(String intStr) {
+        try {
+            return Integer.valueOf(intStr);
+        } catch (Exception ec) {
+            return null;
+        }
+    }
+
+    public String tryParseMoneyFormat(Object preco) {
+        return "R$" + String.format("%.2f", preco);
+    }
+
+    public Double tryParseDouble(String intStr) {
+        try {
+            return Double.valueOf(intStr);
+        } catch (Exception ec) {
+            return null;
+        }
+    }
+}

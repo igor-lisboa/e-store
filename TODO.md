@@ -22,7 +22,9 @@ Update this active list when work is evidenced complete or new gaps are found. S
 - [ ] Add browser E2E coverage for sign-in, catalog search, cart handoff, checkout, favorites, and ratings.
 - [ ] Make Cucumber steps and features English and assert user-visible outcomes.
 - [ ] Translate legacy Portuguese identifiers, comments, logs, and technical strings to English as affected areas are refactored.
+- [x] Rename maintained source/test files, Java types/packages, JSPs, CSS assets, feature files, and root test collections to English and update references.
 - [ ] Add CI for static checks, unit, integration, and E2E suites.
+- [x] Add initial CI for repository contracts, isolated Java tests, and migration apply/validate/reapply. Browser E2E and isolated repository integration coverage remain pending.
 
 ## P1 — Localization and accessibility
 
@@ -34,7 +36,8 @@ Update this active list when work is evidenced complete or new gaps are found. S
 ## P1 — Local developer setup
 
 - [ ] Verify Compose startup, schema initialization, Maven tests, and shutdown on Windows, macOS, and Linux.
-- [ ] Separate migrations from sample data and add repeatable versioned migrations.
+- [x] Separate schema/routine/reference migrations from optional local fixtures and run them with Flyway before startup.
+- [ ] Execute Flyway against MySQL in CI and verify adoption of an existing database with preserved data.
 - [ ] Add a safe, documented database reset and fixture strategy.
 - [ ] Pin supported Java, Maven, MySQL, and Compose versions; review the MySQL runtime lifecycle.
 
@@ -42,12 +45,14 @@ Update this active list when work is evidenced complete or new gaps are found. S
 
 - [ ] Inject repository interfaces; remove service constructors that instantiate concrete DAOs.
 - [ ] Separate domain rules, application use cases, HTTP adapters, and JDBC implementations with inward dependency direction.
-- [ ] Split files above 300 lines by responsibility. `ProdutosServlet.java` (365 lines) is an immediate candidate.
-- [ ] Split the legacy `LojaApplicationTests.java` (843 lines) into focused test classes with isolated fixtures.
+- [x] Extract catalog category selection so production Java files stay below 300 lines.
+- [ ] Replace the split legacy integration-test batches with feature-focused classes and isolated fixtures. File-size splitting is complete; fixture isolation remains.
 - [ ] Replace map-backed persistence mapping with explicit typed row mapping.
 - [ ] Add input validation objects and consistent domain errors.
 - [ ] Replace stored-procedure-only checkout orchestration with a tested transaction boundary.
 - [ ] Document API routes, auth, status codes, payloads, and error schema.
+- [x] Replace the Postman collection with packaged Swagger UI and an OpenAPI contract for current read endpoints, session authentication, response schemas, and errors.
+- [ ] Exercise Swagger UI and OpenAPI responses against a running servlet container; add dedicated 404 responses.
 - [ ] Decide whether to migrate Java EE 7/Servlets/JSP or maintain the current stack.
 
 ## P2 — Product decisions

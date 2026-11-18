@@ -1,0 +1,14 @@
+INSERT INTO `category` VALUES ('1', 'Playstation', null);
+INSERT INTO `category` VALUES ('2', 'Xbox', null);
+INSERT INTO `category` VALUES ('3', 'Wii', null);
+INSERT INTO `category` VALUES ('4', 'Accessories', '1');
+INSERT INTO `category` VALUES ('5', 'Consoles', '1');
+INSERT INTO `category` VALUES ('6', 'Games', '1');
+INSERT INTO `category` VALUES ('7', 'Accessories', '2');
+INSERT INTO `category` VALUES ('8', 'Consoles', '2');
+INSERT INTO `category` VALUES ('9', 'Games', '2');
+INSERT INTO `category` VALUES ('10', 'Accessories', '3');
+INSERT INTO `category` VALUES ('11', 'Consoles', '3');
+INSERT INTO `category` VALUES ('12', 'Games', '3');
+INSERT INTO `roles` VALUES ('1', 'ADMIN');
+INSERT INTO `roles` VALUES ('2', 'CUSTOMER');

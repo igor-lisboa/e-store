@@ -6,7 +6,10 @@
 - Services construct concrete DAOs in several no-argument constructors, limiting isolation and substitutability.
 - The project targets Java 8, Java EE 7 APIs, JSP, Servlets, Maven WAR packaging, and a legacy webapp-runner.
 - The repository has service tests that require MySQL and Cucumber feature tests. It has no isolated browser E2E suite.
+- Default Maven tests are isolated. The older mutable database tests and Cucumber scenarios run explicitly through `-Plegacy-integration`; they are retained for migration work and need fixture repair.
 - State-changing form actions now require POST, but CSRF tokens are not yet implemented.
+- Catalog category-link mapping is separated from request orchestration. Java files are checked against the 300-line limit. Legacy database tests are split into small batches pending a feature-focused fixture rewrite.
+- Java source and test filenames and type names use English under `br.uff.store`. JSPs, stylesheets, feature filenames, OpenAPI documents, and the load-test filename use English too. Import, package-path, type-filename, and stylesheet reference checks guard these renames.
 
 ## Target requirements
 

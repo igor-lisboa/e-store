@@ -1,1 +1,1 @@
-web: java -jar target/endorsed/webapp-runner.jar --port $PORT target/loja-1.0-SNAPSHOT.war
+web: java -jar target/dependency/webapp-runner.jar --port $PORT target/e-store-1.0.1.war

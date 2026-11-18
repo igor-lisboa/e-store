@@ -1,0 +1,18 @@
+{
+  "description": "The request failed. Details are not disclosed to the client.",
+  "content": {
+    "application/json": {
+      "schema": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

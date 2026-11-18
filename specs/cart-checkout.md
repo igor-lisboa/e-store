@@ -7,7 +7,7 @@
 - A signed-in user can claim an eligible anonymous cart; carts are checked for existence, ownership, and sold state.
 - Cart items can be added, removed, quantity-adjusted, listed, and paginated.
 - Checkout requires a user, a valid active non-empty cart, and an address owned by that user.
-- The database procedure `buy_cart_itens` records a sale and stock updates are guarded by database triggers in the seed dump.
+- The database procedure `buy_cart_itens` records a sale; the procedure and stock trigger are installed by versioned migrations.
 
 ## Requirements
 

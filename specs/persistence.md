@@ -3,9 +3,9 @@
 ## Observed behavior
 
 - MySQL stores users, roles, addresses, products, categories, carts, cart items, sales, ratings, and favorites.
-- `database/dump/dump.sql` is both schema and sample data, with stored procedures and triggers.
+- `database/migrations` contains versioned tables, views, routines, and reference data. `database/dev-seeds` contains optional local fixtures. Flyway records applied versions and checksums.
 - Data access classes issue SQL through `MySQLDAO`; DAOs return map-backed DTOs.
-- Several operations wrap low-level failures in `LojaException`.
+- Several operations wrap low-level failures in `StoreException`.
 
 ## Requirements
 
@@ -24,4 +24,4 @@
 
 ## Open questions
 
-- Define supported MySQL version and a migration tool before replacing the checked-in dump workflow.
+- MySQL 5.7 and Flyway 9.22.3 are the current local baseline. Plan a supported MySQL upgrade and verify existing-database adoption before production use.

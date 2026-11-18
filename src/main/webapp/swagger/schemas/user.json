@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "format": "int32",
+      "description": "User ID."
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "roleId": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ],
+      "description": "1: administrator; 2: customer."
+    }
+  },
+  "description": "Account details. Passwords and hashes are never serialized."
+}

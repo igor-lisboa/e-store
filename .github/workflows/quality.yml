@@ -1,0 +1,30 @@
+name: Quality
+
+on: [push, pull_request]
+
+jobs:
+  unit-and-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/test_repository_contracts.py
+      - run: python -m pip install -r scripts/requirements.txt
+      - run: python scripts/validate_openapi.py
+      - run: mvn -B test
+      - run: docker compose run --rm migrate migrate
+      - run: docker compose run --rm migrate validate
+      - run: docker compose run --rm migrate migrate
+      - name: Collect database logs
+        if: failure()
+        run: docker compose logs database
+      - name: Stop services
+        if: always()
+        run: docker compose down -v

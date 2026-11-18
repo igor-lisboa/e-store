@@ -13,13 +13,18 @@ Use this tool-independent workflow for feature implementation, refactoring, and 
 - Inspect the full affected flow from HTTP/UI through application services to persistence and tests.
 - Distinguish observed behavior from target requirements. Record unknowns instead of inventing policy.
 - Identify security, data migration, compatibility, and locale impacts.
+- If API routes, inputs, JSON serialization, validation, authentication/authorization, or errors change, apply the shared `agents/skills/maintain-openapi/SKILL.md` workflow, including service changes that affect endpoint behavior.
 
 ## During implementation
 
 - Make cohesive changes and preserve behavior unless the spec requires a change.
 - Keep dependencies pointing toward domain and application rules; isolate frameworks and persistence at the edges.
 - Prefer explicit dependencies, validation, deterministic errors, and files under 300 lines.
+- Follow SOLID with simple solutions that junior developers can understand; avoid unnecessary patterns and layers.
+- Use English endpoints, links, query parameters, and action names. Update callers and contract tests together.
+- Manage schema, seeds, views, procedures, and triggers through versioned migrations rather than database dumps.
 - Write English source and technical docs. Put user-visible translations in locale resources and update every supported locale.
+- Require English filenames, directories, packages, types, methods, variables, tests, assets, comments, logs, and errors. Reject Portuguese or mixed-language naming and update every reference in the same rename.
 - Add unit tests for rules, integration tests for adapters/persistence, and browser E2E tests for key journeys.
 - Keep tests independent of shared mutable data and make failures actionable.
 
