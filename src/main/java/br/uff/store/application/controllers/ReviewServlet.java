@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,13 +20,13 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/reviews")
 public class ReviewServlet extends HttpServlet {
-    private final IReviewService avaliacaoService;
-    private static final String PRODUTOID = "productId";
+    private final IReviewService reviewService;
+    private static final String PRODUCT_ID = "productId";
     private static final String RATING = "rating";
     private final Helper helper;
 
     public ReviewServlet() {
-        avaliacaoService = new ReviewService();
+        reviewService = StoreServices.reviews();
         helper = new Helper();
     }
 
@@ -38,39 +40,36 @@ public class ReviewServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
-            // seta produtoId na sessao se estiver passado por parametro antes de verificar login
-            if (request.getParameter(PRODUTOID) != null) {
-                session.setAttribute(PRODUTOID, request.getParameter(PRODUTOID));
+
+            if (request.getParameter(PRODUCT_ID) != null) {
+                session.setAttribute(PRODUCT_ID, request.getParameter(PRODUCT_ID));
             }
 
-            // seta rating na sessao se estiver passado por parametro antes de verificar login
             if (request.getParameter(RATING) != null) {
                 session.setAttribute(RATING, request.getParameter(RATING));
             }
 
-            // se n tem usuario logado manda p controller de user
             Integer userId = null;
             if (session.getAttribute("userId") == null) {
-                session.setAttribute("msg", "Realize login para avaliar um produto!");
+                session.setAttribute("msg", "Sign in to review a product.");
                 response.sendRedirect("account?redirect=reviews");
                 return;
             } else {
                 userId = helper.tryParseInteger(session.getAttribute("userId").toString());
             }
 
-            Integer produtoId = null;
-            if (session.getAttribute(PRODUTOID) != null) {
-                produtoId = helper.tryParseInteger(session.getAttribute(PRODUTOID).toString());
+            Integer productId = null;
+            if (session.getAttribute(PRODUCT_ID) != null) {
+                productId = helper.tryParseInteger(session.getAttribute(PRODUCT_ID).toString());
             } else {
-                session.setAttribute("msg", "Por favor, selecione um produto.");
+                session.setAttribute("msg", "Please select a product.");
                 response.sendRedirect("products");
                 return;
             }
 
-            // recupera acao solicitada se existir
             String action = "";
             if (request.getParameter("action") != null) {
                 action = request.getParameter("action");
@@ -82,8 +81,8 @@ public class ReviewServlet extends HttpServlet {
                     return;
                 }
                 Integer rating = helper.tryParseInteger(request.getParameter(RATING));
-                avaliacaoService.avaliaProduct(new ProductReviewInputDTO(
-                        userId, produtoId, rating, request.getParameter("description"), request.getParameter("title")));
+                reviewService.reviewProduct(new ProductReviewInputDTO(
+                        userId, productId, rating, request.getParameter("description"), request.getParameter("title")));
                 session.setAttribute(RATING, null);
                 response.sendRedirect("product");
                 return;
@@ -138,7 +137,7 @@ public class ReviewServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra tratar avaliações dos usuaários feitas sobre os produtos.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

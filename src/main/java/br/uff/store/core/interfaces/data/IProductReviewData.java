@@ -8,9 +8,9 @@ import br.uff.store.core.exceptions.StoreException;
 
 public interface IProductReviewData {
 
-    public Boolean jaFoiAvaliado(Integer usuarioId, Integer produtoId) throws StoreException;
+    public Boolean hasReviewedProduct(Integer userId, Integer productId) throws StoreException;
 
-    public void insereReviewDoProduct(ProductReviewInputDTO avaliacaoProductInsertDTO) throws StoreException;
+    public void insertProductReview(ProductReviewInputDTO reviewInput) throws StoreException;
 
-    public List<ProductReviewListDTO> recuperaAvaliacoesDeUmProduct(Integer produtoId) throws StoreException;
+    public List<ProductReviewListDTO> listProductReviews(Integer productId) throws StoreException;
 }

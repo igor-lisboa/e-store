@@ -7,5 +7,5 @@ import br.uff.store.core.exceptions.StoreException;
 
 public interface ICategoryData {
 
-    public List<CategoryDTO> listaCategorys() throws StoreException;
+    public List<CategoryDTO> categories() throws StoreException;
 }

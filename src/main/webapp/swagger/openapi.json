@@ -74,6 +74,9 @@
           },
           "400": {
             "$ref": "#/components/responses/Error400"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
           }
         },
         "parameters": [
@@ -88,7 +91,7 @@
             }
           }
         ],
-        "description": "Missing records currently produce a generic 500 response; a dedicated 404 contract is pending."
+        "description": "Returns 404 when the requested resource does not exist."
       }
     },
     "/api/categories/": {
@@ -185,6 +188,9 @@
           },
           "400": {
             "$ref": "#/components/responses/Error400"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
           }
         },
         "security": [
@@ -204,7 +210,7 @@
             }
           }
         ],
-        "description": "Missing records currently produce a generic 500 response; a dedicated 404 contract is pending."
+        "description": "Returns 404 when the requested resource does not exist."
       }
     }
   },
@@ -240,6 +246,9 @@
       },
       "Error500": {
         "$ref": "responses/error500.json"
+      },
+      "Error404": {
+        "$ref": "responses/error404.json"
       }
     }
   }

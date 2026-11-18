@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import br.uff.store.core.dtos.ProductFilterDTO;
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.ProductListDTO;
 import br.uff.store.core.interfaces.services.IProductService;
 import br.uff.store.core.services.ProductService;
@@ -23,195 +25,179 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/products")
 public class ProductsServlet extends HttpServlet {
-    private final IProductService produtoService;
+    private final IProductService productService;
     private final Helper helper;
-    private static final String PESQUISASTR = "search";
+    private static final String SEARCH_KEY = "search";
     private static final String PLAYSTATIONSTR = "playstation";
     private static final String CHECKEDSTR = "checked";
     private static final String CONSOLESSTR = "consoles";
-    private static final String LANCAMENTOSSTR = "newReleases";
-    private static final String FAVORITOSSTR = "favorites";
-    private static final String ACESSORIOSSTR = "accessories";
-    private static final String JOGOSSTR = "games";
+    private static final String NEW_RELEASES_KEY = "newReleases";
+    private static final String FAVORITES_KEY = "favorites";
+    private static final String ACCESSORIES_KEY = "accessories";
+    private static final String GAMES_KEY = "games";
     private static final String XBOXSTR = "xbox";
     private static final String WIISTR = "wii";
-    private static final String PRODUTOSPAGSTR = "ProductsPag";
-    private static final String MAXPAGSTR = "maxPag";
+    private static final String PRODUCT_PAGE = "productPage";
+    private static final String MAXPAGSTR = "maxPage";
 
     public ProductsServlet() {
         helper = new Helper();
-        produtoService = new ProductService();
+        productService = StoreServices.products();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
 
         try {
-            ProductFilterDTO filtro = new ProductFilterDTO();
-            filtro.setItensPorPagina(5);
-            filtro.setPaginaAtual(1);
+            ProductFilterDTO filter = new ProductFilterDTO();
+            filter.setPageSize(5);
+            filter.setPageNumber(1);
 
-            if (request.getParameter(PESQUISASTR) != null) {
-                session.setAttribute(PESQUISASTR, request.getParameter(PESQUISASTR));
+            if (request.getParameter(SEARCH_KEY) != null) {
+                session.setAttribute(SEARCH_KEY, request.getParameter(SEARCH_KEY));
             }
 
-            if (session.getAttribute(PESQUISASTR) != null) {
-                filtro.setPesquisa(session.getAttribute(PESQUISASTR).toString());
+            if (session.getAttribute(SEARCH_KEY) != null) {
+                filter.setSearch(session.getAttribute(SEARCH_KEY).toString());
             }
 
-            // pega esp
-            String[] especiais = request.getParameterValues("special");
+            String[] specialValues = request.getParameterValues("special");
 
-            // pega categorias
-            String[] categorias = request.getParameterValues("category");
+            String[] requestedCategories = request.getParameterValues("category");
 
-            // pega sub categorias
-            String[] subCategorys = request.getParameterValues("subCategory");
+            String[] requestedSubcategories = request.getParameterValues("subCategory");
 
-            // Converte String Array de categorias p Lista
-            List<String> listaCategorys = new ArrayList<>();
-            if (categorias != null) {
-                listaCategorys = new ArrayList<>(Arrays.asList(categorias));
+            List<String> categories = new ArrayList<>();
+            if (requestedCategories != null) {
+                categories = new ArrayList<>(Arrays.asList(requestedCategories));
             }
 
-            // Converte String Array de sub categorias p Lista
-            List<String> listaSubCategorys = new ArrayList<>();
-            if (subCategorys != null) {
-                listaSubCategorys = new ArrayList<>(Arrays.asList(subCategorys));
+            List<String> subcategories = new ArrayList<>();
+            if (requestedSubcategories != null) {
+                subcategories = new ArrayList<>(Arrays.asList(requestedSubcategories));
             }
 
-            // Converte String Array de especiais p Lista
-            List<String> listaEsp = new ArrayList<>();
-            if (especiais != null) {
-                listaEsp = new ArrayList<>(Arrays.asList(especiais));
+            List<String> specials = new ArrayList<>();
+            if (specialValues != null) {
+                specials = new ArrayList<>(Arrays.asList(specialValues));
             }
 
-            // carrega categorias com base nos selects checados
-            session.setAttribute(PLAYSTATIONSTR, (listaCategorys.contains(PLAYSTATIONSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(XBOXSTR, (listaCategorys.contains(XBOXSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(WIISTR, (listaCategorys.contains(WIISTR) ? CHECKEDSTR : ""));
-            session.setAttribute(CONSOLESSTR, (listaSubCategorys.contains(CONSOLESSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(JOGOSSTR, (listaSubCategorys.contains(JOGOSSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(ACESSORIOSSTR, (listaSubCategorys.contains(ACESSORIOSSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(FAVORITOSSTR, (listaEsp.contains(FAVORITOSSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(LANCAMENTOSSTR, (listaEsp.contains(LANCAMENTOSSTR) ? CHECKEDSTR : ""));
+            session.setAttribute(PLAYSTATIONSTR, (categories.contains(PLAYSTATIONSTR) ? CHECKEDSTR : ""));
+            session.setAttribute(XBOXSTR, (categories.contains(XBOXSTR) ? CHECKEDSTR : ""));
+            session.setAttribute(WIISTR, (categories.contains(WIISTR) ? CHECKEDSTR : ""));
+            session.setAttribute(CONSOLESSTR, (subcategories.contains(CONSOLESSTR) ? CHECKEDSTR : ""));
+            session.setAttribute(GAMES_KEY, (subcategories.contains(GAMES_KEY) ? CHECKEDSTR : ""));
+            session.setAttribute(ACCESSORIES_KEY, (subcategories.contains(ACCESSORIES_KEY) ? CHECKEDSTR : ""));
+            session.setAttribute(FAVORITES_KEY, (specials.contains(FAVORITES_KEY) ? CHECKEDSTR : ""));
+            session.setAttribute(NEW_RELEASES_KEY, (specials.contains(NEW_RELEASES_KEY) ? CHECKEDSTR : ""));
 
-            CatalogCategorySelection.apply(request, session, listaCategorys, listaSubCategorys);
+            CatalogCategorySelection.apply(request, session, categories, subcategories);
 
-            if(!listaCategorys.isEmpty()) {
-                filtro.setCategorys(listaCategorys);
+            if(!categories.isEmpty()) {
+                filter.setCategories(categories);
             }
             
-            if(!listaSubCategorys.isEmpty()) {
-                filtro.setSubCategorys(listaSubCategorys);
+            if(!subcategories.isEmpty()) {
+                filter.setSubcategories(subcategories);
             }
 
-            // verifica se chamou um filtro especial
             String espParameter = "";
             if (request.getParameter("special") != null) {
                 espParameter = request.getParameter("special");
             }
 
-            if (espParameter.equals(LANCAMENTOSSTR)) {
-                session.setAttribute(LANCAMENTOSSTR, CHECKEDSTR);
-            } else if (espParameter.equals(FAVORITOSSTR)) {
-                session.setAttribute(FAVORITOSSTR, CHECKEDSTR);
+            if (espParameter.equals(NEW_RELEASES_KEY)) {
+                session.setAttribute(NEW_RELEASES_KEY, CHECKEDSTR);
+            } else if (espParameter.equals(FAVORITES_KEY)) {
+                session.setAttribute(FAVORITES_KEY, CHECKEDSTR);
             }
 
-            // pega esp lancamentos q n esta na lista de esp e insere
-            if (session.getAttribute(LANCAMENTOSSTR) != null) {
-                if (session.getAttribute(LANCAMENTOSSTR).toString().equals(CHECKEDSTR) && !listaEsp.contains(LANCAMENTOSSTR)) {
-                    listaEsp.add(LANCAMENTOSSTR);
+            if (session.getAttribute(NEW_RELEASES_KEY) != null) {
+                if (session.getAttribute(NEW_RELEASES_KEY).toString().equals(CHECKEDSTR) && !specials.contains(NEW_RELEASES_KEY)) {
+                    specials.add(NEW_RELEASES_KEY);
                 }
             }
 
-            // pega esp favoritos q n esta na lista de esp e insere
-            if (session.getAttribute(FAVORITOSSTR) != null) {
-                if (session.getAttribute(FAVORITOSSTR).toString().equals(CHECKEDSTR) && !listaEsp.contains(FAVORITOSSTR)) {
-                    listaEsp.add(FAVORITOSSTR);
+            if (session.getAttribute(FAVORITES_KEY) != null) {
+                if (session.getAttribute(FAVORITES_KEY).toString().equals(CHECKEDSTR) && !specials.contains(FAVORITES_KEY)) {
+                    specials.add(FAVORITES_KEY);
                 }
             }
 
-            // pega sub categoria console q n esta na lista de sub categorias e insere
             if (session.getAttribute(CONSOLESSTR) != null) {
-                if (session.getAttribute(CONSOLESSTR).toString().equals(CHECKEDSTR) && !listaSubCategorys.contains(CONSOLESSTR)) {
-                    listaSubCategorys.add(CONSOLESSTR);
-                }
-            }
-            // pega  sub categoria jogo q n esta na lista de sub categorias e insere
-            if (session.getAttribute(JOGOSSTR) != null) {
-                if (session.getAttribute(JOGOSSTR).toString().equals(CHECKEDSTR) && !listaSubCategorys.contains(JOGOSSTR)) {
-                    listaSubCategorys.add(JOGOSSTR);
-                }
-            }
-            // pega sub categoria acessorio q n esta na lista de sub categorias e insere
-            if (session.getAttribute(ACESSORIOSSTR) != null) {
-                if (session.getAttribute(ACESSORIOSSTR).toString().equals(CHECKEDSTR) && !listaSubCategorys.contains(ACESSORIOSSTR)) {
-                    listaSubCategorys.add(ACESSORIOSSTR);
-                }
-            }
-            // pega categoria playstation q n esta na lista de categorias e insere
-            if (session.getAttribute(PLAYSTATIONSTR) != null) {
-                if (session.getAttribute(PLAYSTATIONSTR).toString().equals(CHECKEDSTR) && !listaCategorys.contains(PLAYSTATIONSTR)) {
-                    listaCategorys.add(PLAYSTATIONSTR);
-                }
-            }
-            // pega categoria xbox q n esta na lista de categorias e insere
-            if (session.getAttribute(XBOXSTR) != null) {
-                if (session.getAttribute(XBOXSTR).toString().equals(CHECKEDSTR) && !listaCategorys.contains(XBOXSTR)) {
-                    listaCategorys.add(XBOXSTR);
-                }
-            }
-            // pega categoria wii q n esta na lista de categorias e insere
-            if (session.getAttribute(WIISTR) != null) {
-                if (session.getAttribute(WIISTR).toString().equals(CHECKEDSTR) && !listaCategorys.contains(WIISTR)) {
-                    listaCategorys.add(WIISTR);
+                if (session.getAttribute(CONSOLESSTR).toString().equals(CHECKEDSTR) && !subcategories.contains(CONSOLESSTR)) {
+                    subcategories.add(CONSOLESSTR);
                 }
             }
 
-            // filtra favoritos
-            if (listaEsp.contains(FAVORITOSSTR)) {
-                // se tem usuario logado mostra filtra produtos por favoritos
+            if (session.getAttribute(GAMES_KEY) != null) {
+                if (session.getAttribute(GAMES_KEY).toString().equals(CHECKEDSTR) && !subcategories.contains(GAMES_KEY)) {
+                    subcategories.add(GAMES_KEY);
+                }
+            }
+
+            if (session.getAttribute(ACCESSORIES_KEY) != null) {
+                if (session.getAttribute(ACCESSORIES_KEY).toString().equals(CHECKEDSTR) && !subcategories.contains(ACCESSORIES_KEY)) {
+                    subcategories.add(ACCESSORIES_KEY);
+                }
+            }
+
+            if (session.getAttribute(PLAYSTATIONSTR) != null) {
+                if (session.getAttribute(PLAYSTATIONSTR).toString().equals(CHECKEDSTR) && !categories.contains(PLAYSTATIONSTR)) {
+                    categories.add(PLAYSTATIONSTR);
+                }
+            }
+
+            if (session.getAttribute(XBOXSTR) != null) {
+                if (session.getAttribute(XBOXSTR).toString().equals(CHECKEDSTR) && !categories.contains(XBOXSTR)) {
+                    categories.add(XBOXSTR);
+                }
+            }
+
+            if (session.getAttribute(WIISTR) != null) {
+                if (session.getAttribute(WIISTR).toString().equals(CHECKEDSTR) && !categories.contains(WIISTR)) {
+                    categories.add(WIISTR);
+                }
+            }
+
+            if (specials.contains(FAVORITES_KEY)) {
+
                 if (session.getAttribute("userId") != null) {
-                    filtro.setUserId(helper.tryParseInteger(session.getAttribute("userId").toString()));
-                    filtro.setApenasFavoritados(true);
+                    filter.setUserId(helper.tryParseInteger(session.getAttribute("userId").toString()));
+                    filter.setFavoritesOnly(true);
                 } else {
-                    session.setAttribute("msg", "Realize login para ver seus favoritos!");
+                    session.setAttribute("msg", "Sign in to view your favorites.");
                     response.sendRedirect("account?redirect=products");
                     return;
                 }
             }
 
-            if (listaEsp.contains(LANCAMENTOSSTR)) {
-                filtro.setApenasLancamentos(true);
+            if (specials.contains(NEW_RELEASES_KEY)) {
+                filter.setNewReleasesOnly(true);
             }
 
-            // filtra menor preco
             if (request.getParameter("price_min") != null) {
                 Double priceMin = helper.tryParseDouble(request.getParameter("price_min"));
                 if (priceMin != null) {
                     session.setAttribute("priceMin", priceMin);
-                    filtro.setPrecoMinimo(priceMin);
+                    filter.setMinimumPrice(priceMin);
                 }
             }
 
-            // filtra maior preco
             if (request.getParameter("price_max") != null) {
                 Double priceMax = helper.tryParseDouble(request.getParameter("price_max"));
                 if (priceMax != null) {
                     session.setAttribute("priceMax", priceMax);
-                    filtro.setPrecoMaximo(priceMax);
+                    filter.setMaximumPrice(priceMax);
                 }
             }
 
-            // define pag atual
-            Integer produtosPag = 1;
-            if (session.getAttribute(PRODUTOSPAGSTR) != null) {
-                produtosPag = Integer.valueOf(session.getAttribute(PRODUTOSPAGSTR).toString());
+            Integer productPage = 1;
+            if (session.getAttribute(PRODUCT_PAGE) != null) {
+                productPage = Integer.valueOf(session.getAttribute(PRODUCT_PAGE).toString());
             }
 
-            // recupera acao solicitada se existir
             String action = "";
             if(request.getParameter("action")!=null) {
                 action = request.getParameter("action");
@@ -219,11 +205,11 @@ public class ProductsServlet extends HttpServlet {
 
             switch (action) {
                 case "previous": {
-                    produtosPag = produtosPag - 1;
+                    productPage = productPage - 1;
                     break;
                 }
                 case "next": {
-                    produtosPag = produtosPag + 1;
+                    productPage = productPage + 1;
                     break;
                 }
                 default: {
@@ -231,14 +217,14 @@ public class ProductsServlet extends HttpServlet {
                 }
             }
 
-            filtro.setPaginaAtual(produtosPag);
+            filter.setPageNumber(productPage);
 
-            PaginateDTO<List<ProductListDTO>> produtosPaginados = produtoService.listaProductsVitrine(filtro);
+            PaginationDTO<List<ProductListDTO>> pagedProducts = productService.listStorefrontProducts(filter);
             
-            session.setAttribute(MAXPAGSTR, produtosPaginados.getUltimaPagina());
-            session.setAttribute(PRODUTOSPAGSTR, produtosPaginados.getPaginaAtual());
+            session.setAttribute(MAXPAGSTR, pagedProducts.getLastPage());
+            session.setAttribute(PRODUCT_PAGE, pagedProducts.getPageNumber());
 
-            request.setAttribute("products", produtosPaginados);
+            request.setAttribute("products", pagedProducts);
             request.getRequestDispatcher("pages/products.jsp").forward(request, response);
         } catch (Exception ex) {
             session.setAttribute("msg", ex.getMessage());
@@ -288,7 +274,7 @@ public class ProductsServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet que lista produtos.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

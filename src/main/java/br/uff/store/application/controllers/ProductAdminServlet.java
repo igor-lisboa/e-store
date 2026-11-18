@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -23,16 +25,16 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/product-admin")
 public class ProductAdminServlet extends HttpServlet {
-    private final IProductService produtoService;
-    private final ICategoryService categoriaService;
-    private final IUserService usuarioService;
+    private final IProductService productService;
+    private final ICategoryService categoryService;
+    private final IUserService userService;
     private final Helper helper;
 
     public ProductAdminServlet() {
         helper = new Helper();
-        produtoService = new ProductService();
-        categoriaService = new CategoryService();
-        usuarioService = new UserService();
+        productService = StoreServices.products();
+        categoryService = StoreServices.categories();
+        userService = StoreServices.users();
     }
 
     /**
@@ -45,35 +47,33 @@ public class ProductAdminServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
-            // opcoes restritas a usuario ADM
+
             Integer activeUserId = helper.tryParseInteger(String.valueOf(session.getAttribute("userId")));
-            if (activeUserId != null && Boolean.TRUE.equals(usuarioService.ehAdmin(activeUserId))) {
+            if (activeUserId != null && Boolean.TRUE.equals(userService.isAdmin(activeUserId))) {
 
                 if (request.getParameter("selectedId") != null) {
                     String selParameterStr = request.getParameter("selectedId");
                     Integer selParameter = helper.tryParseInteger(selParameterStr);
-                    ProductDTO produto = new ProductDTO();
+                    ProductDTO product = new ProductDTO();
                     if(selParameter != null){
-                        produto = produtoService.encontraProductPorId(selParameter);
+                        product = productService.findProductById(selParameter);
                     }
-                    // define atributo de produto
-                    request.setAttribute("product", produto);
-                    request.setAttribute("categorias", categoriaService.listaCategorys());
+
+                    request.setAttribute("product", product);
+                    request.setAttribute("categories", categoryService.categories());
                     session.setAttribute("selectedId", selParameterStr);
                     request.getRequestDispatcher("pages/product-edit.jsp").forward(request, response);
                     return;
                 }
 
-                // define produto selecionado
                 Integer sel = null;
                 if (session.getAttribute("selectedId") != null) {
                     sel = helper.tryParseInteger(session.getAttribute("selectedId").toString());
                 }
 
-                // recupera acao solicitada se existir
                 String action = "";
                 if (request.getParameter("action") != null) {
                     action = request.getParameter("action");
@@ -86,8 +86,8 @@ public class ProductAdminServlet extends HttpServlet {
 
                 switch (action) {
                     case "save": {
-                        // grava alteracoes do session.getAttribute("productId")
-                        ProductDTO produtoDto = new ProductDTO(
+
+                        ProductDTO productDto = new ProductDTO(
                             sel,
                             request.getParameter("name"),
                             Double.valueOf(request.getParameter("price")),
@@ -98,26 +98,26 @@ public class ProductAdminServlet extends HttpServlet {
                         );
                         
                         if (sel == null) {
-                            produtoService.insereProduct(produtoDto);
+                            productService.insertProduct(productDto);
                         } else {
-                            produtoService.atualizaProductPorId(sel, produtoDto);
+                            productService.updateProductById(sel, productDto);
                         }
-                        session.setAttribute("msg", "Product gravado com sucesso!");
+                        session.setAttribute("msg", "Product saved.");
 
                         break;
                     }
                     case "addStock": {
-                        produtoService.insereQuantidadeEmEstoqueDoProductPorId(sel, helper.tryParseInteger(request.getParameter("quantity")));
-                        session.setAttribute("msg", "Quantidade em estoque aumentada com sucesso!");
+                        productService.addProductStock(sel, helper.tryParseInteger(request.getParameter("quantity")));
+                        session.setAttribute("msg", "Stock increased.");
                         break;
                     }
                     case "delete": {
-                        produtoService.excluiProductPorId(sel);
-                        session.setAttribute("msg", "Product deletado com sucesso!");
+                        productService.deleteProductById(sel);
+                        session.setAttribute("msg", "Product deleted.");
                         break;
                     }
                     case "clear": {
-                        // apaga sel da sessao
+
                         session.setAttribute("selectedId", null);
                         break;
                     }
@@ -126,13 +126,11 @@ public class ProductAdminServlet extends HttpServlet {
                     }
                 }
             } else {
-                throw new StoreException("Usuário não permitido!");
+                throw new StoreException("User is not authorized.");
             }
 
-            // define grid
-            request.setAttribute("grid", produtoService.listaProductsAdm());
+            request.setAttribute("grid", productService.listAdminProducts());
 
-            // manda p pag de grid de produtos
             request.getRequestDispatcher("pages/product-admin.jsp").forward(request, response);
         } catch (Exception e) {
             session.setAttribute("msg", e.getMessage());
@@ -183,7 +181,7 @@ public class ProductAdminServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra administrar produtos.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

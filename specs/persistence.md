@@ -6,6 +6,11 @@
 - `database/migrations` contains versioned tables, views, routines, and reference data. `database/dev-seeds` contains optional local fixtures. Flyway records applied versions and checksums.
 - Data access classes issue SQL through `MySQLDAO`; DAOs return map-backed DTOs.
 - Several operations wrap low-level failures in `StoreException`.
+- Each DAO operation now owns its connection, statement, and result set through try-with-resources. A transaction uses one private connection, rolls back on failure, and retains rollback failures as suppressed exceptions. Repository cleanup no longer overrides the original error.
+- H2-based JDBC integration tests verify commit, rollback, null mapping, and shared-DAO concurrent operations. These tests do not replace MySQL migration and stored-procedure verification.
+- The `mysql-integration` profile applies, validates, and reapplies seven migrations against an explicitly disposable MySQL schema. It verifies atomic checkout rollback, decimal totals, duplicate-sale prevention, ownership, and stock contention.
+- Legacy integration tests and Cucumber reset the disposable schema before each case. Both database profiles reject URLs whose schema is not exactly `e_store_integration`.
+- V7 renames the historical misspelled review table to `product_reviews`. Earlier applied migrations remain unchanged.
 
 ## Requirements
 
@@ -24,4 +29,4 @@
 
 ## Open questions
 
-- MySQL 5.7 and Flyway 9.22.3 are the current local baseline. Plan a supported MySQL upgrade and verify existing-database adoption before production use.
+- The local baseline is MySQL 8.4.13 and Flyway 9.22.3. Existing-database adoption still requires backup, schema comparison, and explicit review. The new Compose volume preserves any old MySQL 5.7 volume rather than opening it with a different server version.

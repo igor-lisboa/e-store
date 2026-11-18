@@ -40,7 +40,7 @@ public class ApiSerializationTest {
         assertEquals(4, json.size());
         assertEquals("Customer", json.get("name").getAsString());
         assertEquals(2, json.get("roleId").getAsInt());
-        assertFalse(json.has("senha"));
+        assertFalse(json.has("password"));
         assertFalse(json.has("password"));
         assertFalse(gson.toJson(user).contains("secret-hash"));
     }
@@ -49,7 +49,7 @@ public class ApiSerializationTest {
     public void categoryResponseUsesEnglishPropertyNames() {
         CategoryDTO category = new CategoryDTO();
         category.setId(5);
-        category.setNome("Consoles");
+        category.setName("Consoles");
 
         JsonObject json = gson.toJsonTree(category).getAsJsonObject();
 

@@ -4,92 +4,91 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import br.uff.store.infrastructure.shared.Helper;
 
 public class SaleDTO extends BaseDTO {
 
     private Integer id;
-    private Integer carrinhoId;
-    private Double precoTotal;
-    private Date criadoEm;
-    private Integer enderecoId;
-    private Integer usuarioId;
-    private List<CartItemDTO> produtosDoCart;
-    private AddressDTO endereco;
+    private Integer cartId;
+    private Double totalPrice;
+    private Date createdAt;
+    private Integer addressId;
+    private Integer userId;
+    private List<CartItemDTO> cartProducts;
+    private AddressDTO address;
 
     public SaleDTO() {
     }
 
-    public SaleDTO(Map<String, Object> venda) {
-        this.setId(Integer.valueOf(String.valueOf(venda.get("id"))));
-        this.setCartId(Integer.valueOf(String.valueOf(venda.get("carrinhoId"))));
-        this.setPrecoTotal(Double.valueOf(String.valueOf(venda.get("precoTotal"))));
-        this.setCriadoEm((new Helper()).convertStringToDate("yyyy-MM-dd HH:mm:ss", String.valueOf(venda.get("criadoEm"))));
-        this.setAddressId(Integer.valueOf(String.valueOf(venda.get("enderecoId"))));
-        this.setUserId(Integer.valueOf(String.valueOf(venda.get("usuarioId"))));
+    public SaleDTO(Map<String, Object> sale) {
+        this.setId(Integer.valueOf(String.valueOf(sale.get("id"))));
+        this.setCartId(Integer.valueOf(String.valueOf(sale.get("cartId"))));
+        this.setTotalPrice(Double.valueOf(String.valueOf(sale.get("totalPrice"))));
+        this.setCreatedAt(DtoValues.date(sale.get("createdAt")));
+        this.setAddressId(Integer.valueOf(String.valueOf(sale.get("addressId"))));
+        this.setUserId(Integer.valueOf(String.valueOf(sale.get("userId"))));
     }
 
     public AddressDTO getAddress() {
-        return endereco;
+        return address;
     }
 
-    public void setAddress(AddressDTO endereco) {
-        this.endereco = endereco;
+    public void setAddress(AddressDTO address) {
+        this.address = address;
     }
 
-    public void setProductsDoCart(List<CartItemDTO> produtosDoCart) {
-        this.produtosDoCart = produtosDoCart;
+    public void setCartProducts(List<CartItemDTO> cartProducts) {
+        this.cartProducts = cartProducts;
     }
 
-    public List<CartItemDTO> getProductsDoCart() {
-        return produtosDoCart;
+    public List<CartItemDTO> getCartProducts() {
+        return cartProducts;
     }
 
     public Integer getCartId() {
-        return carrinhoId;
+        return cartId;
     }
 
-    public Date getCriadoEm() {
-        return criadoEm;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public Integer getAddressId() {
-        return enderecoId;
+        return addressId;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public Double getPrecoTotal() {
-        return precoTotal;
+    public Double getTotalPrice() {
+        return totalPrice;
     }
 
     public Integer getUserId() {
-        return usuarioId;
+        return userId;
     }
 
-    public void setCartId(Integer carrinhoId) {
-        this.carrinhoId = carrinhoId;
+    public void setCartId(Integer cartId) {
+        this.cartId = cartId;
     }
 
-    public void setCriadoEm(Date criadoEm) {
-        this.criadoEm = criadoEm;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public void setAddressId(Integer enderecoId) {
-        this.enderecoId = enderecoId;
+    public void setAddressId(Integer addressId) {
+        this.addressId = addressId;
     }
 
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public void setPrecoTotal(Double precoTotal) {
-        this.precoTotal = precoTotal;
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
-    public void setUserId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

@@ -1,19 +1,8 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/* 
-    Created on : 10/10/2019, 19:14:35
-    Author     : Caio
-*/
-
-/* Container principal */
 .products-main {
     display: flex;
 }
 
-/* Container dos filtros */
+
 .products-filter {
     width: 15%;
     margin: 40px 20px 50px 15px;
@@ -47,7 +36,7 @@ and open the template in the editor.
     margin-right: 5px;
 }
 
-/* Container dos produtos */
+
 .products-page {
     width: 80%;
     margin: 100px 5% 50px 0px;
@@ -112,7 +101,7 @@ and open the template in the editor.
     margin-left: 5px;
 }
 
-/* Páginas */
+
 .products-paging {
     text-align: center;
     margin-top: 50px;

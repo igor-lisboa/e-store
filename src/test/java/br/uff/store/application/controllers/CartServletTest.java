@@ -35,33 +35,33 @@ public class CartServletTest {
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getContextPath()).thenReturn("");
         when(request.getRequestDispatcher("pages/cart.jsp")).thenReturn(mock(RequestDispatcher.class));
-        when(cartService.listaProductsCart(22)).thenReturn(Collections.emptyList());
-        when(cartService.recuperaPrecoTotalDeUmCart(22)).thenReturn(0.0);
+        when(cartService.listCartProducts(22)).thenReturn(Collections.emptyList());
+        when(cartService.getCartTotal(22)).thenReturn(0.0);
     }
 
     @Test
     public void ignoresLegacyClientControlledCartIdCookies() throws Exception {
-        when(request.getCookies()).thenReturn(new Cookie[] {new Cookie("carrinhoId", "999")});
+        when(request.getCookies()).thenReturn(new Cookie[] {new Cookie("cartId", "999")});
         CartDTO activeCart = new CartDTO();
         activeCart.setId(22);
-        when(cartService.recuperaCartAtivo(null, null, "127.0.0.1")).thenReturn(activeCart);
+        when(cartService.getActiveCart(null, null, "127.0.0.1")).thenReturn(activeCart);
 
         servlet.doGet(request, response);
 
-        verify(cartService).recuperaCartAtivo(null, null, "127.0.0.1");
-        verify(session).setAttribute("carrinhoId", 22);
+        verify(cartService).getActiveCart(null, null, "127.0.0.1");
+        verify(session).setAttribute("cartId", 22);
     }
 
     @Test
     public void usesTheServerSideSessionCartReference() throws Exception {
-        when(session.getAttribute("carrinhoId")).thenReturn("22");
-        when(request.getCookies()).thenReturn(new Cookie[] {new Cookie("carrinhoId", "999")});
+        when(session.getAttribute("cartId")).thenReturn("22");
+        when(request.getCookies()).thenReturn(new Cookie[] {new Cookie("cartId", "999")});
         CartDTO activeCart = new CartDTO();
         activeCart.setId(22);
-        when(cartService.recuperaCartAtivo(22, null, "127.0.0.1")).thenReturn(activeCart);
+        when(cartService.getActiveCart(22, null, "127.0.0.1")).thenReturn(activeCart);
 
         servlet.doGet(request, response);
 
-        verify(cartService).recuperaCartAtivo(22, null, "127.0.0.1");
+        verify(cartService).getActiveCart(22, null, "127.0.0.1");
     }
 }

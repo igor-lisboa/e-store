@@ -1,41 +1,38 @@
 package br.uff.store.core.dtos;
 
 import java.util.Map;
-import com.google.gson.annotations.SerializedName;
 
 public class UserDTO extends BaseDTO {
 
     private Integer id;
-    @SerializedName("name")
-    private String nome;
+    private String name;
     private String email;
-    private transient String senha;
-    @SerializedName("roleId")
-    private Integer permissaoId;
+    private transient String password;
+    private Integer roleId;
 
     public UserDTO() {
     }
 
     public UserDTO(
             Integer id,
-            String nome,
+            String name,
             String email,
-            String senha,
-            Integer permissaoId
+            String password,
+            Integer roleId
     ) {
         this.setId(id);
-        this.setNome(nome);
+        this.setName(name);
         this.setEmail(email);
-        this.setSenha(senha);
-        this.setPermissaoId(permissaoId);
+        this.setPassword(password);
+        this.setRoleId(roleId);
     }
 
-    public UserDTO(Map<String, Object> usuario) {
-        this.setId(Integer.valueOf(String.valueOf(usuario.get("id"))));
-        this.setNome(String.valueOf(usuario.get("nome")));
-        this.setEmail(String.valueOf(usuario.get("email")));
-        this.setSenha(String.valueOf(usuario.get("senha")));
-        this.setPermissaoId(Integer.valueOf(String.valueOf(usuario.get("permissaoId"))));
+    public UserDTO(Map<String, Object> user) {
+        this.setId(Integer.valueOf(String.valueOf(user.get("id"))));
+        this.setName(String.valueOf(user.get("name")));
+        this.setEmail(String.valueOf(user.get("email")));
+        this.setPassword(String.valueOf(user.get("password")));
+        this.setRoleId(Integer.valueOf(String.valueOf(user.get("roleId"))));
     }
 
     public void setEmail(String email) {
@@ -46,32 +43,32 @@ public class UserDTO extends BaseDTO {
         this.id = id;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setPermissaoId(Integer permissaoId) {
-        this.permissaoId = permissaoId;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public Integer getPermissaoId() {
-        return permissaoId;
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
     public Integer getId() {

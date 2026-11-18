@@ -1,7 +1,6 @@
 package br.uff.store.infrastructure.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -9,159 +8,91 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
-import br.uff.store.core.exceptions.StoreException;
-import io.github.cdimascio.dotenv.Dotenv;
-
+/** Each operation owns its resources; servlet requests never share a JDBC connection. */
 public class MySQLDAO {
+    private final ConnectionFactory connections;
 
-    private Connection conn = null;
+    public MySQLDAO() {
+        this(new MySqlConnectionFactory());
+    }
 
-    public void dbTransaction(String[] comandos, Object[][] bind) throws SQLException {
-        try {
-            this.abreConexao();
-            this.conn.setAutoCommit(false);
-            Integer aux = 0;
-            for (String comando : comandos) {
-                // pega comando e verifica se index existe e pega bind
-                this.dbGrava(comando, aux < bind.length ? bind[aux] : null, true);
-                // incrementa aux
-                aux += 1;
+    public MySQLDAO(ConnectionFactory connections) {
+        this.connections = Objects.requireNonNull(connections, "Connection factory is required.");
+    }
+
+    public void executeTransaction(String[] commands, Object[][] bindings) throws SQLException {
+        Objects.requireNonNull(commands, "Transaction commands are required.");
+        try (Connection connection = connections.open()) {
+            connection.setAutoCommit(false);
+            try {
+                for (int index = 0; index < commands.length; index++) {
+                    Object[] parameters = bindings != null && index < bindings.length ? bindings[index] : null;
+                    execute(connection, commands[index], parameters);
+                }
+                connection.commit();
+            } catch (SQLException | RuntimeException failure) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackFailure) {
+                    failure.addSuppressed(rollbackFailure);
+                }
+                throw failure;
             }
-            this.conn.commit();
-        } catch (SQLException ex) {
-            this.conn.rollback();
-            throw new SQLException(ex.getMessage());
-        } finally {
-            this.fechaConexao();
-            this.conn.setAutoCommit(true);
         }
     }
 
-    public Integer dbGrava(String comando, Object[] bind, Boolean ehTransacao) throws SQLException {
-        this.abreConexao();
-        PreparedStatement sql = this.montaComando(comando, bind);
-        Integer retorno = sql.executeUpdate();
-        this.fechaComando(sql);
-        if (!Boolean.TRUE.equals(ehTransacao)) {
-            this.fechaConexao();
-        }
-        return retorno;
-    }
-
-    public Object dbValor(String campo, String tabela, String filtro, Object[] bind) throws SQLException {
-        if (!tabela.toUpperCase().startsWith("SELECT")) {
-            tabela = "SELECT * FROM " + tabela;
-        }
-        if (!filtro.equals("")) {
-            tabela = "SELECT * FROM (" + tabela + ") _x1 WHERE " + filtro;
-        }
-        String consulta = "SELECT " + campo + " FROM (" + tabela + ") _x2";
-
-        List<HashMap<String, Object>> ret = this.dbCarrega(consulta, bind);
-        if (!ret.isEmpty()) {
-            // pega primeira coluna da primeira row
-            return ret.get(0).values().toArray()[0];
-        }
-        return null;
-    }
-
-    public List<HashMap<String, Object>> dbCarrega(String consulta, Object[] bind) throws SQLException {
-        this.abreConexao();
-        PreparedStatement sql = this.montaComando(consulta, bind);
-        ResultSet rs = sql.executeQuery();
-        List<HashMap<String, Object>> ret = this.transformResultSetInArrayListHashMap(rs);
-        this.fechaComando(sql);
-        this.fechaConexao();
-        return ret;
-    }
-
-    public void destroyDb() throws StoreException {
-        try {
-            this.conn.close();
-        } catch (Exception e) {
-            throw new StoreException("Não foi possível fechar a conexão com o banco de dados.");
+    public Integer executeUpdate(String command, Object[] bindings) throws SQLException {
+        try (Connection connection = connections.open()) {
+            return execute(connection, command, bindings);
         }
     }
 
-    /**
-     *
-     * @param sql
-     * @param bind
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public PreparedStatement montaComando(String sql, Object[] bind) throws SQLException {
-        PreparedStatement comando;
-        // inicia comando
-        comando = this.conn.prepareStatement(sql);
-        // retorna comando com bind inserido
-        if (bind != null) {
-            comando = this.setBind(comando, bind);
+    private int execute(Connection connection, String command, Object[] bindings) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(command)) {
+            bind(statement, bindings);
+            return statement.executeUpdate();
         }
-        return comando;
     }
 
-    public void abreConexao() throws SQLException {
-        if (this.conn != null && !this.conn.isClosed()) {
+    public Object scalar(String field, String table, String filter, Object[] bindings) throws SQLException {
+        if (!table.toUpperCase(Locale.ROOT).startsWith("SELECT")) {
+            table = "SELECT * FROM " + table;
+        }
+        if (!filter.isEmpty()) {
+            table = "SELECT * FROM (" + table + ") source WHERE " + filter;
+        }
+        List<HashMap<String, Object>> rows = query("SELECT " + field + " FROM (" + table + ") result", bindings);
+        return rows.isEmpty() ? null : rows.get(0).values().iterator().next();
+    }
+
+    public List<HashMap<String, Object>> query(String command, Object[] bindings) throws SQLException {
+        try (Connection connection = connections.open();
+                PreparedStatement statement = connection.prepareStatement(command)) {
+            bind(statement, bindings);
+            try (ResultSet results = statement.executeQuery()) {
+                ResultSetMetaData metadata = results.getMetaData();
+                List<HashMap<String, Object>> rows = new ArrayList<>();
+                while (results.next()) {
+                    HashMap<String, Object> row = new HashMap<>();
+                    for (int column = 1; column <= metadata.getColumnCount(); column++) {
+                        row.put(metadata.getColumnLabel(column), results.getString(column));
+                    }
+                    rows.add(row);
+                }
+                return rows;
+            }
+        }
+    }
+
+    private void bind(PreparedStatement statement, Object[] bindings) throws SQLException {
+        if (bindings == null) {
             return;
         }
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        String url = setting(dotenv, "MYSQL_CONNECTION_STRING", "jdbc:mysql://localhost:3306/e_store?useSSL=false&serverTimezone=UTC");
-        String user = setting(dotenv, "MYSQL_USER", "e_store");
-        String password = setting(dotenv, "MYSQL_PASSWORD", "123456");
-        this.conn = DriverManager.getConnection(url, user, password);
-    }
-
-    private String setting(Dotenv dotenv, String name, String fallback) {
-        String environmentValue = System.getenv(name);
-        if (environmentValue != null && !environmentValue.trim().isEmpty()) {
-            return environmentValue;
+        for (int index = 0; index < bindings.length; index++) {
+            statement.setObject(index + 1, bindings[index]);
         }
-        String fileValue = dotenv.get(name);
-        return fileValue == null || fileValue.trim().isEmpty() ? fallback : fileValue;
-    }
-
-    public void fechaConexao() throws SQLException {
-        if (!this.conn.isClosed()) {
-            this.conn.close();
-        }
-    }
-
-    public void fechaComando(PreparedStatement comando) throws SQLException {
-        if (!comando.isClosed()) {
-            comando.close();
-        }
-    }
-
-    public String pegaDbNome() throws SQLException {
-        return this.conn.getMetaData().getDatabaseProductName();
-    }
-
-    public PreparedStatement setBind(PreparedStatement comando, Object[] bind) throws SQLException {
-        // define contador
-        Integer contador = 1;
-        for (Object valor : bind) {
-            // insere valor no Statement
-            comando.setObject(contador, valor);
-            // incrementa contador
-            contador += 1;
-        }
-        // retorna comando com o bind definido
-        return comando;
-    }
-
-    public List<HashMap<String, Object>> transformResultSetInArrayListHashMap(ResultSet rs) throws SQLException {
-        ResultSetMetaData md = rs.getMetaData();
-        int columns = md.getColumnCount();
-        List<HashMap<String, Object>> list = new ArrayList<>();
-        while (rs.next()) {
-            HashMap<String, Object> row = new HashMap<>(columns);
-            for (int i = 1; i <= columns; ++i) {
-                row.put(md.getColumnLabel(i), rs.getString(i));
-            }
-            list.add(row);
-        }
-        return list;
     }
 }

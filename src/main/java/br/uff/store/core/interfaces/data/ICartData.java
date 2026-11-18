@@ -4,44 +4,44 @@ import java.util.List;
 
 import br.uff.store.core.dtos.CartDTO;
 import br.uff.store.core.dtos.CartItemDTO;
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.exceptions.StoreException;
 
 public interface ICartData {
 
-    public CartDTO encontraCart(Integer id) throws StoreException;
+    public CartDTO findCart(Integer id) throws StoreException;
 
-    public List<CartDTO> listaCartsDoUserNaoVendidos(Integer usuarioId) throws StoreException;
+    public List<CartDTO> listUnsoldUserCarts(Integer userId) throws StoreException;
 
-    public PaginateDTO<List<CartItemDTO>> listaProductsCart(Integer id, Integer itensPorPagina, Integer paginaAtual) throws StoreException;
+    public PaginationDTO<List<CartItemDTO>> listCartProducts(Integer id, Integer pageSize, Integer pageNumber) throws StoreException;
 
-    public Boolean carrinhoVendido(Integer id) throws StoreException;
+    public Boolean isCartSold(Integer id) throws StoreException;
 
-    public void defineDonoDeUmCartSemUserNoMomento(Integer id, Integer usuarioId) throws StoreException;
+    public void assignUnownedCart(Integer id, Integer userId) throws StoreException;
 
-    public Boolean carrinhoSemDono(Integer id) throws StoreException;
+    public Boolean isCartUnowned(Integer id) throws StoreException;
 
-    public Boolean carrinhoDoUser(Integer id, Integer usuarioId) throws StoreException;
+    public Boolean cartBelongsToUser(Integer id, Integer userId) throws StoreException;
 
-    public Boolean carrinhoExiste(Integer id) throws StoreException;
+    public Boolean cartExists(Integer id) throws StoreException;
 
-    public Integer quantidadeProductsCart(Integer id) throws StoreException;
+    public Integer cartItemCount(Integer id) throws StoreException;
 
-    public Integer quantidadeProductNoCart(Integer id, Integer produtoId) throws StoreException;
+    public Integer productQuantityInCart(Integer id, Integer productId) throws StoreException;
 
-    public void criaCart(String ip, String criadoEm, Integer usuarioId) throws StoreException;
+    public void createCart(String ip, String createdAt, Integer userId) throws StoreException;
 
-    public CartDTO encontraCart(String ip, String criadoEm, Integer usuarioId) throws StoreException;
+    public CartDTO findCart(String ip, String createdAt, Integer userId) throws StoreException;
 
-    public List<CartItemDTO> listaProductsCart(Integer id) throws StoreException;
+    public List<CartItemDTO> listCartProducts(Integer id) throws StoreException;
 
-    public Boolean verificaProductNoCart(Integer id, Integer produtoId) throws StoreException;
+    public Boolean containsProduct(Integer id, Integer productId) throws StoreException;
 
-    public void adicionaProductNoCart(Integer id, Integer produtoId) throws StoreException;
+    public void addProductToCart(Integer id, Integer productId) throws StoreException;
 
-    public void removeProductDoCart(Integer id, Integer produtoId) throws StoreException;
+    public void removeProductFromCart(Integer id, Integer productId) throws StoreException;
 
-    public void atualizaQtdDoProductNoCart(Integer id, Integer produtoId, Integer novaQtd) throws StoreException;
+    public void updateProductQuantity(Integer id, Integer productId, Integer newQuantity) throws StoreException;
 
-    public Double recuperaPrecoTotalDeUmCart(Integer id) throws StoreException;
+    public Double getCartTotal(Integer id) throws StoreException;
 }

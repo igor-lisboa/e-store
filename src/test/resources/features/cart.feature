@@ -1,18 +1,20 @@
-# language: pt
+Feature: Active carts and sign-in handoff
+  A visitor receives an active cart and can retain it after signing in.
 
-Funcionalidade: Testar a recuperacao de um carrinho
-  O sistema deve receber o id do carrinho, o id do usuario e o ip
-  o sistema deve retornar um carrinho ativo
+  Scenario Outline: Resolve an active cart
+    Given cart reference <cart>, customer <customer>, and visitor address "127.0.0.1"
+    When the visitor requests an active cart
+    Then the returned cart belongs to customer <customer>
 
-  Esquema do Cenario: Testar passar dados aleatorios
-    Dado sistema pega as variaveis <carrinho>, <usuario> e <ip> pra recuperar o carrinho
-    Quando usuario solicita o carrinho
-    Entao recebo o carrinho criado ou recuperado com o usuario <usuario>
+    Examples:
+      | cart | customer |
+      | 0    | 0        |
+      | 0    | 2        |
+      | 543  | 2        |
 
-    Exemplos:
-      | carrinho | usuario | ip    |
-      | 2        | 0       | 22222 |
-      | 2        | 2       | 22222 |
-      | 543      | 2       | 22222 |
-      | 0        | 2       | 0     |
-      | 1        | 2       | 3     |
+  Scenario: A signed-in customer claims the visitor cart
+    Given cart reference 0, customer 0, and visitor address "127.0.0.1"
+    When the visitor requests an active cart
+    Then the returned cart belongs to customer 0
+    When customer 2 resumes the anonymous cart
+    Then the returned cart belongs to customer 2

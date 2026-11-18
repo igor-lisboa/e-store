@@ -6,19 +6,18 @@ import br.uff.store.core.dtos.RoleDTO;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.IRoleData;
 import br.uff.store.core.interfaces.services.IRoleService;
-import br.uff.store.infrastructure.data.RoleData;
 
 public class RoleService implements IRoleService {
 
-    private IRoleData roleData;
+    private final IRoleData roleData;
 
-    public RoleService() {
-        roleData = new RoleData();
+    public RoleService(IRoleData data) {
+        roleData = java.util.Objects.requireNonNull(data, "Repository is required.");
     }
 
     @Override
-    public List<RoleDTO> listaRoles() throws StoreException {
-        return roleData.listaRoles();
+    public List<RoleDTO> listRoles() throws StoreException {
+        return roleData.listRoles();
     }
 
 }

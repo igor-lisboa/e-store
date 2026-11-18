@@ -16,6 +16,9 @@
 - Users may view or edit only their own account and addresses, except for explicitly authorized administration.
 - Email and address fields must be validated; error messages must not expose secrets or SQL details.
 - Session identifiers must be rotated after successful authentication.
+- Post-login redirects are restricted to known local storefront routes. Submitted redirect values must never become arbitrary URLs or HTML.
+- Account names/emails are required and bounded to the schema length; email syntax, role IDs, and new-account passwords are validated before database access. Address fields and owner IDs are validated before writes.
+- Sign-in, registration, account edits, and sign-out require a CSRF token from the current browser session. The token stays valid after session-ID rotation and expires when the session is invalidated.
 
 ## Security changes implemented
 

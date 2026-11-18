@@ -8,7 +8,7 @@ import br.uff.store.core.exceptions.StoreException;
 
 public interface IReviewService {
 
-    public void avaliaProduct(ProductReviewInputDTO avaliacaoProductInsertDTO) throws StoreException;
+    public void reviewProduct(ProductReviewInputDTO reviewInput) throws StoreException;
 
-    public List<ProductReviewListDTO> recuperaAvaliacoesDeUmProduct(Integer produtoId) throws StoreException;
+    public List<ProductReviewListDTO> listProductReviews(Integer productId) throws StoreException;
 }

@@ -18,17 +18,15 @@ public class CategoryData implements ICategoryData {
     }
 
     @Override
-    public List<CategoryDTO> listaCategorys() throws StoreException {
+    public List<CategoryDTO> categories() throws StoreException {
         try {
             Object[] bind = {};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega("SELECT id, category_name AS nome FROM vw_category", bind);
-            List<CategoryDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(categoria -> retornoFormatado.add(new CategoryDTO(categoria)));
-            return retornoFormatado;
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, category_name AS name FROM vw_category", bind);
+            List<CategoryDTO> mappedResults = new ArrayList<>();
+            rows.forEach(category -> mappedResults.add(new CategoryDTO(category)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar as Categorys. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the category database operation.", e);
         }
     }
 

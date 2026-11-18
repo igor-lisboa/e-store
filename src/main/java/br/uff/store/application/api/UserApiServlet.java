@@ -1,8 +1,11 @@
 package br.uff.store.application.api;
 
+import br.uff.store.application.StoreServices;
+
 import br.uff.store.core.dtos.UserDTO;
 import br.uff.store.core.interfaces.services.IUserService;
 import br.uff.store.core.services.UserService;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,14 +15,14 @@ import javax.servlet.http.HttpSession;
 
 @WebServlet("/api/users/*")
 public class UserApiServlet extends HttpServlet {
-    private final IUserService usuarioService;
+    private final IUserService userService;
 
     public UserApiServlet() {
-        this(new UserService());
+        this(StoreServices.users());
     }
 
-    UserApiServlet(IUserService usuarioService) {
-        this.usuarioService = usuarioService;
+    UserApiServlet(IUserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -35,14 +38,14 @@ public class UserApiServlet extends HttpServlet {
         }
 
         try {
-            boolean administrator = usuarioService.ehAdmin(activeUserId);
+            boolean administrator = userService.isAdmin(activeUserId);
             String pathInfo = request.getPathInfo();
             if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
                 if (!administrator) {
                     ApiResponses.writeError(response, HttpServletResponse.SC_FORBIDDEN, "Administrator access is required.");
                     return;
                 }
-                ApiResponses.writeJson(response, usuarioService.listaUsers());
+                ApiResponses.writeJson(response, userService.listUsers());
                 return;
             }
 
@@ -55,7 +58,9 @@ public class UserApiServlet extends HttpServlet {
                 ApiResponses.writeError(response, HttpServletResponse.SC_FORBIDDEN, "You cannot view this account.");
                 return;
             }
-            ApiResponses.writeJson(response, usuarioService.encontraUserPorId(requestedUserId));
+            ApiResponses.writeJson(response, userService.findUserById(requestedUserId));
+        } catch (ResourceNotFoundException missing) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_NOT_FOUND, "User was not found.");
         } catch (Exception exception) {
             ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The request could not be completed.");
         }

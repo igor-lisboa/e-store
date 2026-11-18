@@ -7,17 +7,17 @@ import br.uff.store.core.exceptions.StoreException;
 
 public interface IAddressData {
 
-    public AddressDTO encontraAddressPorId(Integer id) throws StoreException;
+    public AddressDTO findAddressById(Integer id) throws StoreException;
 
-    public void excluiAddressPorId(Integer id) throws StoreException;
+    public void deleteAddressById(Integer id) throws StoreException;
 
-    public void atualizaAddressPorId(Integer id, AddressDTO endereco) throws StoreException;
+    public void updateAddressById(Integer id, AddressDTO address) throws StoreException;
 
-    public Boolean verificaAddressDoUser(Integer id, Integer usuarioId) throws StoreException;
+    public Boolean addressBelongsToUser(Integer id, Integer userId) throws StoreException;
 
-    public void insereAddress(AddressDTO endereco) throws StoreException;
+    public void insertAddress(AddressDTO address) throws StoreException;
 
-    public List<AddressDTO> listaAddresssPorUserId(Integer usuarioId) throws StoreException;
+    public List<AddressDTO> listUserAddresses(Integer userId) throws StoreException;
 
-    public Boolean enderecoFoiUsadoEmAlgumaSale(Integer enderecoId) throws StoreException;
+    public Boolean addressUsedInSale(Integer addressId) throws StoreException;
 }

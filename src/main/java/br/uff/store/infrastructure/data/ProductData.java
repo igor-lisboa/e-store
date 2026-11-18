@@ -5,292 +5,268 @@ import java.util.HashMap;
 import java.util.List;
 
 import br.uff.store.core.dtos.ProductFilterDTO;
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.ProductDTO;
 import br.uff.store.core.dtos.FeaturedProductDTO;
 import br.uff.store.core.dtos.ProductListDTO;
 import br.uff.store.core.dtos.CustomerProductDTO;
 import br.uff.store.core.exceptions.StoreException;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import br.uff.store.core.interfaces.data.IProductData;
 import br.uff.store.infrastructure.database.MySQLDAO;
 
 public class ProductData implements IProductData {
 
     private final MySQLDAO mysqlDAO;
-    private static final String CONSULTAPRODUTO = "SELECT p.id AS id, p.name AS nome, p.price AS preco, p.description AS descricao,p.img AS imagem, p.category_id AS categoriaId, p.quantity AS quantidade, c.category_name AS categoria FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id)";
+    private static final String PRODUCT_QUERY = "SELECT p.id AS id, p.name AS name, p.price AS price, p.description AS description,p.img AS image, p.category_id AS categoryId, p.quantity AS quantity, c.category_name AS category FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id)";
 
     public ProductData() {
-        this.mysqlDAO = new MySQLDAO();
+        this(new MySQLDAO());
+    }
+
+    public ProductData(MySQLDAO mysqlDAO) {
+        this.mysqlDAO = java.util.Objects.requireNonNull(mysqlDAO, "Database access is required.");
     }
 
     @Override
-    public ProductDTO encontraProductPorId(Integer id) throws StoreException {
+    public ProductDTO findProductById(Integer id) throws StoreException {
         try {
             Object[] bind = { id };
-            List<HashMap<String, Object>> retorno = this.mysqlDAO.dbCarrega(CONSULTAPRODUTO + " WHERE p.id=?", bind);
-            return new ProductDTO(retorno.get(0));
+            List<HashMap<String, Object>> result = this.mysqlDAO.query(PRODUCT_QUERY + " WHERE p.id=?", bind);
+            if (result.isEmpty()) {
+                throw new ResourceNotFoundException("Product");
+            }
+            return new ProductDTO(result.get(0));
+        } catch (ResourceNotFoundException missing) {
+            throw missing;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Recuperar o Product de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void excluiProductPorId(Integer id) throws StoreException {
+    public void deleteProductById(Integer id) throws StoreException {
         try {
             Object[] bind = { id };
-            this.mysqlDAO.dbGrava("DELETE FROM products WHERE id=?", bind, false);
+            this.mysqlDAO.executeUpdate("DELETE FROM products WHERE id=?", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Excluir o Product de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void atualizaProductPorId(Integer id, ProductDTO produto) throws StoreException {
+    public void updateProductById(Integer id, ProductDTO product) throws StoreException {
         try {
-            Object[] bind = { produto.getNome(), produto.getPreco(), produto.getDescricao(), produto.getImagem(),
-                    produto.getCategoryId(), id };
-            this.mysqlDAO.dbGrava("UPDATE products SET name=?, price=?, description=?, img=?, category_id=? WHERE id=?",
-                    bind, false);
+            Object[] bind = { product.getName(), product.getPrice(), product.getDescription(), product.getImage(),
+                    product.getCategoryId(), id };
+            this.mysqlDAO.executeUpdate("UPDATE products SET name=?, price=?, description=?, img=?, category_id=? WHERE id=?",
+                    bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Atualizar o Product de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void insereQuantidadeEmEstoqueDoProductPorId(Integer id, Integer quantidade) throws StoreException {
+    public void addProductStock(Integer id, Integer quantity) throws StoreException {
         try {
-            Object[] bind = { quantidade, id };
-            this.mysqlDAO.dbGrava("UPDATE products SET quantity = quantity + ? WHERE id=?", bind, false);
+            Object[] bind = { quantity, id };
+            this.mysqlDAO.executeUpdate("UPDATE products SET quantity = quantity + ? WHERE id=?", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Inserir estoque do Product de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void insereProduct(ProductDTO produto) throws StoreException {
+    public void insertProduct(ProductDTO product) throws StoreException {
         try {
-            Object[] bind = { produto.getNome(), produto.getPreco(), produto.getDescricao(), produto.getImagem(),
-                    produto.getCategoryId() };
-            this.mysqlDAO.dbGrava(
+            Object[] bind = { product.getName(), product.getPrice(), product.getDescription(), product.getImage(),
+                    product.getCategoryId() };
+            this.mysqlDAO.executeUpdate(
                     "INSERT INTO products (name,price,description,img,category_id,created_at,quantity) VALUES (?,?,?,?,?,SYSDATE(),0)",
-                    bind, false);
+                    bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Inserir Product. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public List<ProductDTO> listaProductsAdm() throws StoreException {
+    public List<ProductDTO> listAdminProducts() throws StoreException {
         try {
             Object[] bind = {};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega(CONSULTAPRODUTO, bind);
-            List<ProductDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(produto -> retornoFormatado.add(new ProductDTO(produto)));
-            return retornoFormatado;
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(PRODUCT_QUERY, bind);
+            List<ProductDTO> mappedResults = new ArrayList<>();
+            rows.forEach(product -> mappedResults.add(new ProductDTO(product)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar os Products para ADMs. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public PaginateDTO<List<ProductListDTO>> listaProductsVitrine(ProductFilterDTO filtroProduct)
+    public PaginationDTO<List<ProductListDTO>> listStorefrontProducts(ProductFilterDTO productFilter)
             throws StoreException {
         try {
-            if (filtroProduct.getPaginaAtual() < 1) {
-                filtroProduct.setPaginaAtual(1);
+            if (productFilter.getPageNumber() < 1) {
+                productFilter.setPageNumber(1);
             }
 
             ArrayList<Object> bind = new ArrayList<>();
-            String consulta = "SELECT p.id AS id,p.name AS nome,p.price AS preco,p.img AS imagem,c.category_name AS categoria FROM products p LEFT JOIN vw_category c on(p.category_id=c.id) ";
+            String query = "SELECT p.id AS id,p.name AS name,p.price AS price,p.img AS image,c.category_name AS category FROM products p LEFT JOIN vw_category c on(p.category_id=c.id) ";
 
-            String filtro = "";
-            String limit = " LIMIT " + filtroProduct.getItensPorPagina() + " ";
+            String filter = "";
+            String limit = " LIMIT " + productFilter.getPageSize() + " ";
 
             String whereTxt = " WHERE ";
             String andTXT = " AND ";
             String orTxt = " OR ";
 
-            // filtra favoritos
-            if (Boolean.TRUE.equals(filtroProduct.getApenasFavoritados())) {
-                // se tem usuario logado mostra filtra produtos por favoritos
-                if (filtroProduct.getUserId() != null) {
-                    filtro += (filtro.equals("") ? whereTxt : andTXT)
+            if (Boolean.TRUE.equals(productFilter.getFavoritesOnly())) {
+
+                if (productFilter.getUserId() != null) {
+                    filter += (filter.equals("") ? whereTxt : andTXT)
                             + " p.id in (SELECT f.product_id FROM favorite_products f WHERE f.user_id=?) ";
-                    bind.add(filtroProduct.getUserId());
+                    bind.add(productFilter.getUserId());
                 } else {
-                    throw new StoreException("Sem usuário logado, para buscar produtos favoritos realize login.");
+                    throw new StoreException("Sign in to browse favorite products.");
                 }
             }
 
-            // filtra categorias
-            if (filtroProduct.getCategorys() != null && !filtroProduct.getCategorys().isEmpty()) {
-                StringBuilder categoriaFiltro = new StringBuilder();
-                for (String value : filtroProduct.getCategorys()) {
+            if (productFilter.getCategories() != null && !productFilter.getCategories().isEmpty()) {
+                StringBuilder categoryFilter = new StringBuilder();
+                for (String value : productFilter.getCategories()) {
                     bind.add("%" + value.toUpperCase() + "%");
                     bind.add(value);
-                    categoriaFiltro.append((categoriaFiltro.toString().equals("") ? " ( " : orTxt)
+                    categoryFilter.append((categoryFilter.toString().equals("") ? " ( " : orTxt)
                             + " UPPER(c.category_name) LIKE ? OR c.id = ? ");
                 }
-                categoriaFiltro.append((categoriaFiltro.toString().equals("") ? "" : " ) "));
-                filtro += (filtro.equals("") ? whereTxt : andTXT) + categoriaFiltro.toString();
+                categoryFilter.append((categoryFilter.toString().equals("") ? "" : " ) "));
+                filter += (filter.equals("") ? whereTxt : andTXT) + categoryFilter.toString();
             }
 
-            // filtra sub categorias
-            if (filtroProduct.getSubCategorys() != null && !filtroProduct.getSubCategorys().isEmpty()) {
-                StringBuilder subCategoryFiltro = new StringBuilder();
-                for (String value : filtroProduct.getSubCategorys()) {
+            if (productFilter.getSubcategories() != null && !productFilter.getSubcategories().isEmpty()) {
+                StringBuilder subcategoryFilter = new StringBuilder();
+                for (String value : productFilter.getSubcategories()) {
                     bind.add("%" + value.toUpperCase() + "%");
                     bind.add(value);
-                    subCategoryFiltro.append((subCategoryFiltro.toString().equals("") ? " ( " : orTxt)
+                    subcategoryFilter.append((subcategoryFilter.toString().equals("") ? " ( " : orTxt)
                             + " UPPER(c.category_name) LIKE ? OR c.id = ? ");
                 }
-                subCategoryFiltro.append((subCategoryFiltro.toString().equals("") ? "" : " ) "));
-                filtro += (filtro.equals("") ? whereTxt : andTXT) + subCategoryFiltro.toString();
+                subcategoryFilter.append((subcategoryFilter.toString().equals("") ? "" : " ) "));
+                filter += (filter.equals("") ? whereTxt : andTXT) + subcategoryFilter.toString();
             }
 
-            if (Boolean.TRUE.equals(filtroProduct.getApenasLancamentos())) {
-                filtro += (filtro.equals("") ? whereTxt : andTXT)
+            if (Boolean.TRUE.equals(productFilter.getNewReleasesOnly())) {
+                filter += (filter.equals("") ? whereTxt : andTXT)
                         + " p.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH) ";
             }
 
-            if (filtroProduct.getPesquisa() != null) {
-                bind.add("%" + filtroProduct.getPesquisa().toUpperCase() + "%");
-                bind.add("%" + filtroProduct.getPesquisa().toUpperCase() + "%");
-                filtro += (filtro.equals("") ? whereTxt : andTXT)
+            if (productFilter.getSearch() != null) {
+                bind.add("%" + productFilter.getSearch().toUpperCase() + "%");
+                bind.add("%" + productFilter.getSearch().toUpperCase() + "%");
+                filter += (filter.equals("") ? whereTxt : andTXT)
                         + " (UPPER(p.name) LIKE ? OR UPPER(p.description) LIKE ?) ";
             }
 
-            // recupera apenas produtos que tem no estoque
-            filtro += (filtro.equals("") ? whereTxt : andTXT) + " p.quantity>0 ";
+            filter += (filter.equals("") ? whereTxt : andTXT) + " p.quantity>0 ";
 
-            // filtra menor preco
-            if (filtroProduct.getPrecoMinimo() != null) {
-                bind.add(filtroProduct.getPrecoMinimo());
-                filtro += (filtro.equals("") ? whereTxt : andTXT) + " p.price >= ? ";
+            if (productFilter.getMinimumPrice() != null) {
+                bind.add(productFilter.getMinimumPrice());
+                filter += (filter.equals("") ? whereTxt : andTXT) + " p.price >= ? ";
             }
 
-            // filtra maior preco
-            if (filtroProduct.getPrecoMaximo() != null) {
-                bind.add(filtroProduct.getPrecoMaximo());
-                filtro += (filtro.equals("") ? whereTxt : andTXT) + " p.price <= ? ";
+            if (productFilter.getMaximumPrice() != null) {
+                bind.add(productFilter.getMaximumPrice());
+                filter += (filter.equals("") ? whereTxt : andTXT) + " p.price <= ? ";
             }
 
-            // define offset
             String offset = "";
-            if (filtroProduct.getPaginaAtual() > 1) {
-                Integer calcOffset = (filtroProduct.getPaginaAtual() - 1) * filtroProduct.getItensPorPagina();
+            if (productFilter.getPageNumber() > 1) {
+                Integer calcOffset = (productFilter.getPageNumber() - 1) * productFilter.getPageSize();
                 offset = " OFFSET " + calcOffset + " ";
             }
 
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO
-                    .dbCarrega(consulta + filtro + limit + offset, bind.toArray());
-            List<ProductListDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(produto -> retornoFormatado.add(new ProductListDTO(produto)));
+            List<HashMap<String, Object>> rows = this.mysqlDAO
+                    .query(query + filter + limit + offset, bind.toArray());
+            List<ProductListDTO> mappedResults = new ArrayList<>();
+            rows.forEach(product -> mappedResults.add(new ProductListDTO(product)));
 
-            Integer ultimaPagina = Integer.valueOf(
-                    String.valueOf(this.mysqlDAO.dbValor("ceil(count(*)/" + filtroProduct.getItensPorPagina() + ")",
-                            consulta + filtro, "", bind.toArray())));
+            Integer lastPage = Integer.valueOf(
+                    String.valueOf(this.mysqlDAO.scalar("ceil(count(*)/" + productFilter.getPageSize() + ")",
+                            query + filter, "", bind.toArray())));
 
-            if (ultimaPagina < 1) {
-                ultimaPagina = 1;
+            if (lastPage < 1) {
+                lastPage = 1;
             }
 
-            if (retornoFormatado.isEmpty()
-                    && Boolean.FALSE.equals(filtroProduct.getPaginaAtual().equals(ultimaPagina))) {
-                filtroProduct.setPaginaAtual(ultimaPagina);
-                return this.listaProductsVitrine(filtroProduct);
+            if (mappedResults.isEmpty()
+                    && Boolean.FALSE.equals(productFilter.getPageNumber().equals(lastPage))) {
+                productFilter.setPageNumber(lastPage);
+                return this.listStorefrontProducts(productFilter);
             }
 
-            return new PaginateDTO<>(filtroProduct.getPaginaAtual(), retornoFormatado, ultimaPagina);
+            return new PaginationDTO<>(productFilter.getPageNumber(), mappedResults, lastPage);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar os Products. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public CustomerProductDTO mostraProductVitrineParaUser(Integer id, Integer usuarioId)
+    public CustomerProductDTO getCustomerProduct(Integer id, Integer userId)
             throws StoreException {
         try {
-            Object[] bind = { String.valueOf(usuarioId), String.valueOf(usuarioId), id };
-            List<HashMap<String, Object>> retorno = this.mysqlDAO.dbCarrega(
-                    "SELECT p.id, p.name AS nome, p.quantity AS quantidade, p.description AS descricao, p.price AS preco, p.img AS imagem, c.category_name AS categoria, (SELECT count(*) FROM favorite_products f WHERE f.product_id = p.id AND f.user_id=?) favoritoDoUser, (SELECT f.rating FROM user_produts_rating f WHERE f.product_id = p.id AND f.user_id=?) avaliacaoDadaPeloUser, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id) quantidadeAvaliacoes, (SELECT COALESCE(sum(f.rating),0) FROM user_produts_rating f WHERE f.product_id = p.id) somaAvaliacoes, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id AND f.rating='1') quantidadeAvaliacoesNota1, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id AND f.rating='2') quantidadeAvaliacoesNota2, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id AND f.rating='3') quantidadeAvaliacoesNota3, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id AND f.rating='4') quantidadeAvaliacoesNota4, (SELECT count(*) FROM user_produts_rating f WHERE f.product_id = p.id AND f.rating='5') quantidadeAvaliacoesNota5 FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id) WHERE p.id=?",
+            Object[] bind = { String.valueOf(userId), String.valueOf(userId), id };
+            List<HashMap<String, Object>> result = this.mysqlDAO.query(
+                    "SELECT p.id, p.name AS name, p.quantity AS quantity, p.description AS description, p.price AS price, p.img AS image, c.category_name AS category, (SELECT count(*) FROM favorite_products f WHERE f.product_id = p.id AND f.user_id=?) favorite, (SELECT f.rating FROM product_reviews f WHERE f.product_id = p.id AND f.user_id=?) userRating, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id) ratingCount, (SELECT COALESCE(sum(f.rating),0) FROM product_reviews f WHERE f.product_id = p.id) ratingSum, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='1') ratingCount1, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='2') ratingCount2, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='3') ratingCount3, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='4') ratingCount4, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='5') ratingCount5 FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id) WHERE p.id=?",
                     bind);
-            return new CustomerProductDTO(retorno.get(0));
+            return new CustomerProductDTO(result.get(0));
         } catch (Exception e) {
-            throw new StoreException("Falha ao mostrar o Product " + id + " para o usuario. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public Boolean produtoFavoritadoPeloUser(Integer produtoId, Integer usuarioId) throws StoreException {
+    public Boolean isFavorite(Integer productId, Integer userId) throws StoreException {
         try {
-            Object[] bind = { produtoId, usuarioId };
+            Object[] bind = { productId, userId };
             return Integer.valueOf(String.valueOf(
-                    this.mysqlDAO.dbValor("count(*)", "favorite_products", "product_id=? AND user_id=?", bind))) > 0;
+                    this.mysqlDAO.scalar("count(*)", "favorite_products", "product_id=? AND user_id=?", bind))) > 0;
         } catch (Exception e) {
-            throw new StoreException("Falha ao verificar se o produto de id:" + produtoId
-                    + " já foi favoritado pelo usuário de id: " + usuarioId + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void removeFavoritacaoProductPeloUser(Integer produtoId, Integer usuarioId) throws StoreException {
+    public void removeFavorite(Integer productId, Integer userId) throws StoreException {
         try {
-            Object[] bind = { produtoId, usuarioId };
-            this.mysqlDAO.dbGrava("DELETE FROM favorite_products WHERE product_id=? AND user_id=?", bind, false);
+            Object[] bind = { productId, userId };
+            this.mysqlDAO.executeUpdate("DELETE FROM favorite_products WHERE product_id=? AND user_id=?", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao desfavoritar o produto de id:" + produtoId + " pelo usuário de id: "
-                    + usuarioId + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public void adicionaFavoritacaoProductPeloUser(Integer produtoId, Integer usuarioId) throws StoreException {
+    public void addFavorite(Integer productId, Integer userId) throws StoreException {
         try {
-            Object[] bind = { produtoId, usuarioId };
-            this.mysqlDAO.dbGrava("INSERT INTO favorite_products (product_id,user_id) VALUES (?,?)", bind, false);
+            Object[] bind = { productId, userId };
+            this.mysqlDAO.executeUpdate("INSERT INTO favorite_products (product_id,user_id) VALUES (?,?)", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao favoritar o produto de id:" + produtoId + " pelo usuário de id: "
-                    + usuarioId + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 
     @Override
-    public List<FeaturedProductDTO> listaProductsBanner() throws StoreException {
+    public List<FeaturedProductDTO> listFeaturedProducts() throws StoreException {
         try {
             Object[] bind = {};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega(
-                    "SELECT id, name AS nome, description AS descricao, img AS imagem FROM products WHERE quantity > 0 ORDER BY quantity DESC LIMIT 3",
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(
+                    "SELECT id, name AS name, description AS description, img AS image FROM products WHERE quantity > 0 ORDER BY quantity DESC LIMIT 3",
                     bind);
-            List<FeaturedProductDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(produto -> retornoFormatado.add(new FeaturedProductDTO(produto)));
-            return retornoFormatado;
+            List<FeaturedProductDTO> mappedResults = new ArrayList<>();
+            rows.forEach(product -> mappedResults.add(new FeaturedProductDTO(product)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao listar produtos do banner da Home. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product database operation.", e);
         }
     }
 }

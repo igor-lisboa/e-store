@@ -4,70 +4,70 @@ import java.util.Map;
 
 public class ProductReviewListDTO extends BaseDTO {
 
-    private String avaliador;
-    private String avaliacaoTitulo;
-    private String avaliacao;
-    private String avaliacaoDescricao;
-    private String avaliacaoData;
-    private String avaliacaoDataSimples;
+    private String reviewer;
+    private String title;
+    private String rating;
+    private String description;
+    private String displayDate;
+    private String shortDate;
 
     public ProductReviewListDTO() {
     }
 
-    public ProductReviewListDTO(Map<String, Object> avaliacao) {
-        this.setAvaliador(String.valueOf(avaliacao.get("avaliador")));
-        this.setReviewTitulo(String.valueOf(avaliacao.get("avaliacaoTitulo")));
-        this.setReview(String.valueOf(avaliacao.get("avaliacao")));
-        this.setReviewDescricao(String.valueOf(avaliacao.get("avaliacaoDescricao")));
-        this.setReviewData(String.valueOf(avaliacao.get("avaliacaoData")));
-        this.setReviewDataSimples(String.valueOf(avaliacao.get("avaliacaoDataSimples")));
+    public ProductReviewListDTO(Map<String, Object> rating) {
+        this.setReviewer(String.valueOf(rating.get("reviewer")));
+        this.setTitle(String.valueOf(rating.get("title")));
+        this.setRating(String.valueOf(rating.get("rating")));
+        this.setDescription(String.valueOf(rating.get("description")));
+        this.setDisplayDate(String.valueOf(rating.get("displayDate")));
+        this.setShortDate(String.valueOf(rating.get("shortDate")));
     }
 
-    public void setReviewDataSimples(String avaliacaoDataSimples) {
-        this.avaliacaoDataSimples = avaliacaoDataSimples;
+    public void setShortDate(String shortDate) {
+        this.shortDate = shortDate;
     }
 
-    public String getReviewDataSimples() {
-        return avaliacaoDataSimples;
+    public String getShortDate() {
+        return shortDate;
     }
 
-    public void setReviewData(String avaliacaoData) {
-        this.avaliacaoData = avaliacaoData;
+    public void setDisplayDate(String displayDate) {
+        this.displayDate = displayDate;
     }
 
-    public String getReviewData() {
-        return avaliacaoData;
+    public String getDisplayDate() {
+        return displayDate;
     }
 
-    public String getReviewDescricao() {
-        return avaliacaoDescricao;
+    public String getDescription() {
+        return description;
     }
 
-    public void setReviewDescricao(String avaliacaoDescricao) {
-        this.avaliacaoDescricao = avaliacaoDescricao;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setReview(String avaliacao) {
-        this.avaliacao = avaliacao;
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 
-    public String getReview() {
-        return avaliacao;
+    public String getRating() {
+        return rating;
     }
 
-    public void setReviewTitulo(String avaliacaoTitulo) {
-        this.avaliacaoTitulo = avaliacaoTitulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getReviewTitulo() {
-        return avaliacaoTitulo;
+    public String getTitle() {
+        return title;
     }
 
-    public void setAvaliador(String avaliador) {
-        this.avaliador = avaliador;
+    public void setReviewer(String reviewer) {
+        this.reviewer = reviewer;
     }
 
-    public String getAvaliador() {
-        return avaliador;
+    public String getReviewer() {
+        return reviewer;
     }
 }

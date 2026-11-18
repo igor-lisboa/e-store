@@ -3,31 +3,30 @@ package br.uff.store.core.dtos;
 import java.util.Date;
 import java.util.Map;
 
-import br.uff.store.infrastructure.shared.Helper;
 
 public class CartDTO extends BaseDTO {
 
     private Integer id;
     private String ip;
-    private Integer usuarioId;
-    private Date criadoEm;
+    private Integer userId;
+    private Date createdAt;
 
     public CartDTO() {
     }
 
-    public CartDTO(Map<String, Object> carrinho) {
-        this.setId(Integer.valueOf(String.valueOf(carrinho.get("id"))));
-        this.setIp(String.valueOf(carrinho.get("ip")));
-        if (carrinho.get("usuarioId") == null) {
+    public CartDTO(Map<String, Object> cart) {
+        this.setId(Integer.valueOf(String.valueOf(cart.get("id"))));
+        this.setIp(String.valueOf(cart.get("ip")));
+        if (cart.get("userId") == null) {
             this.setUserId(null);
         } else {
-            this.setUserId(Integer.valueOf(String.valueOf(carrinho.get("usuarioId"))));
+            this.setUserId(Integer.valueOf(String.valueOf(cart.get("userId"))));
         }
-        this.setCriadoEm(new Helper().convertStringToDate("yyyy-MM-dd HH:mm:ss", String.valueOf(carrinho.get("criadoEm"))));
+        this.setCreatedAt(DtoValues.date(cart.get("createdAt")));
     }
 
-    public void setCriadoEm(Date criadoEm) {
-        this.criadoEm = criadoEm;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setId(Integer id) {
@@ -38,12 +37,12 @@ public class CartDTO extends BaseDTO {
         this.ip = ip;
     }
 
-    public void setUserId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public Date getCriadoEm() {
-        return criadoEm;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public Integer getId() {
@@ -55,6 +54,6 @@ public class CartDTO extends BaseDTO {
     }
 
     public Integer getUserId() {
-        return usuarioId;
+        return userId;
     }
 }

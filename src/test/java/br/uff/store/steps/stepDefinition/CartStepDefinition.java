@@ -1,44 +1,46 @@
 package br.uff.store.steps.stepDefinition;
 
-import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.Entao;
-import io.cucumber.java.pt.Quando;
+import br.uff.store.application.StoreServices;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import br.uff.store.core.dtos.CartDTO;
-import br.uff.store.core.interfaces.services.ICartService;
 import br.uff.store.core.services.CartService;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import io.cucumber.java.en.Then;
 
 public class CartStepDefinition {
-    Integer carrinhoId;
-    Integer usuarioId;
-    String ip;
-    CartDTO carrinhoRetorno;
-    String exMsg = "";
+    private final CartService carts = StoreServices.carts();
+    private Integer cartId;
+    private Integer userId;
+    private String ip;
+    private CartDTO result;
 
-    ICartService carrinhoService = new CartService();
-
-    @Dado("sistema pega as variaveis {int}, {int} e {int} pra recuperar o carrinho")
-    public void sistema_pega_as_variaveis_e_pra_recuperar_o_carrinho(Integer int1, Integer int2, Integer int3) {
-        this.carrinhoId = (int1.equals(0) ? null : int1);
-        this.usuarioId = (int2.equals(0) ? null : int2);
-        this.ip = String.valueOf(int3);
+    @Given("cart reference {int}, customer {int}, and visitor address {string}")
+    public void cartReference(Integer cart, Integer customer, String address) {
+        cartId = cart == 0 ? null : cart;
+        userId = customer == 0 ? null : customer;
+        ip = address;
     }
 
-    @Quando("usuario solicita o carrinho")
-    public void usuario_solicita_o_carrinho() {
-        try {
-            carrinhoRetorno = carrinhoService.recuperaCartAtivo(this.carrinhoId, this.usuarioId, this.ip);
-        } catch (Exception e) {
-            exMsg = e.getMessage();
-        }
+    @When("the visitor requests an active cart")
+    public void requestCart() throws Exception {
+        result = carts.getActiveCart(cartId, userId, ip);
     }
 
-    @Entao("recebo o carrinho criado ou recuperado com o usuario {int}")
-    public void recebo_o_carrinho_criado_ou_recuperado_com_o_usuario(Integer int1) {
-        Integer esperado = (int1.equals(0) ? null : int1);
-        Assert.assertEquals(carrinhoRetorno.getUserId(), esperado);
+    @Then("the returned cart belongs to customer {int}")
+    public void verifyOwner(Integer customer) {
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertEquals(customer == 0 ? null : customer, result.getUserId());
+    }
 
+    @When("customer {int} resumes the anonymous cart")
+    public void claimAnonymousCart(Integer customer) throws Exception {
+        Integer anonymousCartId = result.getId();
+        result = carts.getActiveCart(anonymousCartId, customer, ip);
+        assertEquals("Sign-in must retain the visitor's cart.", anonymousCartId, result.getId());
     }
 }

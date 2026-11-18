@@ -25,11 +25,11 @@ public class ReviewServiceTest {
     @Test
     public void acceptsRatingsFromOneToFive() throws Exception {
         ProductReviewInputDTO review = new ProductReviewInputDTO(4, 7, 5, "Review", "Title");
-        when(reviewData.jaFoiAvaliado(4, 7)).thenReturn(false);
+        when(reviewData.hasReviewedProduct(4, 7)).thenReturn(false);
 
-        service.avaliaProduct(review);
+        service.reviewProduct(review);
 
-        verify(reviewData).insereReviewDoProduct(review);
+        verify(reviewData).insertProductReview(review);
     }
 
     @Test
@@ -46,10 +46,10 @@ public class ReviewServiceTest {
 
     private void assertInvalid(ProductReviewInputDTO review) throws Exception {
         try {
-            service.avaliaProduct(review);
+            service.reviewProduct(review);
             fail("Expected invalid review data to be rejected.");
         } catch (StoreException expected) {
-            verify(reviewData, never()).insereReviewDoProduct(review);
+            verify(reviewData, never()).insertProductReview(review);
         }
     }
 }

@@ -1,151 +1,147 @@
 package br.uff.store.core.services;
 
-import java.util.Date;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import br.uff.store.core.dtos.CartDTO;
 import br.uff.store.core.dtos.CartItemDTO;
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.ProductDTO;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.ICartData;
 import br.uff.store.core.interfaces.data.IProductData;
 import br.uff.store.core.interfaces.services.ICartService;
-import br.uff.store.infrastructure.data.CartData;
-import br.uff.store.infrastructure.data.ProductData;
-import br.uff.store.infrastructure.shared.Helper;
 
 public class CartService implements ICartService {
 
-    private final ICartData carrinhoData;
-    private final IProductData produtoData;
-    private final Helper helper;
-    private static final String TEXTOAVISOESPECIFICACARRINHO = " no carrinho de Id: ";
+    private final ICartData cartData;
+    private final IProductData productData;
+    private final Clock clock;
+    private static final String CART_ID_CONTEXT = " in cart ID ";
 
-    public CartService() {
-        this(new CartData(), new ProductData(), new Helper());
+    public CartService(ICartData cartData, IProductData productData) {
+        this(cartData, productData, Clock.systemUTC());
     }
 
-    public CartService(ICartData carrinhoData, IProductData produtoData) {
-        this(carrinhoData, produtoData, new Helper());
-    }
-
-    CartService(ICartData carrinhoData, IProductData produtoData, Helper helper) {
-        if (carrinhoData == null || produtoData == null || helper == null) {
-            throw new IllegalArgumentException("Cart, product, and helper dependencies are required.");
+    public CartService(ICartData cartData, IProductData productData, Clock clock) {
+        if (cartData == null || productData == null || clock == null) {
+            throw new IllegalArgumentException("Cart, product, and clock dependencies are required.");
         }
-        this.carrinhoData = carrinhoData;
-        this.produtoData = produtoData;
-        this.helper = helper;
+        this.cartData = cartData;
+        this.productData = productData;
+        this.clock = clock;
     }
 
     @Override
-    public CartDTO recuperaCartAtivo(Integer carrinhoId, Integer usuarioId, String ip) throws StoreException {
-        if (carrinhoId != null) {
-            if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
-                if (usuarioId == null) {
-                    if (Boolean.TRUE.equals(carrinhoData.carrinhoSemDono(carrinhoId))) {
-                        return carrinhoData.encontraCart(carrinhoId);
+    public CartDTO getActiveCart(Integer cartId, Integer userId, String ip) throws StoreException {
+        if (cartId != null) {
+            if (Boolean.TRUE.equals(cartData.cartExists(cartId)) && Boolean.FALSE.equals(cartData.isCartSold(cartId))) {
+                if (userId == null) {
+                    if (Boolean.TRUE.equals(cartData.isCartUnowned(cartId))) {
+                        return cartData.findCart(cartId);
                     }
                 } else {
-                    if (Boolean.TRUE.equals(carrinhoData.carrinhoSemDono(carrinhoId))) {
-                        carrinhoData.defineDonoDeUmCartSemUserNoMomento(carrinhoId, usuarioId);
+                    if (Boolean.TRUE.equals(cartData.isCartUnowned(cartId))) {
+                        cartData.assignUnownedCart(cartId, userId);
                     }
-                    if (Boolean.TRUE.equals(carrinhoData.carrinhoDoUser(carrinhoId, usuarioId))) {
-                        return carrinhoData.encontraCart(carrinhoId);
+                    if (Boolean.TRUE.equals(cartData.cartBelongsToUser(cartId, userId))) {
+                        return cartData.findCart(cartId);
                     }
                 }
             }
         }
-        if (usuarioId != null) {
-            List<CartDTO> carrinhosNaoVendidos = carrinhoData.listaCartsDoUserNaoVendidos(usuarioId);
-            if (Boolean.FALSE.equals(carrinhosNaoVendidos.isEmpty())) {
-                return carrinhosNaoVendidos.get(0);
+        if (userId != null) {
+            List<CartDTO> unsoldCarts = cartData.listUnsoldUserCarts(userId);
+            if (Boolean.FALSE.equals(unsoldCarts.isEmpty())) {
+                return unsoldCarts.get(0);
             }
         }
-        String criadoEm = helper.convertDateToString("yyyy-MM-dd HH:mm:ss", new Date());
-        carrinhoData.criaCart(ip, criadoEm, usuarioId);
-        return carrinhoData.encontraCart(ip, criadoEm, usuarioId);
+        String createdAt = LocalDateTime.now(clock).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        cartData.createCart(ip, createdAt, userId);
+        return cartData.findCart(ip, createdAt, userId);
     }
 
     @Override
-    public void insereProductCart(Integer carrinhoId, Integer produtoId) throws StoreException {
-        if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
-            Integer qtd = carrinhoData.quantidadeProductNoCart(carrinhoId, produtoId);
-            int currentQuantity = qtd == null ? 0 : qtd;
-            validateStock(produtoId, currentQuantity + 1);
+    public void addProductToCart(Integer cartId, Integer productId) throws StoreException {
+        if (Boolean.TRUE.equals(cartData.cartExists(cartId)) && Boolean.FALSE.equals(cartData.isCartSold(cartId))) {
+            Integer storedQuantity = cartData.productQuantityInCart(cartId, productId);
+            int currentQuantity = storedQuantity == null ? 0 : storedQuantity;
+            validateStock(productId, currentQuantity + 1);
             if (currentQuantity > 0) {
-                carrinhoData.atualizaQtdDoProductNoCart(carrinhoId, produtoId, currentQuantity + 1);
+                cartData.updateProductQuantity(cartId, productId, currentQuantity + 1);
             } else {
-                carrinhoData.adicionaProductNoCart(carrinhoId, produtoId);
+                cartData.addProductToCart(cartId, productId);
             }
             return;
         }
-        throw new StoreException("Não foi possível inserir o produto de Id: " + produtoId + TEXTOAVISOESPECIFICACARRINHO + carrinhoId + ".");
+        throw new StoreException("Unable to add product ID " + productId + CART_ID_CONTEXT + cartId + ".");
 
     }
 
     @Override
-    public void removeProductCart(Integer carrinhoId, Integer produtoId) throws StoreException {
-        if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
-            Integer qtd = carrinhoData.quantidadeProductNoCart(carrinhoId, produtoId);
-            if (qtd > 0) {
-                carrinhoData.removeProductDoCart(carrinhoId, produtoId);
+    public void removeProductFromCart(Integer cartId, Integer productId) throws StoreException {
+        if (Boolean.TRUE.equals(cartData.cartExists(cartId)) && Boolean.FALSE.equals(cartData.isCartSold(cartId))) {
+            Integer storedQuantity = cartData.productQuantityInCart(cartId, productId);
+            if (storedQuantity > 0) {
+                cartData.removeProductFromCart(cartId, productId);
             } else {
-                throw new StoreException("O produto de id: " + produtoId + " não encontra-se no carrinho de id: " + carrinhoId + ".");
+                throw new StoreException("Product ID " + productId + " is not in cart ID " + cartId + ".");
             }
             return;
         }
-        throw new StoreException("Não foi possível remover o produto de Id: " + produtoId + TEXTOAVISOESPECIFICACARRINHO + carrinhoId + ".");
+        throw new StoreException("Unable to remove product ID " + productId + CART_ID_CONTEXT + cartId + ".");
     }
 
     @Override
-    public List<CartItemDTO> listaProductsCart(Integer id) throws StoreException {
-        if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(id))) {
-            return carrinhoData.listaProductsCart(id);
+    public List<CartItemDTO> listCartProducts(Integer id) throws StoreException {
+        if (Boolean.TRUE.equals(cartData.cartExists(id))) {
+            return cartData.listCartProducts(id);
         }
-        throw new StoreException("Não foi possível listar os produtos do carrinho de Id: " + id + ".");
+        throw new StoreException("Unable to list products in cart ID " + id + ".");
     }
 
     @Override
-    public void alteraQuantidadeProductCart(Integer carrinhoId, Integer produtoId, Integer quantidade) throws StoreException {
-        if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
-            if (!Boolean.TRUE.equals(carrinhoData.verificaProductNoCart(carrinhoId, produtoId))) {
+    public void changeProductQuantity(Integer cartId, Integer productId, Integer quantity) throws StoreException {
+        if (Boolean.TRUE.equals(cartData.cartExists(cartId)) && Boolean.FALSE.equals(cartData.isCartSold(cartId))) {
+            if (!Boolean.TRUE.equals(cartData.containsProduct(cartId, productId))) {
                 throw new StoreException("The product is not in this cart.");
             }
-            validateStock(produtoId, quantidade);
-            carrinhoData.atualizaQtdDoProductNoCart(carrinhoId, produtoId, quantidade);
+            validateStock(productId, quantity);
+            cartData.updateProductQuantity(cartId, productId, quantity);
             return;
         }
-        throw new StoreException("Não foi possível atualizar a quantidade do produto de Id: " + produtoId + TEXTOAVISOESPECIFICACARRINHO + carrinhoId + ".");
+        throw new StoreException("Unable to update quantity for product ID " + productId + CART_ID_CONTEXT + cartId + ".");
     }
 
     @Override
-    public Boolean carrinhoAtivoValido(Integer id, Integer usuarioId) throws StoreException {
-        return Boolean.TRUE.equals(carrinhoData.carrinhoExiste(id)) && Boolean.TRUE.equals(carrinhoData.carrinhoDoUser(id, usuarioId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(id)) && Boolean.TRUE.equals(carrinhoData.quantidadeProductsCart(id) > 0);
+    public Boolean isValidActiveCart(Integer id, Integer userId) throws StoreException {
+        return Boolean.TRUE.equals(cartData.cartExists(id)) && Boolean.TRUE.equals(cartData.cartBelongsToUser(id, userId)) && Boolean.FALSE.equals(cartData.isCartSold(id)) && Boolean.TRUE.equals(cartData.cartItemCount(id) > 0);
     }
 
     @Override
-    public Double recuperaPrecoTotalDeUmCart(Integer id) throws StoreException {
-        return carrinhoData.recuperaPrecoTotalDeUmCart(id);
+    public Double getCartTotal(Integer id) throws StoreException {
+        return cartData.getCartTotal(id);
     }
 
     @Override
-    public PaginateDTO<List<CartItemDTO>> listaProductsCart(Integer id, Integer itensPorPagina, Integer paginaAtual) throws StoreException {
-        return carrinhoData.listaProductsCart(id, itensPorPagina, paginaAtual);
+    public PaginationDTO<List<CartItemDTO>> listCartProducts(Integer id, Integer pageSize, Integer pageNumber) throws StoreException {
+        InputRules.page(pageSize, pageNumber);
+        return cartData.listCartProducts(id, pageSize, pageNumber);
     }
 
     @Override
-    public Integer quantidadeProductNoCart(Integer id, Integer produtoId) throws StoreException {
-        return carrinhoData.quantidadeProductNoCart(id, produtoId);
+    public Integer productQuantityInCart(Integer id, Integer productId) throws StoreException {
+        return cartData.productQuantityInCart(id, productId);
     }
 
     private void validateStock(Integer productId, Integer requestedQuantity) throws StoreException {
         if (requestedQuantity == null || requestedQuantity <= 0) {
             throw new StoreException("Cart quantity must be greater than zero.");
         }
-        ProductDTO product = produtoData.encontraProductPorId(productId);
-        if (product.getQuantidade() == null || requestedQuantity > product.getQuantidade()) {
+        ProductDTO product = productData.findProductById(productId);
+        if (product.getQuantity() == null || requestedQuantity > product.getQuantity()) {
             throw new StoreException("Requested quantity exceeds available stock.");
         }
     }

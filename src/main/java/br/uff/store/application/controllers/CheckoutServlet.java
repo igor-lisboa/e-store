@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -12,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.SaleDTO;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.services.ICartService;
@@ -25,15 +27,15 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
-    private final ISaleService vendaService;
-    private final ICartService carrinhoService;
-    private final IAddressService enderecoService;
+    private final ISaleService saleService;
+    private final ICartService cartService;
+    private final IAddressService addressService;
     private final Helper helper;
 
     public CheckoutServlet() {
-        vendaService = new SaleService();
-        carrinhoService = new CartService();
-        enderecoService = new AddressService();
+        saleService = StoreServices.sales();
+        cartService = StoreServices.carts();
+        addressService = StoreServices.addresses();
         helper = new Helper();
     }
 
@@ -47,47 +49,45 @@ public class CheckoutServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
-            // se n tem usuario logado manda p controller de user
-            Integer usuarioId = null;
+
+            Integer userId = null;
             if (session.getAttribute("userId") == null) {
                 response.sendRedirect("account?redirect=cart");
                 return;
             } else {
-                usuarioId = helper.tryParseInteger(session.getAttribute("userId").toString());
+                userId = helper.tryParseInteger(session.getAttribute("userId").toString());
             }
 
-            // se solicitar historico manda p pag d compras realizadas
             if (request.getParameter("history") != null) {
-                Integer paginaAtual = 1;
+                Integer pageNumber = 1;
                 if (request.getParameter("page") != null) {
-                    paginaAtual = helper.tryParseInteger(request.getParameter("page"));
+                    pageNumber = helper.tryParseInteger(request.getParameter("page"));
                 }
 
-                PaginateDTO<List<SaleDTO>> vendas = vendaService.listaSalesDoUser(usuarioId, 5, paginaAtual);
-                for(SaleDTO venda : vendas.getDados()) {
-                    venda.setProductsDoCart(carrinhoService.listaProductsCart(venda.getCartId()));
-                    venda.setAddress(enderecoService.encontraAddressPorId(venda.getAddressId()));
+                PaginationDTO<List<SaleDTO>> sales = saleService.listUserSales(userId, 5, pageNumber);
+                for(SaleDTO sale : sales.getItems()) {
+                    sale.setCartProducts(cartService.listCartProducts(sale.getCartId()));
+                    sale.setAddress(addressService.findAddressById(sale.getAddressId()));
                 }
-                request.setAttribute("vendas", vendas);
+                request.setAttribute("sales", sales);
 
                 request.getRequestDispatcher("pages/orders.jsp").forward(request, response);
                 return;
             }
 
-            Integer enderecoId = null;
-            if (session.getAttribute("enderecoId") != null) {
-                enderecoId = helper.tryParseInteger(session.getAttribute("enderecoId").toString());
+            Integer addressId = null;
+            if (session.getAttribute("addressId") != null) {
+                addressId = helper.tryParseInteger(session.getAttribute("addressId").toString());
             }
 
-            Integer carrinhoId = null;
-            if (session.getAttribute("carrinhoId") != null) {
-                carrinhoId = helper.tryParseInteger(session.getAttribute("carrinhoId").toString());
+            Integer cartId = null;
+            if (session.getAttribute("cartId") != null) {
+                cartId = helper.tryParseInteger(session.getAttribute("cartId").toString());
             }
 
-            // recupera acao solicitada se existir
             String action = request.getParameter("action");
             if (action == null) {
                 action = "";
@@ -99,25 +99,27 @@ public class CheckoutServlet extends HttpServlet {
 
             switch (action) {
                 case "paymentSuccess": {
-                    vendaService.gravaSale(usuarioId, carrinhoId, enderecoId);
+                    if (!Boolean.parseBoolean(System.getenv("ALLOW_DEMO_CHECKOUT"))) {
+                        throw new StoreException("Demo checkout is disabled. Verified online payments are not configured.");
+                    }
+                    saleService.recordSale(userId, cartId, addressId);
                     response.sendRedirect("checkout?history");
                     return;
                 }
                 case "paymentFailure": {
-                    throw new StoreException("Houve um erro durante sua compra, realize o procedimento de confirmação de carrinho novamente.");
+                    throw new StoreException("Checkout could not be completed. Confirm the cart again.");
                 }
                 default: {
                     break;
                 }
             }
 
-            if (enderecoId != null) {
-                request.setAttribute("addresses", enderecoService.encontraAddressPorId(enderecoId));
+            if (addressId != null) {
+                request.setAttribute("addresses", addressService.findAddressById(addressId));
             } else {
-                throw new StoreException("Por favor selecione um endereço!");
+                throw new StoreException("Select an address.");
             }
 
-            // manda atributos para a pagina definida, no caso carrinho.jsp
             request.getRequestDispatcher("pages/payment.jsp").forward(request, response);
         } catch (Exception ex) {
             session.setAttribute("msg", ex.getMessage());
@@ -167,7 +169,7 @@ public class CheckoutServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra tratar compras.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

@@ -12,6 +12,9 @@
 - Manage tables, views, procedures, triggers, and seed data through versioned migrations. Never restore a SQL dump as application startup.
 - Aim for files under 300 lines. Split large files by responsibility while preserving behavior.
 - Add or update unit, integration, and browser E2E coverage. Avoid shared mutable database fixtures.
+- Every test must prove meaningful behavior or an important invariant and catch a plausible defect. Shallow tests are not accepted: avoid trivial accessor/existence checks, assertions of configured mock returns, implementation-mirroring calculations, and source-text checks presented as behavioral proof.
+- Apply `agents/skills/verify-quality/SKILL.md` during implementation/refactoring and use `agents/test-build-reviewer.md` for review. Verify relevant success/failure paths, boundary cases, authorization, and side effects; keep tests deterministic and isolated.
+- Run required suites and `mvn -B clean verify` before claiming completion. Default tests exclude legacy integration tests; report each suite's result and build artifacts separately. Never hide failures by skipping tests or weakening assertions. Missing tooling and unrun suites must be reported as unverified, and coverage percentages require measured reports.
 - Update the specialty spec, translations, README, and backlog when their subject changes.
 - For API changes, update the OpenAPI contract under `src/main/webapp/swagger/` and its schema/response files alongside serialization tests. Validate the specification before finishing.
 - Apply `agents/skills/maintain-openapi/SKILL.md` whenever a change affects API routing, inputs, JSON serialization, validation, auth, or error responses. Use `agents/swagger-maintainer.md` as the API review checklist, including changes in services that alter endpoint behavior.

@@ -1,80 +1,72 @@
 package br.uff.store.core.dtos;
 
 import java.util.Map;
-import com.google.gson.annotations.SerializedName;
 
 public class ProductDTO extends BaseDTO {
 
     private Integer id;
-    @SerializedName("name")
-    private String nome;
-    @SerializedName("price")
-    private Double preco;
-    @SerializedName("description")
-    private String descricao;
-    @SerializedName("image")
-    private String imagem;
-    @SerializedName("categoryId")
-    private Integer categoriaId;
-    @SerializedName("quantity")
-    private Integer quantidade;
-    @SerializedName("category")
-    private String categoria;
+    private String name;
+    private Double price;
+    private String description;
+    private String image;
+    private Integer categoryId;
+    private Integer quantity;
+    private String category;
 
-    public void setCategory(String categoria) {
-        this.categoria = categoria;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getCategory() {
-        return categoria;
+        return category;
     }
 
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
-    public Integer getQuantidade() {
-        return quantidade;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public String getDescription() {
+        return description;
     }
 
-    public void setImagem(String imagem) {
-        this.imagem = imagem;
+    public void setImage(String image) {
+        this.image = image;
     }
 
-    public String getImagem() {
-        return imagem;
+    public String getImage() {
+        return image;
     }
 
-    public void setCategoryId(Integer categoriaId) {
-        this.categoriaId = categoriaId;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Integer getCategoryId() {
-        return categoriaId;
+        return categoryId;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setPreco(Double preco) {
-        this.preco = preco;
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
-    public Double getPreco() {
-        return preco;
+    public Double getPrice() {
+        return price;
     }
 
     public void setId(Integer id) {
@@ -86,29 +78,29 @@ public class ProductDTO extends BaseDTO {
     }
 
     public ProductDTO() {
-        this.setNome("");
-        this.setPreco(0.0);
-        this.setDescricao("");
+        this.setName("");
+        this.setPrice(0.0);
+        this.setDescription("");
     }
 
-    public ProductDTO(Map<String, Object> produto) {
-        this.setId(Integer.valueOf(String.valueOf(produto.get("id"))));
-        this.setNome(String.valueOf(produto.get("nome")));
-        this.setPreco(Double.valueOf(String.valueOf(produto.get("preco"))));
-        this.setDescricao(String.valueOf(produto.get("descricao")));
-        this.setImagem(String.valueOf(produto.get("imagem")));
-        this.setCategory(String.valueOf(produto.get("categoria")));
-        this.setCategoryId(Integer.valueOf(String.valueOf(produto.get("categoriaId"))));
-        this.setQuantidade(Integer.valueOf(String.valueOf(produto.get("quantidade"))));
+    public ProductDTO(Map<String, Object> product) {
+        this.setId(Integer.valueOf(String.valueOf(product.get("id"))));
+        this.setName(String.valueOf(product.get("name")));
+        this.setPrice(Double.valueOf(String.valueOf(product.get("price"))));
+        this.setDescription(String.valueOf(product.get("description")));
+        this.setImage(String.valueOf(product.get("image")));
+        this.setCategory(String.valueOf(product.get("category")));
+        this.setCategoryId(Integer.valueOf(String.valueOf(product.get("categoryId"))));
+        this.setQuantity(Integer.valueOf(String.valueOf(product.get("quantity"))));
     }
 
-    public ProductDTO(Integer id, String nome, Double preco, String descricao, String imagem, Integer categoriaId, Integer quantidade) {
+    public ProductDTO(Integer id, String name, Double price, String description, String image, Integer categoryId, Integer quantity) {
         this.setId(id);
-        this.setNome(nome);
-        this.setPreco(preco);
-        this.setDescricao(descricao);
-        this.setImagem(imagem);
-        this.setCategoryId(categoriaId);
-        this.setQuantidade(quantidade);
+        this.setName(name);
+        this.setPrice(price);
+        this.setDescription(description);
+        this.setImage(image);
+        this.setCategoryId(categoryId);
+        this.setQuantity(quantity);
     }
 }

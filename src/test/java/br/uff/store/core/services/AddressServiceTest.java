@@ -26,38 +26,38 @@ public class AddressServiceTest {
 
     @Test
     public void rejectsAddressUpdatesByAnotherAccount() throws Exception {
-        when(addressData.verificaAddressDoUser(7, 12)).thenReturn(false);
+        when(addressData.addressBelongsToUser(7, 12)).thenReturn(false);
 
         try {
-            service.atualizaAddressPorId(7, addressFor(12));
+            service.updateAddressById(7, addressFor(12));
             fail("Expected an ownership error.");
         } catch (StoreException expected) {
-            verify(addressData, never()).atualizaAddressPorId(eq(7), any(AddressDTO.class));
+            verify(addressData, never()).updateAddressById(eq(7), any(AddressDTO.class));
         }
     }
 
     @Test
     public void rejectsAddressDeletionByAnotherAccount() throws Exception {
-        when(addressData.verificaAddressDoUser(7, 12)).thenReturn(false);
+        when(addressData.addressBelongsToUser(7, 12)).thenReturn(false);
 
         try {
-            service.excluiAddressPorId(7, 12);
+            service.deleteAddressById(7, 12);
             fail("Expected an ownership error.");
         } catch (StoreException expected) {
-            verify(addressData, never()).excluiAddressPorId(7);
+            verify(addressData, never()).deleteAddressById(7);
         }
     }
 
     @Test
     public void doesNotDeleteAnAddressThatWasUsedForAPurchase() throws Exception {
-        when(addressData.verificaAddressDoUser(7, 12)).thenReturn(true);
-        when(addressData.enderecoFoiUsadoEmAlgumaSale(7)).thenReturn(true);
+        when(addressData.addressBelongsToUser(7, 12)).thenReturn(true);
+        when(addressData.addressUsedInSale(7)).thenReturn(true);
 
         try {
-            service.excluiAddressPorId(7, 12);
+            service.deleteAddressById(7, 12);
             fail("Expected a purchase history error.");
         } catch (StoreException expected) {
-            verify(addressData, never()).excluiAddressPorId(7);
+            verify(addressData, never()).deleteAddressById(7);
         }
     }
 

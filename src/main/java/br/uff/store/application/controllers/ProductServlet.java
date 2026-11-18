@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,15 +21,15 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/product")
 public class ProductServlet extends HttpServlet {
-    private static final String PRODUTOID = "productId";
-    private final IProductService produtoService;
-    private final IReviewService avaliacaoService;
+    private static final String PRODUCT_ID = "productId";
+    private final IProductService productService;
+    private final IReviewService reviewService;
     private final Helper helper;
 
     public ProductServlet() {
         helper = new Helper();
-        produtoService = new ProductService();
-        avaliacaoService = new ReviewService();
+        productService = StoreServices.products();
+        reviewService = StoreServices.reviews();
     }
 
     /**
@@ -40,29 +42,26 @@ public class ProductServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
-            // se rating estiver setado na sessao... define null
+
             session.setAttribute("rating", null);
 
-            // se tem produto selecionado por parametro passa p sessao
-            Integer produtoId = null;
-            if (request.getParameter(PRODUTOID) != null) {
-                produtoId = helper.tryParseInteger(request.getParameter(PRODUTOID));
-                session.setAttribute(PRODUTOID, produtoId);
+            Integer productId = null;
+            if (request.getParameter(PRODUCT_ID) != null) {
+                productId = helper.tryParseInteger(request.getParameter(PRODUCT_ID));
+                session.setAttribute(PRODUCT_ID, productId);
             }
 
-            // se produtoId da sessao for null manda p pag d produtos
-            if (session.getAttribute(PRODUTOID) != null) {
-                produtoId = helper.tryParseInteger(session.getAttribute(PRODUTOID).toString());
+            if (session.getAttribute(PRODUCT_ID) != null) {
+                productId = helper.tryParseInteger(session.getAttribute(PRODUCT_ID).toString());
             } else {
-                session.setAttribute("msg", "Por favor, selecione um produto.");
+                session.setAttribute("msg", "Please select a product.");
                 response.sendRedirect("products");
                 return;
             }
 
-            // recupera user id
             Integer userId = null;
             if (session.getAttribute("userId") != null) {
                 userId = helper.tryParseInteger(session.getAttribute("userId").toString());
@@ -73,20 +72,20 @@ public class ProductServlet extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                     return;
                 }
-                // VERIFICA SE ESTA LOGADO
+
                 if (userId == null) {
-                    session.setAttribute("msg", "Realize login para favoritar um produto!");
+                    session.setAttribute("msg", "Sign in to save a favorite.");
                     response.sendRedirect("account?redirect=product");
                     return;
                 } else {
-                    produtoService.usuarioToogleFavoritaProductPorId(produtoId, userId);
+                    productService.toggleFavorite(productId, userId);
                     request.removeAttribute("fav");
                     response.sendRedirect("product");
                     return;
                 }
             }
-            request.setAttribute("product", produtoService.mostraProductVitrineParaUser(produtoId, userId));
-            request.setAttribute("avaliacoes", avaliacaoService.recuperaAvaliacoesDeUmProduct(produtoId));
+            request.setAttribute("product", productService.getCustomerProduct(productId, userId));
+            request.setAttribute("avaliacoes", reviewService.listProductReviews(productId));
 
             request.getRequestDispatcher("pages/product.jsp").forward(request, response);
         } catch (Exception ex) {
@@ -137,7 +136,7 @@ public class ProductServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Esse servlet trata a visualização do produto para o usuário.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

@@ -4,94 +4,94 @@ import java.util.List;
 
 public class ProductFilterDTO extends BaseDTO {
 
-    private Integer paginaAtual;
-    private Integer itensPorPagina;
-    private String pesquisa;
-    private Double precoMinimo;
-    private Double precoMaximo;
-    private Boolean apenasFavoritados;
-    private Integer usuarioId;
-    private Boolean apenasLancamentos;
-    private List<String> categorias;
-    private List<String> subCategorys;
+    private Integer pageNumber;
+    private Integer pageSize;
+    private String search;
+    private Double minimumPrice;
+    private Double maximumPrice;
+    private Boolean favoritesOnly;
+    private Integer userId;
+    private Boolean newReleasesOnly;
+    private List<String> categories;
+    private List<String> subcategories;
 
-    public Integer getItensPorPagina() {
-        return itensPorPagina;
+    public Integer getPageSize() {
+        return pageSize;
     }
 
-    public void setItensPorPagina(Integer itensPorPagina) {
-        this.itensPorPagina = itensPorPagina;
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
-    public Boolean getApenasFavoritados() {
-        return apenasFavoritados;
+    public Boolean getFavoritesOnly() {
+        return favoritesOnly;
     }
 
-    public Boolean getApenasLancamentos() {
-        return apenasLancamentos;
+    public Boolean getNewReleasesOnly() {
+        return newReleasesOnly;
     }
 
-    public List<String> getCategorys() {
-        return categorias;
+    public List<String> getCategories() {
+        return categories;
     }
 
-    public Integer getPaginaAtual() {
-        return paginaAtual;
+    public Integer getPageNumber() {
+        return pageNumber;
     }
 
-    public String getPesquisa() {
-        return pesquisa;
+    public String getSearch() {
+        return search;
     }
 
-    public Double getPrecoMaximo() {
-        return precoMaximo;
+    public Double getMaximumPrice() {
+        return maximumPrice;
     }
 
-    public Double getPrecoMinimo() {
-        return precoMinimo;
+    public Double getMinimumPrice() {
+        return minimumPrice;
     }
 
-    public List<String> getSubCategorys() {
-        return subCategorys;
+    public List<String> getSubcategories() {
+        return subcategories;
     }
 
     public Integer getUserId() {
-        return usuarioId;
+        return userId;
     }
 
-    public void setApenasFavoritados(Boolean apenasFavoritados) {
-        this.apenasFavoritados = apenasFavoritados;
+    public void setFavoritesOnly(Boolean favoritesOnly) {
+        this.favoritesOnly = favoritesOnly;
     }
 
-    public void setApenasLancamentos(Boolean apenasLancamentos) {
-        this.apenasLancamentos = apenasLancamentos;
+    public void setNewReleasesOnly(Boolean newReleasesOnly) {
+        this.newReleasesOnly = newReleasesOnly;
     }
 
-    public void setCategorys(List<String> categorias) {
-        this.categorias = categorias;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
-    public void setPaginaAtual(Integer paginaAtual) {
-        this.paginaAtual = paginaAtual;
+    public void setPageNumber(Integer pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
-    public void setPesquisa(String pesquisa) {
-        this.pesquisa = pesquisa;
+    public void setSearch(String search) {
+        this.search = search;
     }
 
-    public void setPrecoMaximo(Double precoMaximo) {
-        this.precoMaximo = precoMaximo;
+    public void setMaximumPrice(Double maximumPrice) {
+        this.maximumPrice = maximumPrice;
     }
 
-    public void setPrecoMinimo(Double precoMinimo) {
-        this.precoMinimo = precoMinimo;
+    public void setMinimumPrice(Double minimumPrice) {
+        this.minimumPrice = minimumPrice;
     }
 
-    public void setSubCategorys(List<String> subCategorys) {
-        this.subCategorys = subCategorys;
+    public void setSubcategories(List<String> subcategories) {
+        this.subcategories = subcategories;
     }
 
-    public void setUserId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

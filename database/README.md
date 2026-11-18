@@ -9,6 +9,8 @@ Flyway tracks applied SQL migrations and checksums in `flyway_schema_history`. C
 - `migrations/V3__create_checkout_procedure_and_stock_trigger.sql`: checkout procedure and stock guard.
 - `migrations/V4__seed_reference_data.sql`: roles and English category names.
 - `dev-seeds/V5__seed_development_store.sql`: local sample accounts and products.
+- `migrations/V6__make_checkout_atomic.sql`: transactional checkout with ownership checks, stock locking, decimal totals, and rollback.
+- `migrations/V7__rename_product_reviews_table.sql`: English review-table naming without rewriting migration history.
 
 Add a new `V<number>__description.sql` for each change. Never edit a migration already applied to a shared environment. SQL migrations are intentionally small and separated by responsibility. Flyway documentation describes [migration naming and execution](https://documentation.red-gate.com/fd/migrations-271585107.html).
 
@@ -32,4 +34,12 @@ docker compose run --rm migrate validate
 docker compose run --rm migrate migrate
 ```
 
-MySQL DDL may commit implicitly. Resolve failed migrations explicitly after inspecting the schema; do not blindly repair history. The checkout routine is retained from the legacy schema and still needs transaction and concurrency testing.
+MySQL DDL may commit implicitly. Resolve failed migrations explicitly after inspecting the schema; do not blindly repair history. MySQL tests cover checkout rollback, duplicate sale rejection, decimal totals, address ownership, and concurrent stock allocation.
+
+## Local server and test isolation
+
+Compose pins MySQL 8.4.13. Flyway Community 9.22.3 was verified with this server; the former MySQL 5.7 baseline is incompatible with this Flyway edition. The `mysql-data-v8` volume leaves older development volumes intact. Moving valuable data between major versions requires a reviewed export/import or supported upgrade procedure.
+
+Binary logging is disabled only for local development so a schema-scoped migrator can create the stock trigger. Production replication, privileges, and backup policy need separate configuration.
+
+Create a separate schema named exactly `e_store_integration` for tests and grant the test account rights only to that schema. Set `TEST_MYSQL_URL`, `TEST_MYSQL_USER`, and `TEST_MYSQL_PASSWORD`, then run `mvn -B -Pmysql-integration clean verify` and `mvn -B -Plegacy-integration test`. Each database case deliberately cleans and reseeds that schema. Never use production credentials. Browser database journeys require the same schema through `MYSQL_CONNECTION_STRING`, `MYSQL_USER`, and `MYSQL_PASSWORD`; they add uniquely named fixtures and change stock, so reset with the integration profile before another independent run.

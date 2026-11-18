@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,12 +20,12 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/addresses")
 public class AddressServlet extends HttpServlet {
-    private final IAddressService enderecoService;
+    private final IAddressService addressService;
     private final Helper helper;
 
     public AddressServlet() {
         helper = new Helper();
-        enderecoService = new AddressService();
+        addressService = StoreServices.addresses();
     }
 
     /**
@@ -36,11 +38,11 @@ public class AddressServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
             Integer userId = null;
-            // recupera usuario logado
+
             if (session.getAttribute("userId") != null) {
                 userId = helper.tryParseInteger(session.getAttribute("userId").toString());
             } else {
@@ -49,28 +51,26 @@ public class AddressServlet extends HttpServlet {
             }
 
             if (request.getParameter("selectedId") != null) {
-                String enderecoIdSelStr = request.getParameter("selectedId");
-                Integer enderecoIdSel = helper.tryParseInteger(enderecoIdSelStr);
-                AddressDTO endereco = new AddressDTO("", userId, null, "", "", "", "Brasil");
-                if(enderecoIdSel != null) {
-                    endereco = enderecoService.encontraAddressPorId(enderecoIdSel);
-                    if (!enderecoService.verificaAddressDoUser(enderecoIdSel, userId)) {
+                String selectedAddressValue = request.getParameter("selectedId");
+                Integer selectedAddressId = helper.tryParseInteger(selectedAddressValue);
+                AddressDTO address = new AddressDTO("", userId, null, "", "", "", "Brasil");
+                if(selectedAddressId != null) {
+                    address = addressService.findAddressById(selectedAddressId);
+                    if (!addressService.addressBelongsToUser(selectedAddressId, userId)) {
                         throw new IllegalArgumentException("The address does not belong to this account.");
                     }
                 }
-                request.setAttribute("addresses", endereco);
-                session.setAttribute("selectedId", enderecoIdSelStr);
+                request.setAttribute("addresses", address);
+                session.setAttribute("selectedId", selectedAddressValue);
                 request.getRequestDispatcher("pages/address-edit.jsp").forward(request, response);
                 return;
             }
 
-            // define endereco selecionado
-            Integer enderecoIdSel = null;
+            Integer selectedAddressId = null;
             if (session.getAttribute("selectedId") != null) {
-                enderecoIdSel = helper.tryParseInteger(session.getAttribute("selectedId").toString());
+                selectedAddressId = helper.tryParseInteger(session.getAttribute("selectedId").toString());
             }
 
-            // recupera acao solicitada se existir
             String action = "";
 
             if (request.getParameter("action") != null) {
@@ -84,7 +84,7 @@ public class AddressServlet extends HttpServlet {
 
             switch (action) {
                 case "save": {
-                    AddressDTO enderecoDto = new AddressDTO(
+                    AddressDTO addressDto = new AddressDTO(
                         request.getParameter("name"),
                         userId,
                         helper.tryParseInteger(request.getParameter("zipcode")),
@@ -94,23 +94,23 @@ public class AddressServlet extends HttpServlet {
                         request.getParameter("country")
                     );
 
-                    if (enderecoIdSel != null) {
-                        enderecoService.atualizaAddressPorId(enderecoIdSel, enderecoDto);
+                    if (selectedAddressId != null) {
+                        addressService.updateAddressById(selectedAddressId, addressDto);
                     } else {
-                        enderecoService.insereAddress(enderecoDto);
+                        addressService.insertAddress(addressDto);
                     }
 
-                    session.setAttribute("msg", "Endereço gravado com sucesso!");
+                    session.setAttribute("msg", "Address saved.");
                     break;
                 }
                 case "delete": {
-                    enderecoService.excluiAddressPorId(enderecoIdSel, userId);
+                    addressService.deleteAddressById(selectedAddressId, userId);
 
-                    session.setAttribute("msg", "Endereço deletado com sucesso!");
+                    session.setAttribute("msg", "Address deleted.");
                     break;
                 }
                 case "clear": {
-                    // apaga sel da sessao
+
                     session.setAttribute("selectedId", null);
                     break;
                 }
@@ -119,9 +119,8 @@ public class AddressServlet extends HttpServlet {
                 }
             }
 
-            request.setAttribute("grid", enderecoService.listaAddresssPorUserId(userId));
+            request.setAttribute("grid", addressService.listUserAddresses(userId));
 
-            // manda p pag de grid de produtos
             request.getRequestDispatcher("pages/addresses.jsp").forward(request, response);
         } catch (Exception e) {
             session.setAttribute("msg", e.getMessage());
@@ -171,7 +170,7 @@ public class AddressServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra tratar interações com endereços.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

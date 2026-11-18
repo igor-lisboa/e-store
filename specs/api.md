@@ -6,8 +6,8 @@
 - Product lookup serializes a product DTO as JSON. Swagger UI is served at `/swagger/` and the OpenAPI 3.0.3 contract at `/swagger/openapi.json`.
 - User lookup requires a signed-in session. Customers can read only their own account; administrators can list and read accounts.
 - User API errors use a generic JSON error object and do not serialize exceptions.
-- All API error responses use an `error` string. Resource-not-found responses still use generic 500 errors; dedicated 404 handling and API versioning remain pending.
-- JSON properties are English, including product `name`, `price`, `description`, `image`, `categoryId`, `quantity`, `category`, and account `name`, `email`, `roleId`. Internal legacy DTO identifiers do not define the public names.
+- All API error responses use an `error` string. Product/account lookups return 404 for absent records, while infrastructure failures remain generic 500 errors. API versioning remains pending.
+- JSON properties are English, including product `name`, `price`, `description`, `image`, `categoryId`, `quantity`, `category`, and account `name`, `email`, `roleId`. Java DTO fields and accessors also use English names.
 - Swagger UI is bundled as a WebJar and loads the local OpenAPI document; it does not depend on a runtime CDN. The setup follows the [Swagger UI installation guide](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/).
 
 ## Requirements
@@ -30,4 +30,4 @@ Browser parameters include `productId`, `addProductId`, `quantity`, `search`, `s
 
 ## Open questions
 
-- Decide API versioning and dedicated not-found response handling. OpenAPI is the supported API documentation; session authentication is currently required for user endpoints.
+- Decide API versioning. OpenAPI is the supported API documentation; session authentication is currently required for user endpoints.

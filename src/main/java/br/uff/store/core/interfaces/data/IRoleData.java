@@ -7,5 +7,5 @@ import br.uff.store.core.exceptions.StoreException;
 
 public interface IRoleData {
 
-    public List<RoleDTO> listaRoles() throws StoreException;
+    public List<RoleDTO> listRoles() throws StoreException;
 }

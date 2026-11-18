@@ -4,26 +4,26 @@ import java.util.List;
 
 import br.uff.store.core.dtos.CartDTO;
 import br.uff.store.core.dtos.CartItemDTO;
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.exceptions.StoreException;
 
 public interface ICartService {
 
-    public CartDTO recuperaCartAtivo(Integer carrinhoId, Integer usuarioId, String ip) throws StoreException;
+    public CartDTO getActiveCart(Integer cartId, Integer userId, String ip) throws StoreException;
 
-    public void insereProductCart(Integer carrinhoId, Integer produtoId) throws StoreException;
+    public void addProductToCart(Integer cartId, Integer productId) throws StoreException;
 
-    public void removeProductCart(Integer carrinhoId, Integer produtoId) throws StoreException;
+    public void removeProductFromCart(Integer cartId, Integer productId) throws StoreException;
 
-    public List<CartItemDTO> listaProductsCart(Integer id) throws StoreException;
+    public List<CartItemDTO> listCartProducts(Integer id) throws StoreException;
 
-    public PaginateDTO<List<CartItemDTO>> listaProductsCart(Integer id, Integer itensPorPagina, Integer paginaAtual) throws StoreException;
+    public PaginationDTO<List<CartItemDTO>> listCartProducts(Integer id, Integer pageSize, Integer pageNumber) throws StoreException;
 
-    public void alteraQuantidadeProductCart(Integer carrinhoId, Integer produtoId, Integer quantidade) throws StoreException;
+    public void changeProductQuantity(Integer cartId, Integer productId, Integer quantity) throws StoreException;
 
-    public Boolean carrinhoAtivoValido(Integer id, Integer usuarioId) throws StoreException;
+    public Boolean isValidActiveCart(Integer id, Integer userId) throws StoreException;
 
-    public Double recuperaPrecoTotalDeUmCart(Integer id) throws StoreException;
+    public Double getCartTotal(Integer id) throws StoreException;
 
-    public Integer quantidadeProductNoCart(Integer id, Integer produtoId) throws StoreException;
+    public Integer productQuantityInCart(Integer id, Integer productId) throws StoreException;
 }

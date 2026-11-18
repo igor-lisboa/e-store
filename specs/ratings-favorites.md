@@ -2,7 +2,7 @@
 
 ## Observed behavior
 
-- Product ratings are associated with a user and product in `user_produts_rating`.
+- Product ratings are associated with a user and product in `product_reviews`, renamed by migration V7.
 - Favorite products are stored per user in `favorite_products`.
 - Services expose rating and favorite operations, including toggling a favorite.
 - Product display DTOs contain rating and favorite-related data.

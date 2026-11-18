@@ -5,99 +5,99 @@ import java.util.Map;
 public class CartItemDTO extends BaseDTO {
 
     private Integer id;
-    private Integer produtoId;
-    private String nome;
-    private String descricao;
-    private String imagem;
-    private Double preco;
-    private Integer quantidadeEmEstoque;
-    private Integer quantidade;
-    private Double precoTotal;
+    private Integer productId;
+    private String name;
+    private String description;
+    private String image;
+    private Double price;
+    private Integer availableStock;
+    private Integer quantity;
+    private Double totalPrice;
 
     public CartItemDTO() {
     }
 
-    public CartItemDTO(Map<String, Object> carrinhoProduct) {
-        this.setId(Integer.valueOf(String.valueOf(carrinhoProduct.get("id"))));
-        this.setProductId(Integer.valueOf(String.valueOf(carrinhoProduct.get("produtoId"))));
-        this.setNome(String.valueOf(carrinhoProduct.get("nome")));
-        this.setDescricao(String.valueOf(carrinhoProduct.get("descricao")));
-        this.setImagem(String.valueOf(carrinhoProduct.get("imagem")));
-        this.setPreco(Double.valueOf(String.valueOf(carrinhoProduct.get("preco"))));
-        this.setQuantidadeEmEstoque(Integer.valueOf(String.valueOf(carrinhoProduct.get("quantidadeEmEstoque"))));
-        this.setQuantidade(Integer.valueOf(String.valueOf(carrinhoProduct.get("quantidade"))));
-        this.setPrecoTotal(Double.valueOf(String.valueOf(carrinhoProduct.get("precoTotal"))));
+    public CartItemDTO(Map<String, Object> cartProduct) {
+        this.setId(Integer.valueOf(String.valueOf(cartProduct.get("id"))));
+        this.setProductId(Integer.valueOf(String.valueOf(cartProduct.get("productId"))));
+        this.setName(String.valueOf(cartProduct.get("name")));
+        this.setDescription(String.valueOf(cartProduct.get("description")));
+        this.setImage(String.valueOf(cartProduct.get("image")));
+        this.setPrice(Double.valueOf(String.valueOf(cartProduct.get("price"))));
+        this.setAvailableStock(Integer.valueOf(String.valueOf(cartProduct.get("availableStock"))));
+        this.setQuantity(Integer.valueOf(String.valueOf(cartProduct.get("quantity"))));
+        this.setTotalPrice(Double.valueOf(String.valueOf(cartProduct.get("totalPrice"))));
     }
 
-    public void setProductId(Integer produtoId) {
-        this.produtoId = produtoId;
+    public void setProductId(Integer productId) {
+        this.productId = productId;
     }
 
     public Integer getProductId() {
-        return produtoId;
+        return productId;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public String getDescription() {
+        return description;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public String getImagem() {
-        return imagem;
+    public String getImage() {
+        return image;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public Double getPreco() {
-        return preco;
+    public Double getPrice() {
+        return price;
     }
 
-    public Double getPrecoTotal() {
-        return precoTotal;
+    public Double getTotalPrice() {
+        return totalPrice;
     }
 
-    public Integer getQuantidade() {
-        return quantidade;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public Integer getQuantidadeEmEstoque() {
-        return quantidadeEmEstoque;
+    public Integer getAvailableStock() {
+        return availableStock;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public void setImagem(String imagem) {
-        this.imagem = imagem;
+    public void setImage(String image) {
+        this.image = image;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setPreco(Double preco) {
-        this.preco = preco;
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
-    public void setPrecoTotal(Double precoTotal) {
-        this.precoTotal = precoTotal;
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
-    public void setQuantidadeEmEstoque(Integer quantidadeEmEstoque) {
-        this.quantidadeEmEstoque = quantidadeEmEstoque;
+    public void setAvailableStock(Integer availableStock) {
+        this.availableStock = availableStock;
     }
 }

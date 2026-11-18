@@ -7,6 +7,7 @@ import java.util.List;
 import br.uff.store.core.dtos.UserDTO;
 import br.uff.store.core.enums.UserRole;
 import br.uff.store.core.exceptions.StoreException;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import br.uff.store.core.interfaces.data.IUserData;
 import br.uff.store.infrastructure.database.MySQLDAO;
 
@@ -16,108 +17,103 @@ public class UserData implements IUserData {
     private String tableUsers = "users";
 
     public UserData() {
-        this.mysqlDAO = new MySQLDAO();
+        this(new MySQLDAO());
+    }
+
+    public UserData(MySQLDAO mysqlDAO) {
+        this.mysqlDAO = java.util.Objects.requireNonNull(mysqlDAO, "Database access is required.");
     }
 
     @Override
-    public UserDTO encontraUserPorId(Integer id) throws StoreException {
+    public UserDTO findUserById(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
-            List<HashMap<String, Object>> retorno = this.mysqlDAO.dbCarrega("SELECT id, name AS nome, email, password AS senha, role_id AS permissaoId FROM users WHERE id=?", bind);
-            return new UserDTO(retorno.get(0));
+            List<HashMap<String, Object>> result = this.mysqlDAO.query("SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users WHERE id=?", bind);
+            if (result.isEmpty()) {
+                throw new ResourceNotFoundException("User");
+            }
+            return new UserDTO(result.get(0));
+        } catch (ResourceNotFoundException missing) {
+            throw missing;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Recuperar o Usuário de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 
     @Override
-    public List<UserDTO> listaUsers() throws StoreException {
+    public List<UserDTO> listUsers() throws StoreException {
         try {
             Object[] bind = {};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega("SELECT id, name AS nome, email, password AS senha, role_id AS permissaoId FROM users", bind);
-            List<UserDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(usuario -> retornoFormatado.add(new UserDTO(usuario)));
-            return retornoFormatado;
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users", bind);
+            List<UserDTO> mappedResults = new ArrayList<>();
+            rows.forEach(user -> mappedResults.add(new UserDTO(user)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar Usuários. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 
     @Override
-    public void atualizaUserPorId(Integer id, UserDTO usuario) throws StoreException {
+    public void updateUserById(Integer id, UserDTO user) throws StoreException {
         try {
-            Object[] bind = {usuario.getNome(), usuario.getEmail(), usuario.getSenha(), usuario.getPermissaoId(), id};
-            this.mysqlDAO.dbGrava("UPDATE users SET name=?,email=?,password=?,role_id=? WHERE id=?", bind, false);
+            Object[] bind = {user.getName(), user.getEmail(), user.getPassword(), user.getRoleId(), id};
+            this.mysqlDAO.executeUpdate("UPDATE users SET name=?,email=?,password=?,role_id=? WHERE id=?", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Atualizar o Usuário de id: " + id + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 
     @Override
-    public UserDTO encontraUserPorEmail(String email) throws StoreException {
+    public UserDTO findUserByEmail(String email) throws StoreException {
         try {
             Object[] bind = {email};
-            List<HashMap<String, Object>> rows = this.mysqlDAO.dbCarrega(
-                    "SELECT id, name AS nome, email, password AS senha, role_id AS permissaoId FROM users WHERE email=? LIMIT 1", bind);
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(
+                    "SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users WHERE email=? LIMIT 1", bind);
             return rows.isEmpty() ? null : new UserDTO(rows.get(0));
         } catch (Exception e) {
             throw new StoreException("Failed to look up account credentials.");
-        } finally {
-            this.mysqlDAO.destroyDb();
         }
     }
 
     @Override
-    public void atualizaSenha(Integer id, String senha) throws StoreException {
+    public void updatePassword(Integer id, String password) throws StoreException {
         try {
-            Object[] bind = {senha, id};
-            this.mysqlDAO.dbGrava("UPDATE users SET password=? WHERE id=?", bind, false);
+            Object[] bind = {password, id};
+            this.mysqlDAO.executeUpdate("UPDATE users SET password=? WHERE id=?", bind);
         } catch (Exception e) {
             throw new StoreException("Failed to update account credentials.");
-        } finally {
-            this.mysqlDAO.destroyDb();
         }
     }
 
     @Override
-    public void insereUser(UserDTO usuario) throws StoreException {
+    public void insertUser(UserDTO user) throws StoreException {
         try {
-            Object[] bind = {usuario.getNome(), usuario.getEmail(), usuario.getSenha(), usuario.getPermissaoId()};
-            this.mysqlDAO.dbGrava("INSERT INTO users (name,email,password,role_id) VALUES (?,?,?,?)", bind, false);
+            Object[] bind = {user.getName(), user.getEmail(), user.getPassword(), user.getRoleId()};
+            this.mysqlDAO.executeUpdate("INSERT INTO users (name,email,password,role_id) VALUES (?,?,?,?)", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Inserir o Usuário. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 
     @Override
-    public Boolean ehAdmin(Integer id) throws StoreException {
+    public Boolean isAdmin(Integer id) throws StoreException {
         try {
-            Object[] bind = {id, UserRole.ADM.getId()};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.dbValor("count(*)", this.tableUsers, "id=? AND role_id=?", bind))) > 0;
+            Object[] bind = {id, UserRole.ADMIN.getId()};
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", this.tableUsers, "id=? AND role_id=?", bind))) > 0;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Verificar se o Usuário de id: " + id + " é Admin. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 
     @Override
-    public Boolean emailJaUsado(String email, String idPraIgnorar) throws StoreException {
+    public Boolean isEmailInUse(String email, String ignoredUserId) throws StoreException {
         try {
-            Object[] bind = {email, idPraIgnorar};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.dbValor("count(*)", this.tableUsers, "email=? AND id<>?", bind))) > 0;
+            boolean creating = ignoredUserId == null || "null".equals(ignoredUserId);
+            Object[] bind = creating ? new Object[] {email} : new Object[] {email, Integer.valueOf(ignoredUserId)};
+            String filter = creating ? "email=?" : "email=? AND id<>?";
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", this.tableUsers, filter, bind))) > 0;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Verificar se o email: " + email + " está em uso por um id que não seja o id: " + idPraIgnorar + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the user database operation.", e);
         }
     }
 

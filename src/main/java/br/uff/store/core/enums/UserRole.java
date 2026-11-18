@@ -1,8 +1,8 @@
 package br.uff.store.core.enums;
 
 public enum UserRole {
-    ADM(1),
-    CLIENTE(2);
+    ADMIN(1),
+    CUSTOMER(2);
 
     private Integer id;
 

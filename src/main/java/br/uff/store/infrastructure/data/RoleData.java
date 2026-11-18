@@ -18,17 +18,15 @@ public class RoleData implements IRoleData {
     }
 
     @Override
-    public List<RoleDTO> listaRoles() throws StoreException {
+    public List<RoleDTO> listRoles() throws StoreException {
         try {
             Object[] bind = {};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega("SELECT id, name AS nome FROM roles", bind);
-            List<RoleDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(role -> retornoFormatado.add(new RoleDTO(role)));
-            return retornoFormatado;
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, name AS name FROM roles", bind);
+            List<RoleDTO> mappedResults = new ArrayList<>();
+            rows.forEach(role -> mappedResults.add(new RoleDTO(role)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao listar Roles. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the role database operation.", e);
         }
     }
 

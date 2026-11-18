@@ -2,10 +2,26 @@ package br.uff.store.infrastructure.shared;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.Currency;
+import java.text.NumberFormat;
+import java.time.ZoneOffset;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import br.uff.store.core.interfaces.shared.IHelper;
 
 public class Helper implements IHelper {
+    private final Locale locale;
+
+    public Helper() {
+        this(Locale.ENGLISH);
+    }
+
+    public Helper(Locale locale) {
+        this.locale = locale == null ? Locale.ENGLISH : locale;
+    }
 
     public Date convertStringToDate(String format, String date) {
         try {
@@ -31,8 +47,20 @@ public class Helper implements IHelper {
         }
     }
 
-    public String tryParseMoneyFormat(Object preco) {
-        return "R$" + String.format("%.2f", preco);
+    public String tryParseMoneyFormat(Object price) {
+        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
+        format.setCurrency(Currency.getInstance("BRL"));
+        return format.format(price);
+    }
+
+    public String formatDate(Date date) {
+        return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
+                .withZone(ZoneOffset.UTC).format(date.toInstant());
+    }
+
+    public String formatReviewDate(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/uuuu"))
+                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale));
     }
 
     public Double tryParseDouble(String intStr) {

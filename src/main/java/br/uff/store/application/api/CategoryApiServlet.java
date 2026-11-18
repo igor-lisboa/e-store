@@ -1,5 +1,7 @@
 package br.uff.store.application.api;
 
+import br.uff.store.application.StoreServices;
+
 import br.uff.store.core.interfaces.services.ICategoryService;
 import br.uff.store.core.services.CategoryService;
 import java.io.IOException;
@@ -10,20 +12,20 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/api/categories/*")
 public class CategoryApiServlet extends HttpServlet {
-    private final ICategoryService categoriaService;
+    private final ICategoryService categoryService;
 
     public CategoryApiServlet() {
-        this(new CategoryService());
+        this(StoreServices.categories());
     }
 
-    CategoryApiServlet(ICategoryService categoriaService) {
-        this.categoriaService = categoriaService;
+    CategoryApiServlet(ICategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            ApiResponses.writeJson(response, categoriaService.listaCategorys());
+            ApiResponses.writeJson(response, categoryService.categories());
         } catch (Exception exception) {
             ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "The request could not be completed.");

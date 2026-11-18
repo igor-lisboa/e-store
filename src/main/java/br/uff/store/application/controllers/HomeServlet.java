@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +21,10 @@ import br.uff.store.core.services.ProductService;
 
 @WebServlet("")
 public class HomeServlet extends HttpServlet {
-    private final IProductService produtoService;
+    private final IProductService productService;
 
     public HomeServlet() {
-        produtoService = new ProductService();
+        productService = StoreServices.products();
     }
 
     /**
@@ -35,12 +37,12 @@ public class HomeServlet extends HttpServlet {
      * @throws IOException      if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         List<FeaturedProductDTO> jogosVitrine = new ArrayList<>();
 
         try {
-            jogosVitrine = produtoService.listaProductsBanner();
+            jogosVitrine = productService.listFeaturedProducts();
         } catch (Exception e) {
             session.setAttribute("msg", e.getMessage());
         }
@@ -73,6 +75,6 @@ public class HomeServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Esse Servlet é a porta de entrada da nossa loja!";
+        return "Handles storefront requests.";
     }// </editor-fold>
 }

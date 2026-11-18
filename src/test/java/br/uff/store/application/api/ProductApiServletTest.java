@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import br.uff.store.core.interfaces.services.IProductService;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.servlet.http.HttpServletRequest;
@@ -45,11 +46,20 @@ public class ProductApiServletTest {
     @Test
     public void hidesServiceErrorsFromClients() throws Exception {
         when(request.getPathInfo()).thenReturn("/4");
-        when(productService.encontraProductPorId(4)).thenThrow(new IllegalStateException("database secret"));
+        when(productService.findProductById(4)).thenThrow(new IllegalStateException("database secret"));
 
         servlet.doGet(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         assertEquals("{\"error\":\"The request could not be completed.\"}", responseBody.toString());
+    }
+
+    @Test
+    public void missingProductsReturnNotFoundRatherThanServerError() throws Exception {
+        when(request.getPathInfo()).thenReturn("/99");
+        when(productService.findProductById(99)).thenThrow(new ResourceNotFoundException("Product"));
+        servlet.doGet(request, response);
+        verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals("{\"error\":\"Product was not found.\"}", responseBody.toString());
     }
 }

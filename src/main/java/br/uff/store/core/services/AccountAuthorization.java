@@ -10,6 +10,6 @@ public final class AccountAuthorization {
             return false;
         }
         return activeUserId.equals(targetUserId)
-                || UserRole.ADM.getId().equals(activeRoleId);
+                || UserRole.ADMIN.getId().equals(activeRoleId);
     }
 }

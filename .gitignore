@@ -37,3 +37,4 @@ build/
 .ionide
 
 .env
+.local-tools/

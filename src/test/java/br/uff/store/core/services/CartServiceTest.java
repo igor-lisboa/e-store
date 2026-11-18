@@ -28,50 +28,50 @@ public class CartServiceTest {
 
     @Test
     public void addingAnItemDoesNotExceedAvailableStock() throws Exception {
-        when(cartData.carrinhoExiste(3)).thenReturn(true);
-        when(cartData.carrinhoVendido(3)).thenReturn(false);
-        when(cartData.quantidadeProductNoCart(3, 8)).thenReturn(1);
-        when(productData.encontraProductPorId(8)).thenReturn(productWithStock(2));
+        when(cartData.cartExists(3)).thenReturn(true);
+        when(cartData.isCartSold(3)).thenReturn(false);
+        when(cartData.productQuantityInCart(3, 8)).thenReturn(1);
+        when(productData.findProductById(8)).thenReturn(productWithStock(2));
 
-        service.insereProductCart(3, 8);
+        service.addProductToCart(3, 8);
 
-        verify(cartData).atualizaQtdDoProductNoCart(3, 8, 2);
+        verify(cartData).updateProductQuantity(3, 8, 2);
     }
 
     @Test
     public void rejectsAddingItemsBeyondAvailableStock() throws Exception {
-        when(cartData.carrinhoExiste(3)).thenReturn(true);
-        when(cartData.carrinhoVendido(3)).thenReturn(false);
-        when(cartData.quantidadeProductNoCart(3, 8)).thenReturn(1);
-        when(productData.encontraProductPorId(8)).thenReturn(productWithStock(1));
+        when(cartData.cartExists(3)).thenReturn(true);
+        when(cartData.isCartSold(3)).thenReturn(false);
+        when(cartData.productQuantityInCart(3, 8)).thenReturn(1);
+        when(productData.findProductById(8)).thenReturn(productWithStock(1));
 
         try {
-            service.insereProductCart(3, 8);
+            service.addProductToCart(3, 8);
             fail("Expected insufficient stock to be rejected.");
         } catch (StoreException expected) {
-            verify(cartData, never()).atualizaQtdDoProductNoCart(3, 8, 2);
-            verify(cartData, never()).adicionaProductNoCart(3, 8);
+            verify(cartData, never()).updateProductQuantity(3, 8, 2);
+            verify(cartData, never()).addProductToCart(3, 8);
         }
     }
 
     @Test
     public void rejectsNonPositiveQuantitiesBeforePersistence() throws Exception {
-        when(cartData.carrinhoExiste(3)).thenReturn(true);
-        when(cartData.carrinhoVendido(3)).thenReturn(false);
-        when(cartData.verificaProductNoCart(3, 8)).thenReturn(true);
+        when(cartData.cartExists(3)).thenReturn(true);
+        when(cartData.isCartSold(3)).thenReturn(false);
+        when(cartData.containsProduct(3, 8)).thenReturn(true);
 
         try {
-            service.alteraQuantidadeProductCart(3, 8, 0);
+            service.changeProductQuantity(3, 8, 0);
             fail("Expected zero quantity to be rejected.");
         } catch (StoreException expected) {
-            verify(productData, never()).encontraProductPorId(anyInt());
-            verify(cartData, never()).atualizaQtdDoProductNoCart(3, 8, 0);
+            verify(productData, never()).findProductById(anyInt());
+            verify(cartData, never()).updateProductQuantity(3, 8, 0);
         }
     }
 
     private ProductDTO productWithStock(Integer quantity) {
         ProductDTO product = new ProductDTO();
-        product.setQuantidade(quantity);
+        product.setQuantity(quantity);
         return product;
     }
 }

@@ -1,3 +1,5 @@
+<%@ include file="/WEB-INF/fragments/messages.jspf" %>
+<%@page import="br.uff.store.application.security.Html"%>
 <!--
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
@@ -13,32 +15,32 @@ and open the template in the editor.
         jogosVitrine = (List<FeaturedProductDTO>) request.getAttribute("jogosVitrine");
     }
 %>
-<!-- Header -->
+
 <jsp:include page="header.jsp">
     <jsp:param name="title" value="Home"/>
 </jsp:include>
 <%
     if (jogosVitrine.size() > 0) {
 %>
-<!-- Slideshow container -->
+
 <div class="slideshow-container">
-    <!-- Full-width images with caption text -->
+
     <%
-        for (FeaturedProductDTO produto : jogosVitrine) {
+        for (FeaturedProductDTO product : jogosVitrine) {
     %>
     <div class="mySlides fade">
-        <div style="width:100%;height:600px;background: url('<%= produto.getImagem()%>') no-repeat center center;background-size: auto;background-size: cover;">&nbsp;</div>
-        <div class="text" onclick="location.href = 'product?productId=<%= produto.getId()%>';">Adquira o Product</div>
+        <div style="width:100%;height:600px;background: url('<%= Html.escape(product.getImage()) %>') no-repeat center center;background-size: auto;background-size: cover;">&nbsp;</div>
+        <div class="text" onclick="location.href = 'product?productId=<%= product.getId()%>';"><fmt:message key="ui.buyProduct"/></div>
     </div>
     <%
         }
     %>
-    <!-- Next and previous buttons -->
+
     <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
     <a class="next" onclick="plusSlides(1)">&#10095;</a>
 </div>
 <br>
-<!-- The dots/circles -->
+
 <div style="text-align:center">
     <%
         for (int i = 0; i < jogosVitrine.size(); i++) {
@@ -53,12 +55,10 @@ and open the template in the editor.
     var slideIndex = 1;
     showSlides(slideIndex);
 
-// Next/previous controls
     function plusSlides(n) {
         showSlides(slideIndex += n);
     }
 
-// Thumbnail image controls
     function currentSlide(n) {
         showSlides(slideIndex = n);
     }
@@ -102,5 +102,5 @@ and open the template in the editor.
     </div>
 </div>
 
-<!-- Footer -->
+
 <jsp:include page="footer.jsp"></jsp:include>

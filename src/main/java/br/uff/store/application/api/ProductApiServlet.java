@@ -1,8 +1,11 @@
 package br.uff.store.application.api;
 
+import br.uff.store.application.StoreServices;
+
 import br.uff.store.core.dtos.ProductDTO;
 import br.uff.store.core.interfaces.services.IProductService;
 import br.uff.store.core.services.ProductService;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.annotation.WebServlet;
@@ -12,14 +15,14 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/api/products/*")
 public class ProductApiServlet extends HttpServlet {
-    private final IProductService produtoService;
+    private final IProductService productService;
 
     public ProductApiServlet() {
-        this(new ProductService());
+        this(StoreServices.products());
     }
 
-    ProductApiServlet(IProductService produtoService) {
-        this.produtoService = produtoService;
+    ProductApiServlet(IProductService productService) {
+        this.productService = productService;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class ProductApiServlet extends HttpServlet {
         String pathInfo = request.getPathInfo();
         if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
             try {
-                List<ProductDTO> products = produtoService.listaProductsAdm();
+                List<ProductDTO> products = productService.listAdminProducts();
                 ApiResponses.writeJson(response, products);
             } catch (Exception exception) {
                 ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -42,8 +45,10 @@ public class ProductApiServlet extends HttpServlet {
             return;
         }
         try {
-            ProductDTO product = produtoService.encontraProductPorId(productId);
+            ProductDTO product = productService.findProductById(productId);
             ApiResponses.writeJson(response, product);
+        } catch (ResourceNotFoundException missing) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_NOT_FOUND, "Product was not found.");
         } catch (Exception exception) {
             ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "The request could not be completed.");

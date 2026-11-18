@@ -7,7 +7,9 @@
 - A signed-in user can claim an eligible anonymous cart; carts are checked for existence, ownership, and sold state.
 - Cart items can be added, removed, quantity-adjusted, listed, and paginated.
 - Checkout requires a user, a valid active non-empty cart, and an address owned by that user.
-- The database procedure `buy_cart_itens` records a sale; the procedure and stock trigger are installed by versioned migrations.
+- Migration V6 replaces the original procedure with `checkout_cart`. It locks the cart and stock rows, validates address ownership, deducts stock, calculates the decimal total, and records one sale inside a transaction. SQL failures roll back all changes.
+- Order completion requires explicit `ALLOW_DEMO_CHECKOUT=true`. Local Compose enables this demonstration mode. It records an order without charging money; no payment provider is integrated. Forged completion requests are rejected when demo mode is disabled.
+- MySQL integration tests cover rollback, decimal totals, duplicate checkout, address ownership, and competing carts. Browser journeys cover both demo-enabled and demo-disabled completion.
 
 ## Requirements
 

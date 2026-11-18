@@ -27,6 +27,7 @@ Use this tool-independent workflow for feature implementation, refactoring, and 
 - Require English filenames, directories, packages, types, methods, variables, tests, assets, comments, logs, and errors. Reject Portuguese or mixed-language naming and update every reference in the same rename.
 - Add unit tests for rules, integration tests for adapters/persistence, and browser E2E tests for key journeys.
 - Keep tests independent of shared mutable data and make failures actionable.
+- Apply `agents/skills/verify-quality/SKILL.md` when implementing or refactoring. Reject shallow tests, review meaningful behavioral coverage, and verify required suites plus packaging before reporting success. Do not infer full coverage from default unit tests or claim blocked checks passed.
 
 ## Before finishing
 

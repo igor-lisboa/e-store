@@ -16,6 +16,7 @@
 - Page size and page bounds must be validated by the application layer.
 - Only authorized administrators may create, update, delete, or adjust product stock.
 - Product name, price, description, category, and image input must be validated before persistence.
+- Names/descriptions are required and bounded to 255 characters. Images are required and capped at 4,000,000 characters. Prices must be finite, non-negative, and fit `DECIMAL(11,2)`; stock increments are positive. Paging accepts 1–100 items with a positive page number and a non-overflowing offset. Price filter bounds must be finite, non-negative, and ordered.
 - A product cannot be purchased beyond available stock.
 
 ## Acceptance checks

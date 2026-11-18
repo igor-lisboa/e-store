@@ -6,60 +6,75 @@ import br.uff.store.core.dtos.AddressDTO;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.IAddressData;
 import br.uff.store.core.interfaces.services.IAddressService;
-import br.uff.store.infrastructure.data.AddressData;
 
 public class AddressService implements IAddressService {
 
-    private final IAddressData enderecoData;
+    private final IAddressData addressData;
 
-    public AddressService() {
-        this(new AddressData());
-    }
-
-    public AddressService(IAddressData enderecoData) {
-        if (enderecoData == null) {
+    public AddressService(IAddressData addressData) {
+        if (addressData == null) {
             throw new IllegalArgumentException("Address data dependency is required.");
         }
-        this.enderecoData = enderecoData;
+        this.addressData = addressData;
     }
 
     @Override
-    public AddressDTO encontraAddressPorId(Integer id) throws StoreException {
-        return enderecoData.encontraAddressPorId(id);
+    public AddressDTO findAddressById(Integer id) throws StoreException {
+        return addressData.findAddressById(id);
     }
 
     @Override
-    public void excluiAddressPorId(Integer id, Integer usuarioId) throws StoreException {
-        if (!Boolean.TRUE.equals(enderecoData.verificaAddressDoUser(id, usuarioId))) {
+    public void deleteAddressById(Integer id, Integer userId) throws StoreException {
+        InputRules.positiveId(id, "Address ID");
+        InputRules.positiveId(userId, "User ID");
+        if (!Boolean.TRUE.equals(addressData.addressBelongsToUser(id, userId))) {
             throw new StoreException("The address does not belong to this account.");
         }
-        if (Boolean.TRUE.equals(enderecoData.enderecoFoiUsadoEmAlgumaSale(id))) {
-            throw new StoreException("Esse endereço não pode ser excluído pois foi usado para realizar uma venda...");
+        if (Boolean.TRUE.equals(addressData.addressUsedInSale(id))) {
+            throw new StoreException("An address used for an order cannot be deleted.");
         }
-        enderecoData.excluiAddressPorId(id);
+        addressData.deleteAddressById(id);
     }
 
     @Override
-    public AddressDTO atualizaAddressPorId(Integer id, AddressDTO endereco) throws StoreException {
-        if (!Boolean.TRUE.equals(enderecoData.verificaAddressDoUser(id, endereco.getUserId()))) {
+    public AddressDTO updateAddressById(Integer id, AddressDTO address) throws StoreException {
+        InputRules.positiveId(id, "Address ID");
+        validateAddress(address);
+        if (!Boolean.TRUE.equals(addressData.addressBelongsToUser(id, address.getUserId()))) {
             throw new StoreException("The address does not belong to this account.");
         }
-        enderecoData.atualizaAddressPorId(id, endereco);
-        return this.encontraAddressPorId(id);
+        addressData.updateAddressById(id, address);
+        return this.findAddressById(id);
     }
 
     @Override
-    public void insereAddress(AddressDTO endereco) throws StoreException {
-        enderecoData.insereAddress(endereco);
+    public void insertAddress(AddressDTO address) throws StoreException {
+        validateAddress(address);
+        addressData.insertAddress(address);
     }
 
     @Override
-    public List<AddressDTO> listaAddresssPorUserId(Integer usuarioId) throws StoreException {
-        return enderecoData.listaAddresssPorUserId(usuarioId);
+    public List<AddressDTO> listUserAddresses(Integer userId) throws StoreException {
+        return addressData.listUserAddresses(userId);
     }
 
     @Override
-    public Boolean verificaAddressDoUser(Integer id, Integer usuarioId) throws StoreException {
-        return enderecoData.verificaAddressDoUser(id, usuarioId);
+    public Boolean addressBelongsToUser(Integer id, Integer userId) throws StoreException {
+        return addressData.addressBelongsToUser(id, userId);
+    }
+
+    private void validateAddress(AddressDTO address) throws StoreException {
+        if (address == null) {
+            throw new StoreException("Address details are required.");
+        }
+        InputRules.positiveId(address.getUserId(), "User ID");
+        InputRules.requiredText(address.getName(), 255, "Address name");
+        InputRules.requiredText(address.getStreetAddress(), 255, "Street address");
+        InputRules.requiredText(address.getCity(), 255, "City");
+        InputRules.requiredText(address.getState(), 255, "State");
+        InputRules.requiredText(address.getCountry(), 255, "Country");
+        if (address.getPostalCode() == null || address.getPostalCode() < 0) {
+            throw new StoreException("A non-negative postal code is required.");
+        }
     }
 }

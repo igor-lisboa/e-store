@@ -12,6 +12,8 @@ OpenAPI validation runs in CI, but cannot prove runtime behavior matches the doc
 
 ## Feature workflow
 
+Use the [verify-quality skill](skills/verify-quality/SKILL.md) and [test/build review role](test-build-reviewer.md) to plan meaningful coverage and verify suites and packaging. Codex, Claude, and Copilot discovery entry points live in their respective skill directories. Shallow tests are not accepted; every test must prove behavior or an important invariant. Report default unit, legacy integration, E2E, coverage, and build results with their actual scope and blockers.
+
 1. Read the relevant specialty spec, implementation, and backlog.
 2. Gather requirements from behavior and tests. Mark assumptions and open decisions in the spec.
 3. Plan a narrow behavior-preserving implementation.

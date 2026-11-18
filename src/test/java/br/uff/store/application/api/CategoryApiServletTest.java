@@ -30,7 +30,7 @@ public class CategoryApiServletTest {
 
     @Test
     public void hidesServiceErrorsFromClients() throws Exception {
-        when(categoryService.listaCategorys()).thenThrow(new IllegalStateException("database secret"));
+        when(categoryService.categories()).thenThrow(new IllegalStateException("database secret"));
 
         servlet.doGet(mock(HttpServletRequest.class), response);
 

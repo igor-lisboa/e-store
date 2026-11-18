@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,23 +24,24 @@ import br.uff.store.core.interfaces.services.IUserService;
 import br.uff.store.core.services.RoleService;
 import br.uff.store.core.services.UserService;
 import br.uff.store.core.services.AccountAuthorization;
+import br.uff.store.application.security.AccountRedirects;
 import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/account")
 public class UserServlet extends HttpServlet {
     private static final String SELUSER = "selUser";
     private static final String EMAIL = "email";
-    private static final String SENHA = "password";
+    private static final String PASSWORD = "password";
     private static final String USERID = "userId";
     private static final String USERROLE = "userRole";
     private static final String REDIRECT = "redirect";
-    private final IUserService usuarioService;
+    private final IUserService userService;
     private final IRoleService roleService;
     private final Helper helper;
 
     public UserServlet() {
-        usuarioService = new UserService();
-        roleService = new RoleService();
+        userService = StoreServices.users();
+        roleService = StoreServices.roles();
         helper = new Helper();
     }
 
@@ -52,7 +55,7 @@ public class UserServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, StoreException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         clearLegacyPasswordCookie(request, response);
         try {
@@ -60,7 +63,6 @@ public class UserServlet extends HttpServlet {
                 session.setAttribute(SELUSER, request.getParameter("selectedId"));
             }
 
-            // recupera acao solicitada se existir
             String action = "";
             if(request.getParameter("action")!=null){
                 action = request.getParameter("action");
@@ -71,50 +73,50 @@ public class UserServlet extends HttpServlet {
                 return;
             }
 
-            Integer usuarioIdSelectionado = null;
+            Integer selectedUserId = null;
             if (session.getAttribute(SELUSER) != null) {
-                usuarioIdSelectionado = helper.tryParseInteger(session.getAttribute(SELUSER).toString());
+                selectedUserId = helper.tryParseInteger(session.getAttribute(SELUSER).toString());
             }
 
             String email = request.getParameter(EMAIL);
-            String senha = request.getParameter(SENHA);
+            String password = request.getParameter(PASSWORD);
             
             switch (action) {
                 case "save": {
                     Integer activeUserId = helper.tryParseInteger(String.valueOf(session.getAttribute(USERID)));
                     Integer activeRoleId = helper.tryParseInteger(String.valueOf(session.getAttribute(USERROLE)));
-                    if (!AccountAuthorization.canEdit(activeUserId, activeRoleId, usuarioIdSelectionado)) {
+                    if (!AccountAuthorization.canEdit(activeUserId, activeRoleId, selectedUserId)) {
                         throw new StoreException("You are not allowed to edit this account.");
                     }
-                    Integer roleId = activeRoleId.equals(UserRole.ADM.getId())
+                    Integer roleId = activeRoleId.equals(UserRole.ADMIN.getId())
                             ? helper.tryParseInteger(request.getParameter("roleId"))
-                            : usuarioService.encontraUserPorId(usuarioIdSelectionado).getPermissaoId();
-                    usuarioService.gravaUser(new UserDTO(
-                        usuarioIdSelectionado,
+                            : userService.findUserById(selectedUserId).getRoleId();
+                    userService.saveUser(new UserDTO(
+                        selectedUserId,
                         request.getParameter("name"),
                         email,
-                        senha,
+                        password,
                         roleId
                     ));
                     break;
                 }
                 case "logout": {
-                    // define variaveis de sessao d usuario como null
+
                     session.setAttribute(USERID, null);
                     session.setAttribute(USERROLE, null);
-                    session.setAttribute("msg", "Usuário deslogado com sucesso!");
-                    // invalida sessao
+                    session.setAttribute("msg", "Signed out successfully.");
+
                     session.invalidate();
                     response.sendRedirect("");
                     return;
                 }
                 case "login": {
                     try {
-                        UserDTO usuarioDto = usuarioService.login(email, senha);
+                        UserDTO userDto = userService.login(email, password);
                         request.changeSessionId();
-                        session.setAttribute(USERID, usuarioDto.getId());
-                            session.setAttribute(USERROLE, usuarioDto.getPermissaoId());
-                            session.setAttribute("msg", "Seja bem vindo " + usuarioDto.getNome() + "!");
+                        session.setAttribute(USERID, userDto.getId());
+                            session.setAttribute(USERROLE, userDto.getRoleId());
+                            session.setAttribute("msg", "Welcome, " + userDto.getName() + "!");
                             // Remember the email only; never persist a password in a browser cookie.
                             if (request.getParameter("remember") != null) {
                                 int durMes = 2592000;
@@ -130,17 +132,17 @@ public class UserServlet extends HttpServlet {
                     break;
                 }
                 case "register": {
-                    UserDTO usuarioDto = usuarioService.gravaUser(new UserDTO(
+                    UserDTO userDto = userService.saveUser(new UserDTO(
                         null,
                         request.getParameter("name"),
                         email,
                         request.getParameter("password"),
-                        UserRole.CLIENTE.getId()
+                        UserRole.CUSTOMER.getId()
                     ));
                     request.changeSessionId();
-                    session.setAttribute(USERID, usuarioDto.getId());
-                    session.setAttribute(USERROLE, usuarioDto.getPermissaoId());
-                    session.setAttribute("msg", "Seja bem vindo " + usuarioDto.getNome() + "!");
+                    session.setAttribute(USERID, userDto.getId());
+                    session.setAttribute(USERROLE, userDto.getRoleId());
+                    session.setAttribute("msg", "Welcome, " + userDto.getName() + "!");
                     break;
                 }
                 case "clear": {
@@ -154,40 +156,39 @@ public class UserServlet extends HttpServlet {
             }
 
             String redirect = null;
-            // recupera redirect
+
             if (request.getAttribute(REDIRECT) != null) {
                 redirect = (String) request.getAttribute(REDIRECT);
             } else if (request.getParameter(REDIRECT) != null) {
                 redirect = request.getParameter(REDIRECT);
             }
+            redirect = AccountRedirects.allowed(redirect);
 
-            // se tem usuario logado manda p conta caso contrario p login
             if (session.getAttribute(USERID) != null) {
-                //recupera userId da sessao
+
                 Integer userId = helper.tryParseInteger(session.getAttribute(USERID).toString());
-                // define redirect se n foi passado
+
                 if (redirect == null || "null".equals(redirect)) {
-                    if (usuarioIdSelectionado != null) {
-                        if (!usuarioIdSelectionado.equals(userId) && !helper.tryParseInteger(session.getAttribute(USERROLE).toString()).equals(UserRole.ADM.getId())) {
+                    if (selectedUserId != null) {
+                        if (!selectedUserId.equals(userId) && !helper.tryParseInteger(session.getAttribute(USERROLE).toString()).equals(UserRole.ADMIN.getId())) {
                             session.setAttribute(SELUSER, null);
-                            throw new StoreException("Acesso não permitido!");
+                            throw new StoreException("Access is not permitted.");
                         }
 
-                        request.setAttribute("permissoes", roleService.listaRoles());
-                        request.setAttribute("account", usuarioService.encontraUserPorId(usuarioIdSelectionado));
+                        request.setAttribute("roles", roleService.listRoles());
+                        request.setAttribute("account", userService.findUserById(selectedUserId));
                         redirect = "pages/account-edit.jsp";
                     } else {
-                        // define grid
-                        List<UserDTO> usuarios = new ArrayList<>();
 
-                        // se for adm traz td mundo
-                        if (session.getAttribute(USERROLE).equals(UserRole.ADM.getId())) {
-                            usuarios = usuarioService.listaUsers();
+                        List<UserDTO> users = new ArrayList<>();
+
+                        if (session.getAttribute(USERROLE).equals(UserRole.ADMIN.getId())) {
+                            users = userService.listUsers();
                         } else {
-                            usuarios.add(usuarioService.encontraUserPorId(userId));
+                            users.add(userService.findUserById(userId));
                         }
 
-                        request.setAttribute("usuarios", usuarios);
+                        request.setAttribute("users", users);
                         redirect = "pages/accounts.jsp";
                     }
                 } else {
@@ -195,7 +196,7 @@ public class UserServlet extends HttpServlet {
                     return;
                 }
             } else {
-                // define redirect q sera passado p pag d login
+
                 request.setAttribute(REDIRECT, redirect);
                 redirect = "pages/login.jsp";
             }
@@ -256,7 +257,7 @@ public class UserServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra tratar edição de usuário.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

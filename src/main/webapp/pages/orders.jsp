@@ -1,79 +1,76 @@
-<%-- 
-    Document   : compras
-    Created on : 02/10/2019, 00:50:48
-    Author     : HP
---%>
+<%@ include file="/WEB-INF/fragments/messages.jspf" %>
+<%@page import="br.uff.store.application.security.Html"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="br.uff.store.infrastructure.shared.Helper"%>
 <%@page import="br.uff.store.core.dtos.CartItemDTO"%>
-<%@page import="br.uff.store.core.dtos.PaginateDTO"%>
+<%@page import="br.uff.store.core.dtos.PaginationDTO"%>
 <%@page import="java.util.List"%>
 <%@page import="br.uff.store.core.dtos.SaleDTO"%>
 <%@page import="java.util.ArrayList"%>
 <%
-    // se n tiver um usuario logado chama UserController e configura p redirecionar d volta p CheckoutController
+
     if (session.getAttribute("userId") == null) {
         response.sendRedirect("account?redirect=checkout");
     }
 
-    PaginateDTO<List<SaleDTO>> vendas = new PaginateDTO<List<SaleDTO>>();
-    if (request.getAttribute("vendas") != null) {
-        vendas = (PaginateDTO<List<SaleDTO>>)request.getAttribute("vendas");
+    PaginationDTO<List<SaleDTO>> sales = new PaginationDTO<List<SaleDTO>>();
+    if (request.getAttribute("sales") != null) {
+        sales = (PaginationDTO<List<SaleDTO>>)request.getAttribute("sales");
     }
 %>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Meus Pedidos"/>
+    <jsp:param name="title" value="Orders"/>
 </jsp:include>
 
-<h2 class="meus-pedidos">Meus Pedidos</h2>
+<h2 class="order-history-title"><fmt:message key="ui.myOrders"/></h2>
 <%
-    for (SaleDTO venda : vendas.getDados()) {
+    for (SaleDTO sale : sales.getItems()) {
 %>
-<div class="compras-container">
+<div class="orders-container">
     <table class="end-grid">
-        <caption>Sales</caption>
+        <caption><fmt:message key="ui.orders"/></caption>
         <thead>
             <tr class="end-title-container">
-                <th scope="col" class="end-title">Nº do Pedido</th>
-                <th scope="col" class="end-title">Momento da Checkout</th>
-                <th scope="col" class="end-title">Endereço de Entrega</th>
-                <th scope="col" class="end-title">Total</th>
+                <th scope="col" class="end-title"><fmt:message key="ui.orderNumber"/></th>
+                <th scope="col" class="end-title"><fmt:message key="ui.orderDate"/></th>
+                <th scope="col" class="end-title"><fmt:message key="ui.deliveryAddress"/></th>
+                <th scope="col" class="end-title"><fmt:message key="ui.total"/></th>
             </tr>
         </thead>
         <tbody>
             <tr class="end-data-container">
-                <td class="end-data">#<%= venda.getId()%></td>
-                <td class="end-data"><%= venda.getCriadoEm()%></td>
+                <td class="end-data">#<%= sale.getId()%></td>
+                <td class="end-data"><%= new Helper((java.util.Locale) session.getAttribute("appLocale")).formatDate(sale.getCreatedAt()) %></td>
                 <td class="end-data">
-                    <%= venda.getAddress().getLogradouro()%> - <%= venda.getAddress().getCidade()%> - <%= venda.getAddress().getEstado()%> - CEP: <%= venda.getAddress().getCep()%>
+                    <%= Html.escape(sale.getAddress().getStreetAddress()) %> - <%= Html.escape(sale.getAddress().getCity()) %> - <%= Html.escape(sale.getAddress().getState()) %> - CEP: <%= sale.getAddress().getPostalCode()%>
                 </td>
-                <td class="end-data"><%= new Helper().tryParseMoneyFormat(venda.getPrecoTotal())%></td>
+                <td class="end-data"><%= new Helper((java.util.Locale) session.getAttribute("appLocale")).tryParseMoneyFormat(sale.getTotalPrice())%></td>
             </tr>
             <tr>
                 <td colspan="4">
                     <table class="end-grid" style="width: 70%; margin: 0px 15%;">
-                        <caption>Products da Sale #<%= venda.getId()%></caption>
+                        <caption>Products da Sale #<%= sale.getId()%></caption>
                         <thead>
                             <tr class="end-title-container">
                                 <th scope="col" class="end-title"></th>
-                                <th scope="col" class="end-title">Product</th>
-                                <th scope="col" class="end-title">Quantidade</th>
-                                <th scope="col" class="end-title">Preço Unitário</th>
-                                <th scope="col" class="end-title">Subtotal</th>
-                                <th scope="col" class="end-title">Avaliação</th>
+                                <th scope="col" class="end-title"><fmt:message key="ui.product"/></th>
+                                <th scope="col" class="end-title"><fmt:message key="ui.quantity"/></th>
+                                <th scope="col" class="end-title"><fmt:message key="ui.unitPrice"/></th>
+                                <th scope="col" class="end-title"><fmt:message key="ui.subtotal"/></th>
+                                <th scope="col" class="end-title"><fmt:message key="ui.rating"/></th>
                             </tr>
                         </thead>
                         <tbody>
                             <%
-                                for (CartItemDTO produto : venda.getProductsDoCart()) {
+                                for (CartItemDTO product : sale.getCartProducts()) {
                             %>
                             <tr class="end-data-container">
-                                <td class="end-data"><img alt="<%= produto.getNome()%>" src="<%= produto.getImagem()%>"/></td>
-                                <td class="end-data"><a class="end-link" href="product?productId=<%= produto.getProductId()%>"><%= produto.getNome()%></a></td>
-                                <td class="end-data"><%= produto.getQuantidade()%></td>
-                                <td class="end-data"><%= new Helper().tryParseMoneyFormat(produto.getPreco())%></td>
-                                <td class="end-data"><%= new Helper().tryParseMoneyFormat(produto.getPrecoTotal())%></td>
-                                <td class="end-data"><a class="end-link" href="reviews?productId=<%= produto.getProductId()%>">Avaliar Product</a></td>
+                                <td class="end-data"><img alt="<%= Html.escape(product.getName()) %>" src="<%= Html.escape(product.getImage()) %>"/></td>
+                                <td class="end-data"><a class="end-link" href="product?productId=<%= product.getProductId()%>"><%= Html.escape(product.getName()) %></a></td>
+                                <td class="end-data"><%= product.getQuantity()%></td>
+                                <td class="end-data"><%= new Helper((java.util.Locale) session.getAttribute("appLocale")).tryParseMoneyFormat(product.getPrice())%></td>
+                                <td class="end-data"><%= new Helper((java.util.Locale) session.getAttribute("appLocale")).tryParseMoneyFormat(product.getTotalPrice())%></td>
+                                <td class="end-data"><a class="end-link" href="reviews?productId=<%= product.getProductId()%>"><fmt:message key="ui.reviewProduct"/></a></td>
                             </tr>
                             <%
                                 }
@@ -84,25 +81,25 @@
             </tr>
         </tbody>
     </table>
-</div>                    
+</div>
 
 <%
     }
-    if (vendas.getDados().size() == 0) {
+    if (sales.getItems().size() == 0) {
 %>
-<h2 class="meus-pedidos">Nenhuma compra foi realizada ainda, corra e faça uma compra para ela aparecer aqui!</h2>
+<h2 class="order-history-title"><fmt:message key="ui.emptyOrders"/></h2>
 <%
     }
 %>
-<!-- Páginas -->
+
 <div style="font-size: 30px; text-align: center; margin-top: 20px;">
-    <% if (vendas.getPaginaAtual() > 1) {%>
-    <a href="checkout?history&page=<%= vendas.getPaginaAtual()-1%>">&#8249;</a>
+    <% if (sales.getPageNumber() > 1) {%>
+    <a href="checkout?history&page=<%= sales.getPageNumber()-1%>">&#8249;</a>
     <% }%>
-    <span><%= vendas.getPaginaAtual()%></span>
-    <% if (vendas.getPaginaAtual() < vendas.getUltimaPagina()) { %>
-    <a href="checkout?history&page=<%= vendas.getPaginaAtual()+1%>">&#8250;</a>
+    <span><%= sales.getPageNumber()%></span>
+    <% if (sales.getPageNumber() < sales.getLastPage()) { %>
+    <a href="checkout?history&page=<%= sales.getPageNumber()+1%>">&#8250;</a>
     <% }%>
 </div>
-<!-- Footer -->
+
 <jsp:include page="footer.jsp"></jsp:include>

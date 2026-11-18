@@ -1,14 +1,10 @@
-<%-- 
-    Document   : footer
-    Created on : 12/09/2019, 19:33:29
-    Author     : Caio
---%>
+<%@ include file="/WEB-INF/fragments/messages.jspf" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!-- Pra impedir de ficar elementos em cima do footer -->
+
 </body>
 <footer>
-    <!-- Informações adicionais -->
-    <span>Site desenvolvido por:</span>
+
+    <span><fmt:message key="ui.credits"/></span>
     <ul class="lista-deitada devs">
         <li>
             <a target="_blank" href="https://github.com/caiowbarros/">Caio Wey Barros</a>

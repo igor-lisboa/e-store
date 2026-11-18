@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import br.uff.store.core.dtos.PaginateDTO;
+import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.SaleDTO;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.ISaleData;
@@ -14,64 +14,57 @@ public class SaleData implements ISaleData {
 
     private final MySQLDAO mysqlDAO;
 
-    private static final String CONSULTAVENDASDOUSUARIO = "SELECT id, cart_id AS carrinhoId, total_price AS precoTotal, created_at AS criadoEm, address_id AS enderecoId, user_id AS usuarioId FROM sales WHERE user_id=? ORDER BY id DESC";
+    private static final String USER_SALES_QUERY = "SELECT id, cart_id AS cartId, total_price AS totalPrice, created_at AS createdAt, address_id AS addressId, user_id AS userId FROM sales WHERE user_id=? ORDER BY id DESC";
 
     public SaleData() {
         this.mysqlDAO = new MySQLDAO();
     }
 
     @Override
-    public List<SaleDTO> listaSalesDoUser(Integer usuarioId) throws StoreException {
+    public List<SaleDTO> listUserSales(Integer userId) throws StoreException {
         try {
-            Object[] bind = {usuarioId};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega(CONSULTAVENDASDOUSUARIO, bind);
-            List<SaleDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(venda -> retornoFormatado.add(new SaleDTO(venda)));
-            return retornoFormatado;
+            Object[] bind = {userId};
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(USER_SALES_QUERY, bind);
+            List<SaleDTO> mappedResults = new ArrayList<>();
+            rows.forEach(sale -> mappedResults.add(new SaleDTO(sale)));
+            return mappedResults;
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar as Sales do usuário de id: " + usuarioId + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the sale database operation.", e);
         }
     }
 
     @Override
-    public void gravaSale(Integer carrinhoId, Integer enderecoId) throws StoreException {
+    public void recordSale(Integer cartId, Integer addressId) throws StoreException {
         try {
-            Object[] bind = {carrinhoId, enderecoId};
-            this.mysqlDAO.dbGrava("CALL buy_cart_itens(?, ?)", bind, false);
+            Object[] bind = {cartId, addressId};
+            this.mysqlDAO.executeUpdate("CALL checkout_cart(?, ?)", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao realizar a venda. (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the sale database operation.", e);
         }
     }
 
     @Override
-    public PaginateDTO<List<SaleDTO>> listaSalesDoUser(Integer usuarioId, Integer itensPorPagina, Integer paginaAtual) throws StoreException {
+    public PaginationDTO<List<SaleDTO>> listUserSales(Integer userId, Integer pageSize, Integer pageNumber) throws StoreException {
         try {
-            Object[] bind = {usuarioId};
+            Object[] bind = {userId};
 
-            // define offset
             String offset = "";
-            if (paginaAtual > 1) {
-                Integer calcOffset = (paginaAtual - 1) * itensPorPagina;
+            if (pageNumber > 1) {
+                Integer calcOffset = (pageNumber - 1) * pageSize;
                 offset = " OFFSET " + calcOffset + " ";
             }
 
-            String limit = " LIMIT " + itensPorPagina + " ";
+            String limit = " LIMIT " + pageSize + " ";
 
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega(CONSULTAVENDASDOUSUARIO + limit + offset, bind);
-            List<SaleDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(venda -> retornoFormatado.add(new SaleDTO(venda)));
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(USER_SALES_QUERY + limit + offset, bind);
+            List<SaleDTO> mappedResults = new ArrayList<>();
+            rows.forEach(sale -> mappedResults.add(new SaleDTO(sale)));
 
-            Integer ultimaPagina = Integer.valueOf(String.valueOf(this.mysqlDAO.dbValor("ceil(count(*)/" + itensPorPagina + ")", CONSULTAVENDASDOUSUARIO, "", bind)));
+            Integer lastPage = Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("ceil(count(*)/" + pageSize + ")", USER_SALES_QUERY, "", bind)));
 
-            return new PaginateDTO<>(paginaAtual, retornoFormatado, ultimaPagina);
+            return new PaginationDTO<>(pageNumber, mappedResults, lastPage);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Listar as Sales do usuário de id: " + usuarioId + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the sale database operation.", e);
         }
     }
 }

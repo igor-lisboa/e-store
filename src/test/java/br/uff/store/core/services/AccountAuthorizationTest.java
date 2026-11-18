@@ -9,18 +9,18 @@ import org.junit.Test;
 public class AccountAuthorizationTest {
     @Test
     public void usersCanEditTheirOwnAccount() {
-        assertTrue(AccountAuthorization.canEdit(8, UserRole.CLIENTE.getId(), 8));
+        assertTrue(AccountAuthorization.canEdit(8, UserRole.CUSTOMER.getId(), 8));
     }
 
     @Test
     public void administratorsCanEditAnotherAccount() {
-        assertTrue(AccountAuthorization.canEdit(8, UserRole.ADM.getId(), 9));
+        assertTrue(AccountAuthorization.canEdit(8, UserRole.ADMIN.getId(), 9));
     }
 
     @Test
     public void guestsAndUsersEditingAnotherAccountAreRejected() {
         assertFalse(AccountAuthorization.canEdit(null, null, 9));
-        assertFalse(AccountAuthorization.canEdit(8, UserRole.CLIENTE.getId(), 9));
-        assertFalse(AccountAuthorization.canEdit(8, UserRole.ADM.getId(), null));
+        assertFalse(AccountAuthorization.canEdit(8, UserRole.CUSTOMER.getId(), 9));
+        assertFalse(AccountAuthorization.canEdit(8, UserRole.ADMIN.getId(), null));
     }
 }

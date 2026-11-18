@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import br.uff.store.core.dtos.UserDTO;
+import br.uff.store.core.exceptions.ResourceNotFoundException;
 import br.uff.store.core.interfaces.services.IUserService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -51,12 +52,12 @@ public class UserApiServletTest {
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("userId")).thenReturn(12);
         when(request.getPathInfo()).thenReturn("/13");
-        when(userService.ehAdmin(12)).thenReturn(false);
+        when(userService.isAdmin(12)).thenReturn(false);
 
         servlet.doGet(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
-        verify(userService).ehAdmin(12);
+        verify(userService).isAdmin(12);
         assertFalse(responseBody.toString().contains("password"));
     }
 
@@ -66,7 +67,7 @@ public class UserApiServletTest {
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("userId")).thenReturn(12);
         when(request.getPathInfo()).thenReturn("/not-an-id");
-        when(userService.ehAdmin(12)).thenReturn(false);
+        when(userService.isAdmin(12)).thenReturn(false);
 
         servlet.doGet(request, response);
 
@@ -80,8 +81,8 @@ public class UserApiServletTest {
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("userId")).thenReturn(12);
         when(request.getPathInfo()).thenReturn("/12");
-        when(userService.ehAdmin(12)).thenReturn(false);
-        when(userService.encontraUserPorId(12)).thenReturn(
+        when(userService.isAdmin(12)).thenReturn(false);
+        when(userService.findUserById(12)).thenReturn(
                 new UserDTO(12, "Customer", "customer@example.test", "stored-hash", 2));
 
         servlet.doGet(request, response);
@@ -89,5 +90,18 @@ public class UserApiServletTest {
         assertEquals("{\"id\":12,\"name\":\"Customer\",\"email\":\"customer@example.test\",\"roleId\":2}",
                 responseBody.toString());
         assertFalse(responseBody.toString().contains("stored-hash"));
+    }
+
+    @Test
+    public void anAdministratorGetsNotFoundForAnAbsentAccount() throws Exception {
+        HttpSession session = mock(HttpSession.class);
+        when(request.getSession(false)).thenReturn(session);
+        when(session.getAttribute("userId")).thenReturn(12);
+        when(request.getPathInfo()).thenReturn("/99");
+        when(userService.isAdmin(12)).thenReturn(true);
+        when(userService.findUserById(99)).thenThrow(new ResourceNotFoundException("User"));
+        servlet.doGet(request, response);
+        verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals("{\"error\":\"User was not found.\"}", responseBody.toString());
     }
 }

@@ -7,90 +7,90 @@ public class AddressDTO extends BaseDTO {
     public AddressDTO() {
     }
 
-    public AddressDTO(Map<String, Object> endereco) {
-        this.setId(Integer.valueOf(String.valueOf(endereco.get("id"))));
-        this.setUserId(Integer.valueOf(String.valueOf(endereco.get("usuarioId"))));
-        this.setNome(String.valueOf(endereco.get("nome")));
-        this.setCep(Integer.valueOf(String.valueOf(endereco.get("cep"))));
-        this.setLogradouro(String.valueOf(endereco.get("logradouro")));
-        this.setEstado(String.valueOf(endereco.get("estado")));
-        this.setCidade(String.valueOf(endereco.get("cidade")));
-        this.setPais(String.valueOf(endereco.get("pais")));
+    public AddressDTO(Map<String, Object> address) {
+        this.setId(Integer.valueOf(String.valueOf(address.get("id"))));
+        this.setUserId(Integer.valueOf(String.valueOf(address.get("userId"))));
+        this.setName(String.valueOf(address.get("name")));
+        this.setPostalCode(Integer.valueOf(String.valueOf(address.get("postalCode"))));
+        this.setStreetAddress(String.valueOf(address.get("streetAddress")));
+        this.setState(String.valueOf(address.get("state")));
+        this.setCity(String.valueOf(address.get("city")));
+        this.setCountry(String.valueOf(address.get("country")));
     }
 
-    public AddressDTO(String nome, Integer usuarioId, Integer cep, String logradouro, String cidade, String estado, String pais) {
-        this.setUserId(usuarioId);
-        this.setNome(nome);
-        this.setCep(cep);
-        this.setLogradouro(logradouro);
-        this.setEstado(estado);
-        this.setCidade(cidade);
-        this.setPais(pais);
+    public AddressDTO(String name, Integer userId, Integer postalCode, String streetAddress, String city, String state, String country) {
+        this.setUserId(userId);
+        this.setName(name);
+        this.setPostalCode(postalCode);
+        this.setStreetAddress(streetAddress);
+        this.setState(state);
+        this.setCity(city);
+        this.setCountry(country);
     }
 
     private Integer id;
-    private String nome;
-    private Integer usuarioId;
-    private Integer cep;
-    private String logradouro;
-    private String cidade;
-    private String estado;
-    private String pais;
+    private String name;
+    private Integer userId;
+    private Integer postalCode;
+    private String streetAddress;
+    private String city;
+    private String state;
+    private String country;
 
-    public void setPais(String pais) {
-        this.pais = pais;
+    public void setCountry(String country) {
+        this.country = country;
     }
 
-    public String getPais() {
-        return pais;
+    public String getCountry() {
+        return country;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setState(String state) {
+        this.state = state;
     }
 
-    public String getEstado() {
-        return estado;
+    public String getState() {
+        return state;
     }
 
-    public void setCidade(String cidade) {
-        this.cidade = cidade;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getCidade() {
-        return cidade;
+    public String getCity() {
+        return city;
     }
 
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
     }
 
-    public String getLogradouro() {
-        return logradouro;
+    public String getStreetAddress() {
+        return streetAddress;
     }
 
-    public void setCep(Integer cep) {
-        this.cep = cep;
+    public void setPostalCode(Integer postalCode) {
+        this.postalCode = postalCode;
     }
 
-    public Integer getCep() {
-        return cep;
+    public Integer getPostalCode() {
+        return postalCode;
     }
 
-    public void setUserId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public Integer getUserId() {
-        return usuarioId;
+        return userId;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
     public void setId(Integer id) {

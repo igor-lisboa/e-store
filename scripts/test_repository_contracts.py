@@ -57,9 +57,10 @@ class RepositoryContractsTest(unittest.TestCase):
             self.assertTrue(source.parent.as_posix().endswith(package.replace('.', '/')), str(source))
 
     def test_internal_java_imports_resolve_after_renaming(self):
-        for source in (ROOT / 'src').rglob('*.java'):
+        sources = list((ROOT / 'src').rglob('*.java')) + list((ROOT / 'src/main/webapp').rglob('*.jsp'))
+        for source in sources:
             text = source.read_text(encoding='utf-8')
-            for imported in re.findall(r'import (br\.uff\.store\.[\w.]+);', text):
+            for imported in re.findall(r'import[= ]"?(br\.uff\.store\.[\w.]+)', text):
                 relative = imported.replace('.', '/') + '.java'
                 self.assertTrue(any((ROOT / folder / relative).is_file()
                                     for folder in ['src/main/java', 'src/test/java']), imported)
@@ -85,6 +86,37 @@ class RepositoryContractsTest(unittest.TestCase):
             schema = json.loads(path.read_text())
             self.assertNotIn('senha', schema['properties'], name)
             self.assertNotIn('password', schema['properties'], name)
+
+    def test_browser_forms_include_the_csrf_fragment_inside_the_form(self):
+        fragment = '<%@ include file="/WEB-INF/fragments/csrf.jspf" %>'
+        pages = ROOT / 'src/main/webapp/pages'
+        for page in pages.glob('*.jsp'):
+            text = page.read_text(encoding='utf-8')
+            # Scriptlets can contain > characters inside quoted form attributes.
+            normalized = re.sub(r'<%(?!@).*?%>', 'expression', text, flags=re.S)
+            forms = re.findall(r'<form\b[^>]*>(.*?)</form>', normalized, flags=re.S | re.I)
+            self.assertEqual(len(re.findall(r'<form\b', normalized)), len(forms), str(page))
+            for form in forms:
+                self.assertIn(fragment, form, str(page))
+        payment = (pages / 'payment.jsp').read_text(encoding='utf-8')
+        if 'document.createElement("form")' in payment:
+            self.assertIn('purchaseForm.appendChild(csrfInput)', payment)
+
+    def test_csrf_filter_covers_all_browser_controller_routes(self):
+        filter_path = ROOT / 'src/main/java/br/uff/store/application/security/CsrfFilter.java'
+        text = filter_path.read_text(encoding='utf-8')
+        patterns = re.search(r'@WebFilter\(urlPatterns = \{(.*?)\}\)', text, re.S).group(1)
+        protected = set(re.findall(r'"([^"]+)"', patterns))
+        for source in (ROOT / 'src/main/java/br/uff/store/application/controllers').glob('*.java'):
+            for route in re.findall(r'@WebServlet\("([^"]*)"\)', source.read_text(encoding='utf-8')):
+                self.assertIn(route or '/', protected, str(source))
+        self.assertIn('/pages/*', protected)
+
+    def test_core_cannot_import_outer_layers_or_frameworks(self):
+        forbidden = re.compile(r'import (?:br\.uff\.store\.(?:application|infrastructure)|'
+                               r'javax\.servlet|com\.google\.gson)')
+        for source in (ROOT / 'src/main/java/br/uff/store/core').rglob('*.java'):
+            self.assertNotRegex(source.read_text(encoding='utf-8'), forbidden, str(source))
 
 
 if __name__ == '__main__':

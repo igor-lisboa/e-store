@@ -1,32 +1,31 @@
-<%-- 
-    Document   : login
-    Created on : 19/09/2019, 00:23:53
-    Author     : Caio
---%>
+<%@ include file="/WEB-INF/fragments/messages.jspf" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@page import="br.uff.store.application.security.Html"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // se tiver um usuario logado retorna p controller
+
     if (session.getAttribute("userId") != null) {
         response.sendRedirect("account");
     }
 %>
-<!-- Header -->
+
 <jsp:include page="header.jsp">
     <jsp:param name="title" value="Login"/>
 </jsp:include>
-<!-- Imagem de fundo -->
+
 <div class="login-background"></div>
 <main class="login-container">
-    <!-- Coluna da esquerda (login) -->
+
     <div class="login-column">
-        <h2>Login</h2>
+        <h2><fmt:message key="ui.login"/></h2>
         <div class="sub-container">
             <form method="POST" action="account">
+        <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
 
-                <input name="redirect" style="display:none;" value="<%= request.getAttribute("redirect")%>">
+                <input name="redirect" style="display:none;" value="<%= Html.escape(request.getAttribute("redirect")) %>">
 
-                <div class="group">      
-                    <input name="email" type="email" required value="${cookie['loginEmail'].getValue()}">
+                <div class="group">
+                    <input name="email" type="email" required value="${fn:escapeXml(cookie['loginEmail'].value)}">
                     <span class="highlight"></span>
                     <span class="bar"></span>
                     <label>E-mail</label>
@@ -36,63 +35,64 @@
                     <input name="password" type="password" required maxlength="255" autocomplete="current-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>Senha</label>
+                    <label><fmt:message key="ui.password"/></label>
                 </div>
 
                 <div class="forgot-pswrd">
                     <input value="1" name="remember" id="remember" type="checkbox">
-                    <label for="remember">Lembre-me</label>
+                    <label for="remember"><fmt:message key="ui.rememberEmail"/></label>
                 </div>
 
                 <div class="login-btn">
-                    <button type="submit" name="action" value="login">Entrar</button>
+                    <button type="submit" name="action" value="login"><fmt:message key="ui.signIn"/></button>
                 </div>
 
             </form>
         </div>
     </div>
 
-    <!-- Coluna da direita (cadastro) -->
+
     <div class="register-column">
-        <h2>Criar Conta</h2>
+        <h2><fmt:message key="ui.createAccount"/></h2>
         <div class="sub-container">
             <form method="POST" action="account">
+        <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
 
-                <input name="redirect" style="display:none;" value="<%= request.getAttribute("redirect")%>">
+                <input name="redirect" style="display:none;" value="<%= Html.escape(request.getAttribute("redirect")) %>">
 
-                <div class="group">      
+                <div class="group">
                     <input name="name" type="text" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>Nome Completo</label>
+                    <label><fmt:message key="ui.fullName"/></label>
                 </div>
 
-                <div class="group">      
+                <div class="group">
                     <input name="email" type="email" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
                     <label>E-mail</label>
                 </div>
 
-                <div class="group">      
-                    <input name="password" id="criaSENHA" type="password" required maxlength="255" autocomplete="new-password">
+                <div class="group">
+                    <input name="password" id="registrationPassword" type="password" required maxlength="255" autocomplete="new-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>Senha</label>
+                    <label><fmt:message key="ui.password"/></label>
                 </div>
 
                 <div class="group">
-                    <input id="criaCONFSENHA" type="password" required>
+                    <input id="confirmationPassword" type="password" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>Confirma Senha</label>
+                    <label><fmt:message key="ui.confirmPassword"/></label>
                 </div>
                 <script>
-                    function verifica_senha() {
-                        var senha = document.getElementById("criaSENHA");
-                        var conf = document.getElementById("criaCONFSENHA");
-                        if (senha.value != conf.value) {
-                            alert("A senha não bate com a conferência");
+                    function validatePasswords() {
+                        var password = document.getElementById("registrationPassword");
+                        var conf = document.getElementById("confirmationPassword");
+                        if (password.value != conf.value) {
+                            alert("The passwords do not match.");
                             return false;
                         } else {
                             return true;
@@ -100,7 +100,7 @@
                     }
                 </script>
                 <div class="login-btn">
-                    <button onclick="return verifica_senha();" name="action" value="register" type="submit">Criar Conta</button>
+                    <button onclick="return validatePasswords();" name="action" value="register" type="submit"><fmt:message key="ui.createAccount"/></button>
                 </div>
 
             </form>
@@ -109,5 +109,5 @@
 
 </main>
 
-<!-- Footer -->
+
 <jsp:include page="footer.jsp"></jsp:include>

@@ -17,7 +17,9 @@
 
 ## Current implementation scope
 
-The session switch and message bundles exist. The shared header is partially localized. Other JSP text and server-side error messages remain Portuguese and are tracked in [the backlog](../TODO.md).
+The session switch, header, and 94 shared page labels use message bundles for all four locales. Currency remains BRL and is formatted using the selected locale. Order and review dates use localized formatting with UTC as the explicit date-time zone. Tests verify complete bundle keys, representative currency/date output, and sign-in labels in all four locales through a real browser.
+
+Page titles, JavaScript confirmations, placeholders, and dynamic server feedback still need complete bundle coverage. Catalog content and stored account/address data are not automatically translated. ViaCEP uses Portuguese response keys because they are defined by that external service.
 
 ## Acceptance checks
 

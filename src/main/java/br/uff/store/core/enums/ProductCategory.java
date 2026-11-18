@@ -4,26 +4,26 @@ public enum ProductCategory {
     PLAYSTATION(1, "Playstation"),
     XBOX(2, "Xbox"),
     WII(3, "Wii"),
-    PLAYSTATIONACESSORIOS(4, "Playstation > Acessórios"),
-    PLAYSTATIONCONSOLES(5, "Playstation > Consoles"),
-    PLAYSTATIONJOGOS(6, "Playstation > Jogos"),
-    XBOXACESSORIOS(7, "Xbox > Acessórios"),
-    XBOXCONSOLES(8, "Xbox > Consoles"),
-    XBOXJOGOS(9, "Xbox > Jogos"),
-    WIIACESSORIOS(10, "Wii > Acessórios"),
-    WIICONSOLES(11, "Wii > Consoles"),
-    WIIJOGOS(12, "Wii > Jogos");
+    PLAYSTATION_ACCESSORIES(4, "Playstation > Accessories"),
+    PLAYSTATION_CONSOLES(5, "Playstation > Consoles"),
+    PLAYSTATION_GAMES(6, "Playstation > Games"),
+    XBOX_ACCESSORIES(7, "Xbox > Accessories"),
+    XBOX_CONSOLES(8, "Xbox > Consoles"),
+    XBOX_GAMES(9, "Xbox > Games"),
+    WII_ACCESSORIES(10, "Wii > Accessories"),
+    WII_CONSOLES(11, "Wii > Consoles"),
+    WII_GAMES(12, "Wii > Games");
 
     private Integer id;
-    private String nome;
+    private String name;
 
-    ProductCategory(Integer id, String nome) {
+    ProductCategory(Integer id, String name) {
         this.id = id;
-        this.nome = nome;
+        this.name = name;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
     public Integer getId() {

@@ -1,0 +1,3 @@
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<fmt:setLocale value="${empty sessionScope.appLocale ? 'en' : sessionScope.appLocale}"/>
+<fmt:setBundle basename="messages"/>

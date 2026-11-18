@@ -19,42 +19,36 @@ public class ProductReviewData implements IProductReviewData {
     }
 
     @Override
-    public Boolean jaFoiAvaliado(Integer usuarioId, Integer produtoId) throws StoreException {
+    public Boolean hasReviewedProduct(Integer userId, Integer productId) throws StoreException {
         try {
-            Object[] bind = {usuarioId, produtoId};
-            Integer qtdAvaliacoes = Integer.valueOf(String.valueOf(this.mysqlDAO.dbValor("count(*)", "user_produts_rating", "user_id=? AND product_id=?", bind)));
-            return qtdAvaliacoes > 0;
+            Object[] bind = {userId, productId};
+            Integer reviewCount = Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", "product_reviews", "user_id=? AND product_id=?", bind)));
+            return reviewCount > 0;
         } catch (Exception e) {
-            throw new StoreException("Falha ao recuperar quantidade de avaliacoes do usuário para o produto: " + e.getMessage());
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product review database operation.", e);
         }
     }
 
     @Override
-    public void insereReviewDoProduct(ProductReviewInputDTO avaliacaoProductInsertDTO) throws StoreException {
+    public void insertProductReview(ProductReviewInputDTO reviewInput) throws StoreException {
         try {
-            Object[] bind = {avaliacaoProductInsertDTO.getUserId(), avaliacaoProductInsertDTO.getProductId(), avaliacaoProductInsertDTO.getReview(), avaliacaoProductInsertDTO.getDescricao(), avaliacaoProductInsertDTO.getTitulo()};
-            this.mysqlDAO.dbGrava("INSERT INTO user_produts_rating (user_id,product_id,rating,description,title,created_at) VALUES (?,?,?,?,?,SYSDATE())", bind, false);
+            Object[] bind = {reviewInput.getUserId(), reviewInput.getProductId(), reviewInput.getRating(), reviewInput.getDescription(), reviewInput.getTitle()};
+            this.mysqlDAO.executeUpdate("INSERT INTO product_reviews (user_id,product_id,rating,description,title,created_at) VALUES (?,?,?,?,?,SYSDATE())", bind);
         } catch (Exception e) {
-            throw new StoreException("Falha ao Inserir a Avaliação do usuário de id: " + avaliacaoProductInsertDTO.getUserId() + " para o Product de id: " + avaliacaoProductInsertDTO.getProductId() + ". (" + e.getMessage() + ")");
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product review database operation.", e);
         }
     }
 
     @Override
-    public List<ProductReviewListDTO> recuperaAvaliacoesDeUmProduct(Integer produtoId) throws StoreException {
+    public List<ProductReviewListDTO> listProductReviews(Integer productId) throws StoreException {
         try {
-            Object[] bind = {produtoId};
-            List<HashMap<String, Object>> retornoDesformatado = this.mysqlDAO.dbCarrega("SELECT  u.`name` AS avaliador,  r.title AS avaliacaoTitulo,  r.rating AS avaliacao,  r.description AS avaliacaoDescricao,  DATE_FORMAT(r.created_at, '%M %d, %Y') AS avaliacaoData,  DATE_FORMAT(r.created_at, '%d/%m/%Y') AS avaliacaoDataSimples  FROM  user_produts_rating r  LEFT JOIN users u ON (r.user_id = u.id)  WHERE  r.product_id = ?  ORDER BY  r.created_at", bind);
-            List<ProductReviewListDTO> retornoFormatado = new ArrayList<>();
-            retornoDesformatado.forEach(avaliacao -> retornoFormatado.add(new ProductReviewListDTO(avaliacao)));
-            return retornoFormatado;
+            Object[] bind = {productId};
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT  u.`name` AS reviewer,  r.title AS title,  r.rating AS rating,  r.description AS description,  DATE_FORMAT(r.created_at, '%M %d, %Y') AS displayDate,  DATE_FORMAT(r.created_at, '%d/%m/%Y') AS shortDate  FROM  product_reviews r  LEFT JOIN users u ON (r.user_id = u.id)  WHERE  r.product_id = ?  ORDER BY  r.created_at", bind);
+            List<ProductReviewListDTO> mappedResults = new ArrayList<>();
+            rows.forEach(rating -> mappedResults.add(new ProductReviewListDTO(rating)));
+            return mappedResults;
         } catch (Exception ex) {
-            throw new StoreException("Erro ao recuperar registros do banco: " + ex.getMessage());
-        } finally {
-            this.mysqlDAO.destroyDb();
+            throw new StoreException("Unable to complete the product review database operation.", ex);
         }
     }
 }

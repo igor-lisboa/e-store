@@ -1,5 +1,7 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.StoreServices;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,20 +22,20 @@ import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/cart")
 public class CartServlet extends HttpServlet {
-    private final ICartService carrinhoService;
-    private final IAddressService enderecoService;
-    private static final String CARRINHOID = "carrinhoId";
-    private static final String PRECOTOTAL = "totalPrice";
-    private static final String PRODUTOS = "products";
+    private final ICartService cartService;
+    private final IAddressService addressService;
+    private static final String CART_ID = "cartId";
+    private static final String TOTAL_PRICE = "totalPrice";
+    private static final String PRODUCTS = "products";
     private final Helper helper;
 
     public CartServlet() {
-        this(new CartService(), new AddressService(), new Helper());
+        this(StoreServices.carts(), StoreServices.addresses(), new Helper());
     }
 
-    CartServlet(ICartService carrinhoService, IAddressService enderecoService, Helper helper) {
-        this.carrinhoService = carrinhoService;
-        this.enderecoService = enderecoService;
+    CartServlet(ICartService cartService, IAddressService addressService, Helper helper) {
+        this.cartService = cartService;
+        this.addressService = addressService;
         this.helper = helper;
     }
 
@@ -47,45 +49,42 @@ public class CartServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // pega sessao
+
         HttpSession session = request.getSession();
         try {
             clearLegacyCartCookie(request, response);
 
             Integer userId = null;
-            // recupera userId
+
             if (session.getAttribute("userId") != null) {
                 userId = helper.tryParseInteger(session.getAttribute("userId").toString());
             }
 
-            Integer carrinhoId = helper.tryParseInteger(String.valueOf(session.getAttribute(CARRINHOID)));
+            Integer cartId = helper.tryParseInteger(String.valueOf(session.getAttribute(CART_ID)));
 
-            carrinhoId = carrinhoService.recuperaCartAtivo(carrinhoId, userId, request.getRemoteAddr()).getId();
+            cartId = cartService.getActiveCart(cartId, userId, request.getRemoteAddr()).getId();
 
-            session.setAttribute(CARRINHOID, carrinhoId);
+            session.setAttribute(CART_ID, cartId);
             
-            Integer produtoId = null;
-            // recupera produtoId pra add no carrinho
+            Integer productId = null;
+
             if (request.getParameter("addProductId") != null) {
                 if (!"POST".equalsIgnoreCase(request.getMethod())) {
                     response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                     return;
                 }
-                produtoId = helper.tryParseInteger(request.getParameter("addProductId"));
+                productId = helper.tryParseInteger(request.getParameter("addProductId"));
             }
 
-            // se produtoId nao for null add
-            if (produtoId != null) {
-                carrinhoService.insereProductCart(carrinhoId, produtoId);
-                session.setAttribute("msg", "Product inserido no carrinho com sucesso!");
+            if (productId != null) {
+                cartService.addProductToCart(cartId, productId);
+                session.setAttribute("msg", "Product added to the cart.");
             }
 
-            // recupera produtoId do request parameter
             if (request.getParameter("productId") != null) {
-                produtoId = helper.tryParseInteger(request.getParameter("productId"));
+                productId = helper.tryParseInteger(request.getParameter("productId"));
             }
 
-            // recupera acao solicitada se existir
             String action = "";
             if (request.getParameter("action") != null) {
                 action = request.getParameter("action");
@@ -98,50 +97,50 @@ public class CartServlet extends HttpServlet {
 
             switch (action) {
                 case "confirmCart": {
-                    request.setAttribute("enderecos", enderecoService.listaAddresssPorUserId(userId));
-                    session.setAttribute(PRODUTOS, carrinhoService.listaProductsCart(carrinhoId));
-                    session.setAttribute(PRECOTOTAL, carrinhoService.recuperaPrecoTotalDeUmCart(carrinhoId));
+                    request.setAttribute("addresses", addressService.listUserAddresses(userId));
+                    session.setAttribute(PRODUCTS, cartService.listCartProducts(cartId));
+                    session.setAttribute(TOTAL_PRICE, cartService.getCartTotal(cartId));
                     request.getRequestDispatcher("pages/cart-confirmation.jsp").forward(request, response);
                     return;
                 }
                 case "continueShopping": {
-                    // redireciona p controller de ProductsController
-                    response.sendRedirect(PRODUTOS);
+
+                    response.sendRedirect(PRODUCTS);
                     return;
                 }
                 case "removeProduct": {
-                    carrinhoService.removeProductCart(carrinhoId, produtoId);
+                    cartService.removeProductFromCart(cartId, productId);
                     break;
                 }
                 case "changeQuantity": {
-                    Integer qtdProduct = null;
-                    // recupera qtdProduct
+                    Integer requestedQuantity = null;
+
                     if (request.getParameter("quantity") != null) {
-                        qtdProduct = helper.tryParseInteger(request.getParameter("quantity"));
+                        requestedQuantity = helper.tryParseInteger(request.getParameter("quantity"));
                     }
 
-                    carrinhoService.alteraQuantidadeProductCart(carrinhoId, produtoId, qtdProduct);
+                    cartService.changeProductQuantity(cartId, productId, requestedQuantity);
 
                     break;
                 }
                 case "continuePayment": {
-                    Integer enderecoId = null;
-                    // recupera enderecoId
+                    Integer addressId = null;
+
                     if (request.getParameter("addressId") != null) {
-                        enderecoId = helper.tryParseInteger(request.getParameter("addressId"));
+                        addressId = helper.tryParseInteger(request.getParameter("addressId"));
                     }
                     
-                    if (enderecoId == null) {
-                        session.setAttribute("msg", "Por favor selecione um endereço!");
-                        session.setAttribute("enderecoId", null);
-                        request.setAttribute(PRECOTOTAL, null);
+                    if (addressId == null) {
+                        session.setAttribute("msg", "Select an address.");
+                        session.setAttribute("addressId", null);
+                        request.setAttribute(TOTAL_PRICE, null);
                         response.sendRedirect("cart");
                         return;
                     } else {
-                        session.setAttribute("enderecoId", enderecoId);
+                        session.setAttribute("addressId", addressId);
                     }
                     
-                    session.setAttribute(PRODUTOS, carrinhoService.listaProductsCart(carrinhoId));
+                    session.setAttribute(PRODUCTS, cartService.listCartProducts(cartId));
                     
                     request.getRequestDispatcher("checkout").forward(request, response);
                     return;
@@ -151,19 +150,18 @@ public class CartServlet extends HttpServlet {
                 }
             }
 
-            request.setAttribute(PRODUTOS, carrinhoService.listaProductsCart(carrinhoId));
-            request.setAttribute(PRECOTOTAL, carrinhoService.recuperaPrecoTotalDeUmCart(carrinhoId));
+            request.setAttribute(PRODUCTS, cartService.listCartProducts(cartId));
+            request.setAttribute(TOTAL_PRICE, cartService.getCartTotal(cartId));
 
-            // manda atributos para a pag do carrinho
             request.getRequestDispatcher("pages/cart.jsp").forward(request, response);
         } catch (Exception ex) {
             session.setAttribute("msg", ex.getMessage());
-            response.sendRedirect(PRODUTOS);
+            response.sendRedirect(PRODUCTS);
         }
     }
 
     private void clearLegacyCartCookie(HttpServletRequest request, HttpServletResponse response) {
-        Cookie cartCookie = new Cookie(CARRINHOID, "");
+        Cookie cartCookie = new Cookie("carrinhoId", "");
         cartCookie.setMaxAge(0);
         cartCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
         response.addCookie(cartCookie);
@@ -211,7 +209,7 @@ public class CartServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Servlet pra tratar ações no carrinho.";
+        return "Handles storefront requests.";
     }// </editor-fold>
 
 }

@@ -3,13 +3,15 @@
 ## Current shape
 
 - The Java web application has `application` servlet/API classes, `core` services/DTOs/interfaces, and `infrastructure` DAO/database helpers.
-- Services construct concrete DAOs in several no-argument constructors, limiting isolation and substitutability.
-- The project targets Java 8, Java EE 7 APIs, JSP, Servlets, Maven WAR packaging, and a legacy webapp-runner.
-- The repository has service tests that require MySQL and Cucumber feature tests. It has no isolated browser E2E suite.
-- Default Maven tests are isolated. The older mutable database tests and Cucumber scenarios run explicitly through `-Plegacy-integration`; they are retained for migration work and need fixture repair.
-- State-changing form actions now require POST, but CSRF tokens are not yet implemented.
-- Catalog category-link mapping is separated from request orchestration. Java files are checked against the 300-line limit. Legacy database tests are split into small batches pending a feature-focused fixture rewrite.
+- `application/StoreServices` is the explicit composition root. Services receive repository interfaces through constructors; core code imports no HTTP, infrastructure, or JSON framework classes. Cart creation accepts an injectable clock.
+- The project targets Java 8, Servlet 3.1, JSP, Maven WAR packaging, and a legacy webapp-runner. A runtime modernization remains a separate decision.
+- Default Maven tests include isolated service/servlet tests and real H2 JDBC checks. `mysql-integration` verifies disposable MySQL migrations and checkout. `legacy-integration` runs reset-per-case database tests and English Cucumber scenarios.
+- Playwright launches a real local servlet container and verifies browser security, four locales, Swagger rendering, and a database-backed customer shopping journey. Both enabled and disabled demo checkout are exercised.
+- State-changing form actions require POST. A servlet filter checks a random session-bound CSRF token before browser controllers run; forms share a hidden-token fragment. Invalid/missing tokens receive HTTP 403. GET API endpoints and Swagger are outside the browser form filter.
+- Catalog category-link mapping is separated from request orchestration. Java files are checked against the 300-line limit. Legacy database tests are organized by account, address, catalog, cart, checkout, and review behavior with reset-per-case fixtures, explicit failure assertions, and no random retry loops.
 - Java source and test filenames and type names use English under `br.uff.store`. JSPs, stylesheets, feature filenames, OpenAPI documents, and the load-test filename use English too. Import, package-path, type-filename, and stylesheet reference checks guard these renames.
+- JaCoCo produces measured line and branch reports during `verify`. There is no percentage threshold yet. Meaningful behavioral coverage is required; shallow assertions and tests added merely to raise a percentage are not accepted.
+- DTOs still use legacy map-based row construction and floating-point money at some Java boundaries. These remain explicit refactoring tasks rather than evidence of a completed domain redesign.
 
 ## Target requirements
 
