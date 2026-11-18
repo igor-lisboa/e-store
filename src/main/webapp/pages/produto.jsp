@@ -54,10 +54,17 @@
         <!-- Preço do produto -->
         <div class="product-price">
             <span><%= new Helper().tryParseMoneyFormat(produto.getPreco())%></span>
-            <a href="carrinho?addProdutoId=<%= produto.getId()%>" class="cart-btn">+ Carrinho</a>
+            <form action="carrinho" method="post">
+                <input type="hidden" name="addProdutoId" value="<%= produto.getId()%>">
+                <button class="cart-btn" type="submit">+ Carrinho</button>
+            </form>
             <!-- Botão de favorito -->
-            <input <%= (produto.getFavoritoDoUsuario() ? "checked" : "")%> onchange="window.location.href = 'produto?fav=<%= produto.getId()%>'" id="toggle-heart" type="checkbox" />
-            <label for="toggle-heart">&#x2764;</label>
+            <form action="produto" method="post">
+                <input type="hidden" name="produtoId" value="<%= produto.getId()%>">
+                <input type="hidden" name="fav" value="<%= produto.getId()%>">
+                <input <%= (produto.getFavoritoDoUsuario() ? "checked" : "")%> onchange="this.form.submit()" id="toggle-heart" type="checkbox" />
+                <label for="toggle-heart">&#x2764;</label>
+            </form>
         </div>
         <!-- Avaliação do produto (em estrelas) -->
         <div class="rate" <%= (produto.getAvaliacaoDadaPeloUsuario() != null ? "style='pointer-events:none'" : "")%>>

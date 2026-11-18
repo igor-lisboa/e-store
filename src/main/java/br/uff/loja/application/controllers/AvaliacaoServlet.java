@@ -77,7 +77,13 @@ public class AvaliacaoServlet extends HttpServlet {
             }
 
             if (action.equals("avalia")) {
-                avaliacaoService.avaliaProduto(new AvaliacaoProdutoInsertDTO(userId, produtoId, Integer.valueOf(session.getAttribute(RATING).toString()), request.getParameter("description"), request.getParameter("title")));
+                if (!"POST".equalsIgnoreCase(request.getMethod())) {
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                    return;
+                }
+                Integer rating = helper.tryParseInteger(request.getParameter(RATING));
+                avaliacaoService.avaliaProduto(new AvaliacaoProdutoInsertDTO(
+                        userId, produtoId, rating, request.getParameter("description"), request.getParameter("title")));
                 session.setAttribute(RATING, null);
                 response.sendRedirect("produto");
                 return;

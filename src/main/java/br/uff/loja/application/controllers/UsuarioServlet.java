@@ -21,6 +21,7 @@ import br.uff.loja.core.interfaces.services.IRoleService;
 import br.uff.loja.core.interfaces.services.IUsuarioService;
 import br.uff.loja.core.services.RoleService;
 import br.uff.loja.core.services.UsuarioService;
+import br.uff.loja.core.services.AccountAuthorization;
 import br.uff.loja.infrastructure.shared.Helper;
 
 @WebServlet("/usuario")
@@ -53,6 +54,7 @@ public class UsuarioServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, LojaException {
         // pega sessao
         HttpSession session = request.getSession();
+        clearLegacyPasswordCookie(request, response);
         try {
             if (request.getParameter("sel") != null) {
                 session.setAttribute(SELUSER, request.getParameter("sel"));
@@ -62,6 +64,11 @@ public class UsuarioServlet extends HttpServlet {
             String action = "";
             if(request.getParameter("action")!=null){
                 action = request.getParameter("action");
+            }
+            if (("grava".equals(action) || "login".equals(action) || "insere".equals(action)
+                    || "logout".equals(action)) && !"POST".equalsIgnoreCase(request.getMethod())) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
             }
 
             Integer usuarioIdSelectionado = null;
@@ -74,13 +81,20 @@ public class UsuarioServlet extends HttpServlet {
             
             switch (action) {
                 case "grava": {
-                    // grava alteracoes no cadastro d usuario feito na pag de usuario-cadastro
+                    Integer activeUserId = helper.tryParseInteger(String.valueOf(session.getAttribute(USERID)));
+                    Integer activeRoleId = helper.tryParseInteger(String.valueOf(session.getAttribute(USERROLE)));
+                    if (!AccountAuthorization.canEdit(activeUserId, activeRoleId, usuarioIdSelectionado)) {
+                        throw new LojaException("You are not allowed to edit this account.");
+                    }
+                    Integer roleId = activeRoleId.equals(EPermissaoUsuario.ADM.getId())
+                            ? helper.tryParseInteger(request.getParameter("roleId"))
+                            : usuarioService.encontraUsuarioPorId(usuarioIdSelectionado).getPermissaoId();
                     usuarioService.gravaUsuario(new UsuarioDTO(
                         usuarioIdSelectionado,
                         request.getParameter("name"),
                         email,
                         senha,
-                        helper.tryParseInteger(request.getParameter("roleId"))
+                        roleId
                     ));
                     break;
                 }
@@ -97,18 +111,17 @@ public class UsuarioServlet extends HttpServlet {
                 case "login": {
                     try {
                         UsuarioDTO usuarioDto = usuarioService.login(email, senha);
+                        request.changeSessionId();
                         session.setAttribute(USERID, usuarioDto.getId());
                             session.setAttribute(USERROLE, usuarioDto.getPermissaoId());
                             session.setAttribute("msg", "Seja bem vindo " + usuarioDto.getNome() + "!");
-                            // seta cookie se solicitar para lembrar login
+                            // Remember the email only; never persist a password in a browser cookie.
                             if (request.getParameter("remember") != null) {
                                 int durMes = 2592000;
                                 Cookie ckEmail = new Cookie("loginEmail", email);
                                 ckEmail.setMaxAge(durMes);
+                                ckEmail.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
                                 response.addCookie(ckEmail);
-                                Cookie ckPassword = new Cookie("loginPassword", senha);
-                                ckPassword.setMaxAge(durMes);
-                                response.addCookie(ckPassword);
                             }
                     } catch (Exception el) {
                         session.setAttribute("msg", el.getMessage());
@@ -118,12 +131,13 @@ public class UsuarioServlet extends HttpServlet {
                 }
                 case "insere": {
                     UsuarioDTO usuarioDto = usuarioService.gravaUsuario(new UsuarioDTO(
-                        usuarioIdSelectionado,
+                        null,
                         request.getParameter("nome"),
                         email,
                         request.getParameter("senha"),
                         EPermissaoUsuario.CLIENTE.getId()
                     ));
+                    request.changeSessionId();
                     session.setAttribute(USERID, usuarioDto.getId());
                     session.setAttribute(USERROLE, usuarioDto.getPermissaoId());
                     session.setAttribute("msg", "Seja bem vindo " + usuarioDto.getNome() + "!");
@@ -191,6 +205,13 @@ public class UsuarioServlet extends HttpServlet {
             session.setAttribute("msg", ex.getMessage());
             response.sendRedirect("");
         }
+    }
+
+    private void clearLegacyPasswordCookie(HttpServletRequest request, HttpServletResponse response) {
+        Cookie passwordCookie = new Cookie("loginPassword", "");
+        passwordCookie.setMaxAge(0);
+        passwordCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+        response.addCookie(passwordCookie);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

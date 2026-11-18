@@ -89,6 +89,10 @@ public class CompraServlet extends HttpServlet {
 
             // recupera acao solicitada se existir
             String action = request.getParameter("action");
+            if ("pagamentoOk".equals(action) && !"POST".equalsIgnoreCase(request.getMethod())) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
+            }
 
             switch (action) {
                 case "pagamentoOk": {

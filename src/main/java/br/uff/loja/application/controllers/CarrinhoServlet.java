@@ -28,9 +28,13 @@ public class CarrinhoServlet extends HttpServlet {
     private final Helper helper;
 
     public CarrinhoServlet() {
-        helper = new Helper();
-        carrinhoService = new CarrinhoService();
-        enderecoService = new EnderecoService();
+        this(new CarrinhoService(), new EnderecoService(), new Helper());
+    }
+
+    CarrinhoServlet(ICarrinhoService carrinhoService, IEnderecoService enderecoService, Helper helper) {
+        this.carrinhoService = carrinhoService;
+        this.enderecoService = enderecoService;
+        this.helper = helper;
     }
 
     /**
@@ -46,18 +50,7 @@ public class CarrinhoServlet extends HttpServlet {
         // pega sessao
         HttpSession session = request.getSession();
         try {
-            String carrinhoIdString = null;
-            Cookie[] cookies = request.getCookies();
-            // procura carrinhoId nos cookies setados
-            if (cookies != null) {
-                for (int i = 0; i < cookies.length; i++) {
-                    Cookie cookie = cookies[i];
-                    if (cookie.getName().equals(CARRINHOID)) {
-                        carrinhoIdString = cookie.getValue();
-                        break;
-                    }
-                }
-            }
+            clearLegacyCartCookie(request, response);
 
             Integer userId = null;
             // recupera userId
@@ -65,26 +58,19 @@ public class CarrinhoServlet extends HttpServlet {
                 userId = helper.tryParseInteger(session.getAttribute("userId").toString());
             }
 
-            Integer carrinhoId = null;
-
-            // verifica se carrinhoIdString eh um numero
-            if (carrinhoIdString != null) {
-                carrinhoId = helper.tryParseInteger(carrinhoIdString);
-            }
+            Integer carrinhoId = helper.tryParseInteger(String.valueOf(session.getAttribute(CARRINHOID)));
 
             carrinhoId = carrinhoService.recuperaCarrinhoAtivo(carrinhoId, userId, request.getRemoteAddr()).getId();
 
-            // define cookie com carrinhoId
-            int durMes = 2592000;
-            Cookie ckCarrinhoId = new Cookie(CARRINHOID, carrinhoId.toString());
-            ckCarrinhoId.setMaxAge(durMes);
-            response.addCookie(ckCarrinhoId);
-            // define variavel de sessao p ser recuperado
             session.setAttribute(CARRINHOID, carrinhoId);
             
             Integer produtoId = null;
             // recupera produtoId pra add no carrinho
             if (request.getParameter("addProdutoId") != null) {
+                if (!"POST".equalsIgnoreCase(request.getMethod())) {
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                    return;
+                }
                 produtoId = helper.tryParseInteger(request.getParameter("addProdutoId"));
             }
 
@@ -103,6 +89,11 @@ public class CarrinhoServlet extends HttpServlet {
             String action = "";
             if (request.getParameter("action") != null) {
                 action = request.getParameter("action");
+            }
+            if (("removeProduto".equals(action) || "mudaQtd".equals(action))
+                    && !"POST".equalsIgnoreCase(request.getMethod())) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
             }
 
             switch (action) {
@@ -169,6 +160,13 @@ public class CarrinhoServlet extends HttpServlet {
             session.setAttribute("msg", ex.getMessage());
             response.sendRedirect(PRODUTOS);
         }
+    }
+
+    private void clearLegacyCartCookie(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cartCookie = new Cookie(CARRINHOID, "");
+        cartCookie.setMaxAge(0);
+        cartCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+        response.addCookie(cartCookie);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

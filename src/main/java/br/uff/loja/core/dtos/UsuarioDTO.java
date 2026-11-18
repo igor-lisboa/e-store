@@ -7,7 +7,7 @@ public class UsuarioDTO extends BaseDTO {
     private Integer id;
     private String nome;
     private String email;
-    private String senha;
+    private transient String senha;
     private Integer permissaoId;
 
     public UsuarioDTO() {

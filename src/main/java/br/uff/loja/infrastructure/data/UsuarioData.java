@@ -60,12 +60,26 @@ public class UsuarioData implements IUsuarioData {
     }
 
     @Override
-    public Integer encontraUsuarioIdPorEmailESenha(String email, String senha) throws LojaException {
+    public UsuarioDTO encontraUsuarioPorEmail(String email) throws LojaException {
         try {
-            Object[] bind = {email, senha};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.dbValor("id", this.tableUsuarios, "email=? AND password=?", bind)));
+            Object[] bind = {email};
+            List<HashMap<String, Object>> rows = this.mysqlDAO.dbCarrega(
+                    "SELECT id, name AS nome, email, password AS senha, role_id AS permissaoId FROM users WHERE email=? LIMIT 1", bind);
+            return rows.isEmpty() ? null : new UsuarioDTO(rows.get(0));
         } catch (Exception e) {
-            throw new LojaException("Falha ao Recuperar o Usuário de email: " + email + " e senha: " + senha + ". (" + e.getMessage() + ")");
+            throw new LojaException("Failed to look up account credentials.");
+        } finally {
+            this.mysqlDAO.destroyDb();
+        }
+    }
+
+    @Override
+    public void atualizaSenha(Integer id, String senha) throws LojaException {
+        try {
+            Object[] bind = {senha, id};
+            this.mysqlDAO.dbGrava("UPDATE users SET password=? WHERE id=?", bind, false);
+        } catch (Exception e) {
+            throw new LojaException("Failed to update account credentials.");
         } finally {
             this.mysqlDAO.destroyDb();
         }

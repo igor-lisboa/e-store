@@ -57,7 +57,7 @@ public class EnderecoData implements IEnderecoData {
     @Override
     public void insereEndereco(EnderecoDTO endereco) throws LojaException {
         try {
-            Object[] bind = {endereco.getNome(), endereco.getUsuarioId(), endereco.getCep(), endereco.getLogradouro(), endereco.getCidade(), endereco.getEstado(), endereco.getCidade()};
+            Object[] bind = {endereco.getNome(), endereco.getUsuarioId(), endereco.getCep(), endereco.getLogradouro(), endereco.getCidade(), endereco.getEstado(), endereco.getPais()};
             this.mysqlDAO.dbGrava("INSERT INTO address (name,user_id,zipcode,address,city,state,country) VALUES (?,?,?,?,?,?,?)", bind, false);
         } catch (Exception e) {
             throw new LojaException("Falha ao Inserir o Endereço de para o Usuário de id: " + endereco.getUsuarioId() + ". (" + e.getMessage() + ")");

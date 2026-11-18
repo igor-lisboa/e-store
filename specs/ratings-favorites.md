@@ -11,6 +11,8 @@
 
 - A rating must be within a documented range and have an explicit policy for repeat ratings.
 - Only an authenticated user may create or update their rating or favorite list.
+- Ratings are limited to 1–5; review titles are required, and review text must fit the database columns.
+- Review submissions are processed only by POST requests and derive the user ID from the authenticated session.
 - Users may change only their own rating and favorite state.
 - Aggregated rating values must be derived consistently and safely when no ratings exist.
 
@@ -22,4 +24,4 @@
 
 ## Open questions
 
-- The accepted rating scale and whether rating edits are allowed need product confirmation.
+- Review edits are not supported; confirm whether users should be able to change a review.

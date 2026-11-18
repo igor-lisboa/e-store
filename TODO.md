@@ -4,11 +4,12 @@ Update this active list when work is evidenced complete or new gaps are found. S
 
 ## P0 — Security and correctness
 
-- [ ] Replace plaintext user passwords with an adaptive password hash and migrate records safely.
-- [ ] Audit authorization and ownership checks for every admin, account, address, rating, favorite, cart, and API action.
-- [ ] Remove stack traces and exception serialization from API responses; define stable status and error DTOs.
+- [ ] Finish the plaintext-password migration: PBKDF2 hashing and login-time upgrades are implemented, but existing records remain plaintext until their owners sign in. Define and execute a safe migration for dormant accounts.
+- [ ] Finish auditing authorization and ownership for every admin, rating, favorite, and cart action. Account edits, address mutation, product administration, review input, session-bound carts, and the user API now enforce server-side checks.
+- [ ] Add CSRF tokens to all state-changing forms and validate them server-side; POST-only checks do not prevent cross-site POST requests.
+- [x] Remove stack traces and exception serialization from API responses; use a shared JSON error object and client/server status codes.
 - [ ] Review SQL transaction handling, JDBC resource closure, rollback behavior, and DAO cleanup.
-- [ ] Validate quantities, stock, price, paging, IDs, and all external values at application boundaries.
+- [ ] Finish validation for product prices, paging, account/address fields, and every other external value. Cart quantities/stock and review input are now checked in services.
 - [ ] Replace binary floating-point money calculations with decimal-safe values.
 - [ ] Remove credentials and personal data from seed data; create safe deterministic fixtures.
 
@@ -51,5 +52,6 @@ Update this active list when work is evidenced complete or new gaps are found. S
 
 ## P2 — Product decisions
 
-- [ ] Confirm page size, out-of-stock visibility, cart expiry/merge policy, rating range/edit policy, password policy, and payment scope.
+- [ ] Confirm page size, out-of-stock visibility, cart expiry/merge policy, review-edit policy, password policy, and payment scope.
+- [ ] Decide whether anonymous carts must survive a new browser session; if so, design a signed opaque cart token and migration from the legacy numeric cookie.
 - [ ] Define production deployment, observability, backups, secret management, and data retention requirements.

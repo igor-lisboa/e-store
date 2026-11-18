@@ -6,6 +6,7 @@
 - Services construct concrete DAOs in several no-argument constructors, limiting isolation and substitutability.
 - The project targets Java 8, Java EE 7 APIs, JSP, Servlets, Maven WAR packaging, and a legacy webapp-runner.
 - The repository has service tests that require MySQL and Cucumber feature tests. It has no isolated browser E2E suite.
+- State-changing form actions now require POST, but CSRF tokens are not yet implemented.
 
 ## Target requirements
 

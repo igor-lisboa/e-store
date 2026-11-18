@@ -9,7 +9,7 @@ public interface IEnderecoService {
 
     public EnderecoDTO encontraEnderecoPorId(Integer id) throws LojaException;
 
-    public void excluiEnderecoPorId(Integer id) throws LojaException;
+    public void excluiEnderecoPorId(Integer id, Integer usuarioId) throws LojaException;
 
     public EnderecoDTO atualizaEnderecoPorId(Integer id, EnderecoDTO endereco) throws LojaException;
 

@@ -12,24 +12,27 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import br.uff.loja.core.dtos.ProdutoDTO;
-import br.uff.loja.core.enums.EPermissaoUsuario;
 import br.uff.loja.core.exceptions.LojaException;
 import br.uff.loja.core.interfaces.services.ICategoriaService;
 import br.uff.loja.core.interfaces.services.IProdutoService;
+import br.uff.loja.core.interfaces.services.IUsuarioService;
 import br.uff.loja.core.services.CategoriaService;
 import br.uff.loja.core.services.ProdutoService;
+import br.uff.loja.core.services.UsuarioService;
 import br.uff.loja.infrastructure.shared.Helper;
 
 @WebServlet("/produto-adm")
 public class ProdutoAdmServlet extends HttpServlet {
     private final IProdutoService produtoService;
     private final ICategoriaService categoriaService;
+    private final IUsuarioService usuarioService;
     private final Helper helper;
 
     public ProdutoAdmServlet() {
         helper = new Helper();
         produtoService = new ProdutoService();
         categoriaService = new CategoriaService();
+        usuarioService = new UsuarioService();
     }
 
     /**
@@ -46,7 +49,8 @@ public class ProdutoAdmServlet extends HttpServlet {
         HttpSession session = request.getSession();
         try {
             // opcoes restritas a usuario ADM
-            if (session.getAttribute("userRole").equals(EPermissaoUsuario.ADM.getId())) {
+            Integer activeUserId = helper.tryParseInteger(String.valueOf(session.getAttribute("userId")));
+            if (activeUserId != null && Boolean.TRUE.equals(usuarioService.ehAdmin(activeUserId))) {
 
                 if (request.getParameter("sel") != null) {
                     String selParameterStr = request.getParameter("sel");
@@ -73,6 +77,11 @@ public class ProdutoAdmServlet extends HttpServlet {
                 String action = "";
                 if (request.getParameter("action") != null) {
                     action = request.getParameter("action");
+                }
+                if (("grava".equals(action) || "estoqueInsere".equals(action) || "del".equals(action))
+                        && !"POST".equalsIgnoreCase(request.getMethod())) {
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                    return;
                 }
 
                 switch (action) {

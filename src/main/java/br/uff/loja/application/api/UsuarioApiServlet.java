@@ -1,93 +1,88 @@
-
 package br.uff.loja.application.api;
-
-import java.io.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.google.gson.Gson;
 
 import br.uff.loja.core.dtos.UsuarioDTO;
 import br.uff.loja.core.interfaces.services.IUsuarioService;
 import br.uff.loja.core.services.UsuarioService;
+import java.io.IOException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/api/usuario/*")
 public class UsuarioApiServlet extends HttpServlet {
-	private final IUsuarioService usuarioService;
+    private final IUsuarioService usuarioService;
 
-	public UsuarioApiServlet() {
-		usuarioService = new UsuarioService();
-	}
+    public UsuarioApiServlet() {
+        this(new UsuarioService());
+    }
 
-	/**
-	 * Processes requests methods.
-	 *
-	 * @param request  servlet request
-	 * @param response servlet response
-	 * @throws ServletException if a servlet-specific error occurs
-	 * @throws IOException      if an I/O error occurs
-	 */
-	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		PrintWriter out = response.getWriter();
-		try {
-			response.setContentType("application/json");
-			response.setCharacterEncoding("UTF-8");
-			String pathInfo = request.getPathInfo();
-			String[] parameters = pathInfo.split("/");
+    UsuarioApiServlet(IUsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
-			if (parameters.length > 0) {
-				int id = Integer.parseInt(parameters[1]);
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-				UsuarioDTO usuarioDTO = usuarioService.encontraUsuarioPorId(id);
-				String json = new Gson().toJson(usuarioDTO);
-				out.println(json);
-			} else {
-				List<UsuarioDTO> usuarioDTOs = usuarioService.listaUsuarios();
-				String json = new Gson().toJson(usuarioDTOs);
-				out.println(json);
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			out.println(new Gson().toJson(ex));
-			response.setStatus(500);
-		}
-	}
+        HttpSession session = request.getSession(false);
+        Integer activeUserId = sessionInteger(session, "userId");
+        if (activeUserId == null) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required.");
+            return;
+        }
 
-	// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the
-	// + sign on the left to edit the code.">
-	/**
-	 * Handles the HTTP <code>GET</code> method.
-	 *
-	 * @param request  servlet request
-	 * @param response servlet response
-	 * @throws ServletException if a servlet-specific error occurs
-	 * @throws IOException      if an I/O error occurs
-	 */
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		try {
-			processRequest(request, response);
-		} catch (Exception ex) {
-			Logger.getLogger(UsuarioApiServlet.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+        try {
+            boolean administrator = usuarioService.ehAdmin(activeUserId);
+            String pathInfo = request.getPathInfo();
+            if (pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo)) {
+                if (!administrator) {
+                    ApiResponses.writeError(response, HttpServletResponse.SC_FORBIDDEN, "Administrator access is required.");
+                    return;
+                }
+                ApiResponses.writeJson(response, usuarioService.listaUsuarios());
+                return;
+            }
 
-	/**
-	 * Returns a short description of the servlet.
-	 *
-	 * @return a String containing servlet description
-	 */
-	@Override
-	public String getServletInfo() {
-		return "Servlet da API pra mostrar usuários.";
-	}// </editor-fold>
+            Integer requestedUserId = parseUserId(pathInfo);
+            if (requestedUserId == null) {
+                ApiResponses.writeError(response, HttpServletResponse.SC_BAD_REQUEST, "A valid user ID is required.");
+                return;
+            }
+            if (!administrator && !activeUserId.equals(requestedUserId)) {
+                ApiResponses.writeError(response, HttpServletResponse.SC_FORBIDDEN, "You cannot view this account.");
+                return;
+            }
+            ApiResponses.writeJson(response, usuarioService.encontraUsuarioPorId(requestedUserId));
+        } catch (Exception exception) {
+            ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "The request could not be completed.");
+        }
+    }
+
+    private Integer sessionInteger(HttpSession session, String attribute) {
+        if (session == null || session.getAttribute(attribute) == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(session.getAttribute(attribute).toString());
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
+    private Integer parseUserId(String pathInfo) {
+        String value = pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
+        if (value.isEmpty() || value.contains("/")) {
+            return null;
+        }
+        try {
+            int userId = Integer.parseInt(value);
+            return userId > 0 ? userId : null;
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
 }

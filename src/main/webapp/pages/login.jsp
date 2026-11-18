@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="group">
-                    <input name="password" type="password" required value="${cookie['loginPassword'].getValue()}">
+                    <input name="password" type="password" required maxlength="255" autocomplete="current-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
                     <label>Senha</label>
@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="group">      
-                    <input name="senha" id="criaSENHA" type="password" required>
+                    <input name="senha" id="criaSENHA" type="password" required maxlength="255" autocomplete="new-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
                     <label>Senha</label>

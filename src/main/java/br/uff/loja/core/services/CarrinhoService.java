@@ -6,21 +6,37 @@ import java.util.List;
 import br.uff.loja.core.dtos.CarrinhoDTO;
 import br.uff.loja.core.dtos.CarrinhoProdutoDTO;
 import br.uff.loja.core.dtos.PaginateDTO;
+import br.uff.loja.core.dtos.ProdutoDTO;
 import br.uff.loja.core.exceptions.LojaException;
 import br.uff.loja.core.interfaces.data.ICarrinhoData;
+import br.uff.loja.core.interfaces.data.IProdutoData;
 import br.uff.loja.core.interfaces.services.ICarrinhoService;
 import br.uff.loja.infrastructure.data.CarrinhoData;
+import br.uff.loja.infrastructure.data.ProdutoData;
 import br.uff.loja.infrastructure.shared.Helper;
 
 public class CarrinhoService implements ICarrinhoService {
 
     private final ICarrinhoData carrinhoData;
+    private final IProdutoData produtoData;
     private final Helper helper;
     private static final String TEXTOAVISOESPECIFICACARRINHO = " no carrinho de Id: ";
 
     public CarrinhoService() {
-        carrinhoData = new CarrinhoData();
-        helper = new Helper();
+        this(new CarrinhoData(), new ProdutoData(), new Helper());
+    }
+
+    public CarrinhoService(ICarrinhoData carrinhoData, IProdutoData produtoData) {
+        this(carrinhoData, produtoData, new Helper());
+    }
+
+    CarrinhoService(ICarrinhoData carrinhoData, IProdutoData produtoData, Helper helper) {
+        if (carrinhoData == null || produtoData == null || helper == null) {
+            throw new IllegalArgumentException("Cart, product, and helper dependencies are required.");
+        }
+        this.carrinhoData = carrinhoData;
+        this.produtoData = produtoData;
+        this.helper = helper;
     }
 
     @Override
@@ -56,8 +72,10 @@ public class CarrinhoService implements ICarrinhoService {
     public void insereProdutoCarrinho(Integer carrinhoId, Integer produtoId) throws LojaException {
         if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
             Integer qtd = carrinhoData.quantidadeProdutoNoCarrinho(carrinhoId, produtoId);
-            if (qtd > 0) {
-                carrinhoData.atualizaQtdDoProdutoNoCarrinho(carrinhoId, produtoId, qtd + 1);
+            int currentQuantity = qtd == null ? 0 : qtd;
+            validateStock(productId, currentQuantity + 1);
+            if (currentQuantity > 0) {
+                carrinhoData.atualizaQtdDoProdutoNoCarrinho(carrinhoId, produtoId, currentQuantity + 1);
             } else {
                 carrinhoData.adicionaProdutoNoCarrinho(carrinhoId, produtoId);
             }
@@ -92,6 +110,10 @@ public class CarrinhoService implements ICarrinhoService {
     @Override
     public void alteraQuantidadeProdutoCarrinho(Integer carrinhoId, Integer produtoId, Integer quantidade) throws LojaException {
         if (Boolean.TRUE.equals(carrinhoData.carrinhoExiste(carrinhoId)) && Boolean.FALSE.equals(carrinhoData.carrinhoVendido(carrinhoId))) {
+            if (!Boolean.TRUE.equals(carrinhoData.verificaProdutoNoCarrinho(carrinhoId, produtoId))) {
+                throw new LojaException("The product is not in this cart.");
+            }
+            validateStock(produtoId, quantidade);
             carrinhoData.atualizaQtdDoProdutoNoCarrinho(carrinhoId, produtoId, quantidade);
             return;
         }
@@ -116,5 +138,15 @@ public class CarrinhoService implements ICarrinhoService {
     @Override
     public Integer quantidadeProdutoNoCarrinho(Integer id, Integer produtoId) throws LojaException {
         return carrinhoData.quantidadeProdutoNoCarrinho(id, produtoId);
+    }
+
+    private void validateStock(Integer productId, Integer requestedQuantity) throws LojaException {
+        if (requestedQuantity == null || requestedQuantity <= 0) {
+            throw new LojaException("Cart quantity must be greater than zero.");
+        }
+        ProdutoDTO product = produtoData.encontraProdutoPorId(productId);
+        if (product.getQuantidade() == null || requestedQuantity > product.getQuantidade()) {
+            throw new LojaException("Requested quantity exceeds available stock.");
+        }
     }
 }

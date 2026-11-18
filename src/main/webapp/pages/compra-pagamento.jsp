@@ -161,7 +161,16 @@
                                         return actions.payment.execute().then(function (payment) {
                                             console.log("Pagamento OK");
                                             console.log(actions);
-                                            window.location.href = "compra?action=pagamentoOk";
+                                            var purchaseForm = document.createElement("form");
+                                            purchaseForm.method = "POST";
+                                            purchaseForm.action = "compra";
+                                            var purchaseAction = document.createElement("input");
+                                            purchaseAction.type = "hidden";
+                                            purchaseAction.name = "action";
+                                            purchaseAction.value = "pagamentoOk";
+                                            purchaseForm.appendChild(purchaseAction);
+                                            document.body.appendChild(purchaseForm);
+                                            purchaseForm.submit();
                                             return false;
                                         });
                                     },

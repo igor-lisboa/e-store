@@ -10,10 +10,21 @@
 ## Requirements
 
 - Passwords must be stored using a modern adaptive one-way password hash.
+- Legacy plaintext credentials are accepted only during login and upgraded to PBKDF2 on successful authentication; new and changed passwords are hashed before storage.
+- Passwords and password hashes must never be returned in API JSON, rendered in account forms, or persisted in browser cookies.
 - Authentication state and role checks must be enforced server-side for every protected action.
 - Users may view or edit only their own account and addresses, except for explicitly authorized administration.
 - Email and address fields must be validated; error messages must not expose secrets or SQL details.
 - Session identifiers must be rotated after successful authentication.
+
+## Security changes implemented
+
+- Login rotates the session identifier, and the remember-me behavior stores only the email address.
+- Account updates require the signed-in user to own the target account or have the administrator role. Non-administrators cannot change their role.
+- Address read-for-edit, update, and delete operations verify that the address belongs to the signed-in user.
+- User registration always creates a new customer account, regardless of submitted account-selection state.
+- The user service hashes passwords with PBKDF2-HMAC-SHA256 using a 600,000 iteration work factor and a unique random salt, following the current [OWASP password-storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html). Legacy plaintext passwords upgrade after successful login; returned account DTOs clear password data.
+- Password inputs are limited to 255 characters, matching the legacy account field limit; final password policy remains open.
 
 ## Acceptance checks
 

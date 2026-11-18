@@ -179,7 +179,7 @@ public class LojaApplicationTests {
 
         EnderecoDTO ultimoEndereco = enderecosDoUsuario.get(enderecosDoUsuario.size() - 1);
 
-        enderecoService.excluiEnderecoPorId(ultimoEndereco.getId());
+        enderecoService.excluiEnderecoPorId(ultimoEndereco.getId(), ultimoEndereco.getUsuarioId());
 
         assertEquals(String.valueOf(enderecosDoUsuario.size() - 1),
                 String.valueOf(enderecoService.listaEnderecosPorUsuarioId(usuarioId).size()));
@@ -275,26 +275,22 @@ public class LojaApplicationTests {
     @Test
     public void testaLoginErro() throws Exception {
         IUsuarioService usuarioService = new UsuarioService();
-
         String msgErr = "";
-
         try {
             usuarioService.login("email@errado.com", "xxx");
         } catch (Exception e) {
             msgErr = e.getMessage();
         }
-
-        assertEquals("Credenciais inválidas, por favor verifique os dados imputados e tente novamente!", msgErr);
+        assertEquals("Invalid email or password.", msgErr);
     }
 
     @Test
     public void testaLoginSucesso() throws Exception {
         IUsuarioService usuarioService = new UsuarioService();
-
-        UsuarioDTO usuario = usuarioService.listaUsuarios().get(0);
-
-        UsuarioDTO usuarioLogin = usuarioService.login(usuario.getEmail(), usuario.getSenha());
-
+        String email = "login-test-" + System.nanoTime() + "@example.test";
+        UsuarioDTO usuario = usuarioService.gravaUsuario(new UsuarioDTO(
+                null, "Login Test", email, "a-unique-password", EPermissaoUsuario.CLIENTE.getId()));
+        UsuarioDTO usuarioLogin = usuarioService.login(email, "a-unique-password");
         assertEquals(usuario.toJson(), usuarioLogin.toJson());
     }
 
@@ -341,7 +337,7 @@ public class LojaApplicationTests {
             msgErr = exc.getMessage();
         }
 
-        assertEquals("O e-mail " + primeiroUsuario.getEmail() + " já está sendo usado por outro usuário...", msgErr);
+        assertEquals("The email address is already in use.", msgErr);
     }
 
     @Test

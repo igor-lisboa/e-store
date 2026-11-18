@@ -4,7 +4,9 @@
 
 - Servlet endpoints exist for products, users, and categories under `/api`.
 - Product lookup serializes a product DTO as JSON. A Postman collection is included at the repository root.
-- The current API implementation does not provide a consistent documented error schema or API versioning.
+- User lookup requires a signed-in session. Customers can read only their own account; administrators can list and read accounts.
+- User API errors use a generic JSON error object and do not serialize exceptions.
+- Product and category API routes still need a consistent documented error schema and API versioning.
 
 ## Requirements
 

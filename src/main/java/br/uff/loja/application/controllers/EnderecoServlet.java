@@ -54,6 +54,9 @@ public class EnderecoServlet extends HttpServlet {
                 EnderecoDTO endereco = new EnderecoDTO("", userId, null, "", "", "", "Brasil");
                 if(enderecoIdSel != null) {
                     endereco = enderecoService.encontraEnderecoPorId(enderecoIdSel);
+                    if (!enderecoService.verificaEnderecoDoUsuario(enderecoIdSel, userId)) {
+                        throw new IllegalArgumentException("The address does not belong to this account.");
+                    }
                 }
                 request.setAttribute("endereco", endereco);
                 session.setAttribute("sel", enderecoIdSelStr);
@@ -72,6 +75,11 @@ public class EnderecoServlet extends HttpServlet {
 
             if (request.getParameter("action") != null) {
                 action = request.getParameter("action");
+            }
+            if (("grava".equals(action) || "del".equals(action))
+                    && !"POST".equalsIgnoreCase(request.getMethod())) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
             }
 
             switch (action) {
@@ -96,7 +104,7 @@ public class EnderecoServlet extends HttpServlet {
                     break;
                 }
                 case "del": {
-                    enderecoService.excluiEnderecoPorId(enderecoIdSel);
+                    enderecoService.excluiEnderecoPorId(enderecoIdSel, userId);
 
                     session.setAttribute("msg", "Endereço deletado com sucesso!");
                     break;

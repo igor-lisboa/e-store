@@ -69,6 +69,10 @@ public class ProdutoServlet extends HttpServlet {
             }            
 
             if (request.getParameter("fav") != null) {
+                if (!"POST".equalsIgnoreCase(request.getMethod())) {
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                    return;
+                }
                 // VERIFICA SE ESTA LOGADO
                 if (userId == null) {
                     session.setAttribute("msg", "Realize login para favoritar um produto!");

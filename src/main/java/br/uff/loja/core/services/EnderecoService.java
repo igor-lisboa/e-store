@@ -10,10 +10,17 @@ import br.uff.loja.infrastructure.data.EnderecoData;
 
 public class EnderecoService implements IEnderecoService {
 
-    private IEnderecoData enderecoData;
+    private final IEnderecoData enderecoData;
 
     public EnderecoService() {
-        enderecoData = new EnderecoData();
+        this(new EnderecoData());
+    }
+
+    public EnderecoService(IEnderecoData enderecoData) {
+        if (enderecoData == null) {
+            throw new IllegalArgumentException("Address data dependency is required.");
+        }
+        this.enderecoData = enderecoData;
     }
 
     @Override
@@ -22,7 +29,10 @@ public class EnderecoService implements IEnderecoService {
     }
 
     @Override
-    public void excluiEnderecoPorId(Integer id) throws LojaException {
+    public void excluiEnderecoPorId(Integer id, Integer usuarioId) throws LojaException {
+        if (!Boolean.TRUE.equals(enderecoData.verificaEnderecoDoUsuario(id, usuarioId))) {
+            throw new LojaException("The address does not belong to this account.");
+        }
         if (Boolean.TRUE.equals(enderecoData.enderecoFoiUsadoEmAlgumaVenda(id))) {
             throw new LojaException("Esse endereço não pode ser excluído pois foi usado para realizar uma venda...");
         }
@@ -31,6 +41,9 @@ public class EnderecoService implements IEnderecoService {
 
     @Override
     public EnderecoDTO atualizaEnderecoPorId(Integer id, EnderecoDTO endereco) throws LojaException {
+        if (!Boolean.TRUE.equals(enderecoData.verificaEnderecoDoUsuario(id, endereco.getUsuarioId()))) {
+            throw new LojaException("The address does not belong to this account.");
+        }
         enderecoData.atualizaEnderecoPorId(id, endereco);
         return this.encontraEnderecoPorId(id);
     }
