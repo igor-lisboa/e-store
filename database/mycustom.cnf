@@ -1,4 +1,4 @@
 [mysqld]
+# skip-character-set-client-handshake was removed in MySQL 8.3; keeping it makes MySQL 8.4 abort at startup.
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
-skip-character-set-client-handshake
