@@ -38,3 +38,5 @@ build/
 
 .env
 .local-tools/
+
+.env.local

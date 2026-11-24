@@ -48,7 +48,7 @@ public class MySqlMigrationIT {
     @Test
     public void stockFailureRollsBackEveryEarlierCheckoutWrite() throws Exception {
         execute("INSERT INTO address VALUES (1, 'Home', 2, 12345, 'Main Street', 'City', 'State', 'Country')");
-        execute("INSERT INTO carts VALUES (1, 2, '127.0.0.1', NOW())");
+        execute("INSERT INTO carts (id, user_id, ip, created_at, last_activity_at) VALUES (1, 2, '127.0.0.1', NOW(), NOW())");
         execute("UPDATE products SET quantity=0 WHERE id=2");
         execute("INSERT INTO carts_products VALUES (1, 1, 1, 2), (2, 1, 2, 1)");
         try {
@@ -63,7 +63,7 @@ public class MySqlMigrationIT {
     @Test
     public void successfulCheckoutStoresDecimalTotalsAndCannotBeRepeated() throws Exception {
         execute("INSERT INTO address VALUES (1, 'Home', 2, 12345, 'Main Street', 'City', 'State', 'Country')");
-        execute("INSERT INTO carts VALUES (1, 2, '127.0.0.1', NOW())");
+        execute("INSERT INTO carts (id, user_id, ip, created_at, last_activity_at) VALUES (1, 2, '127.0.0.1', NOW(), NOW())");
         execute("UPDATE products SET price=0.10 WHERE id=1");
         execute("INSERT INTO carts_products VALUES (1, 1, 1, 3)");
         execute("CALL checkout_cart(1, 1)");
@@ -83,7 +83,7 @@ public class MySqlMigrationIT {
     @Test
     public void anotherAccountsAddressCannotBeUsedForCheckout() throws Exception {
         execute("INSERT INTO address VALUES (1, 'Admin Home', 1, 12345, 'Main Street', 'City', 'State', 'Country')");
-        execute("INSERT INTO carts VALUES (1, 2, '127.0.0.1', NOW())");
+        execute("INSERT INTO carts (id, user_id, ip, created_at, last_activity_at) VALUES (1, 2, '127.0.0.1', NOW(), NOW())");
         execute("INSERT INTO carts_products VALUES (1, 1, 1, 2)");
         try {
             execute("CALL checkout_cart(1, 1)");
@@ -97,7 +97,7 @@ public class MySqlMigrationIT {
     @Test
     public void competingCartsCannotOversellTheSameProduct() throws Exception {
         execute("INSERT INTO address VALUES (1, 'Home', 2, 12345, 'Main Street', 'City', 'State', 'Country')");
-        execute("INSERT INTO carts VALUES (1, 2, '127.0.0.1', NOW()), (2, 2, '127.0.0.1', NOW())");
+        execute("INSERT INTO carts (id, user_id, ip, created_at, last_activity_at) VALUES (1, 2, '127.0.0.1', NOW(), NOW()), (2, 2, '127.0.0.1', NOW(), NOW())");
         execute("UPDATE products SET quantity=10 WHERE id=1");
         execute("INSERT INTO carts_products VALUES (1, 1, 1, 7), (2, 2, 1, 7)");
         java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(2);

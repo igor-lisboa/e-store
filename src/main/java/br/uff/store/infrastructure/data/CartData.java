@@ -26,7 +26,11 @@ public class CartData implements ICartData {
     private static final String CART_PRODUCTS_QUERY = "SELECT c.cart_id AS id, p.id AS productId, p.name AS name, p.description AS description, p.img AS image, p.price AS price, p.quantity AS availableStock, c.quantity AS quantity, p.price * c.quantity AS totalPrice FROM carts_products c LEFT JOIN products p ON (c.product_id = p.id) WHERE c.cart_id=?";
 
     public CartData() {
-        this.mysqlDAO = new MySQLDAO();
+        this(new MySQLDAO());
+    }
+
+    public CartData(MySQLDAO mysqlDAO) {
+        this.mysqlDAO = mysqlDAO;
     }
 
     @Override
@@ -127,8 +131,8 @@ public class CartData implements ICartData {
     @Override
     public void createCart(String ip, String createdAt, Integer userId) throws StoreException {
         try {
-            Object[] bind = {ip, createdAt, userId};
-            this.mysqlDAO.executeUpdate("INSERT INTO carts (ip,created_at,user_id) VALUES (?,?,?)", bind);
+            Object[] bind = {ip, createdAt, createdAt, userId};
+            this.mysqlDAO.executeUpdate("INSERT INTO carts (ip,created_at,last_activity_at,user_id) VALUES (?,?,?,?)", bind);
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -207,6 +211,51 @@ public class CartData implements ICartData {
             Object[] bind = {id};
             String totalPrice = String.valueOf(this.mysqlDAO.scalar("totalPrice", "SELECT sum(p.price * c.quantity) AS totalPrice FROM carts_products c LEFT JOIN products p ON (c.product_id = p.id) WHERE c.cart_id=? GROUP BY c.cart_id", "", bind));
             return new BigDecimal(totalPrice.equals("null") ? "0" : totalPrice);
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the cart database operation.", e);
+        }
+    }
+
+    @Override
+    public void touchCart(Integer id, String activityAt) throws StoreException {
+        try {
+            Object[] bind = {activityAt, id};
+            this.mysqlDAO.executeUpdate("UPDATE carts SET last_activity_at=? WHERE id=?", bind);
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the cart database operation.", e);
+        }
+    }
+
+    @Override
+    public Boolean isCartActiveSince(Integer id, String since) throws StoreException {
+        try {
+            Object[] bind = {id, since};
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=? AND last_activity_at>=?", bind))) > 0;
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the cart database operation.", e);
+        }
+    }
+
+    /** Stock caps each merged quantity; rows that end at zero are removed, and the source cart is emptied. */
+    @Override
+    public void mergeCart(Integer sourceCartId, Integer targetCartId) throws StoreException {
+        String[] commands = {
+            "UPDATE carts_products target JOIN carts_products source ON source.product_id = target.product_id AND source.cart_id = ? "
+                + "JOIN products p ON p.id = target.product_id SET target.quantity = LEAST(target.quantity + source.quantity, p.quantity) WHERE target.cart_id = ?",
+            "INSERT INTO carts_products (cart_id, product_id, quantity) SELECT ?, source.product_id, LEAST(source.quantity, p.quantity) "
+                + "FROM carts_products source JOIN products p ON p.id = source.product_id WHERE source.cart_id = ? "
+                + "AND source.product_id NOT IN (SELECT product_id FROM carts_products WHERE cart_id = ?)",
+            "DELETE FROM carts_products WHERE cart_id = ? AND quantity <= 0",
+            "DELETE FROM carts_products WHERE cart_id = ?"
+        };
+        Object[][] bindings = {
+            {sourceCartId, targetCartId},
+            {targetCartId, sourceCartId, targetCartId},
+            {targetCartId},
+            {sourceCartId}
+        };
+        try {
+            this.mysqlDAO.executeTransaction(commands, bindings);
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }

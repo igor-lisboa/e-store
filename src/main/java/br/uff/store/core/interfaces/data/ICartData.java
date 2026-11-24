@@ -46,4 +46,11 @@ public interface ICartData {
     public void updateProductQuantity(Integer id, Integer productId, Integer newQuantity) throws StoreException;
 
     public BigDecimal getCartTotal(Integer id) throws StoreException;
+
+    public void touchCart(Integer id, String activityAt) throws StoreException;
+
+    public Boolean isCartActiveSince(Integer id, String since) throws StoreException;
+
+    /** Moves the source cart's items into the target cart atomically, capped at current stock. */
+    public void mergeCart(Integer sourceCartId, Integer targetCartId) throws StoreException;
 }

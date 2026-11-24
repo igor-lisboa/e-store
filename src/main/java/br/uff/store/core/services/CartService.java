@@ -3,6 +3,7 @@ package br.uff.store.core.services;
 import java.math.BigDecimal;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,6 +23,9 @@ public class CartService implements ICartService {
     private final IProductData productData;
     private final Clock clock;
     private static final String CART_ID_CONTEXT = " in cart ID ";
+    /** Anonymous carts unused for this long are no longer reused (decision 5C, confirmed at 30 days). */
+    static final Duration ANONYMOUS_CART_TTL = Duration.ofDays(30);
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CartService(ICartData cartData, IProductData productData) {
         this(cartData, productData, Clock.systemUTC());
@@ -38,31 +42,59 @@ public class CartService implements ICartService {
 
     @Override
     public CartDTO getActiveCart(Integer cartId, Integer userId, String ip) throws StoreException {
-        if (cartId != null) {
-            if (Boolean.TRUE.equals(cartData.cartExists(cartId)) && Boolean.FALSE.equals(cartData.isCartSold(cartId))) {
-                if (userId == null) {
-                    if (Boolean.TRUE.equals(cartData.isCartUnowned(cartId))) {
-                        return cartData.findCart(cartId);
-                    }
-                } else {
-                    if (Boolean.TRUE.equals(cartData.isCartUnowned(cartId))) {
-                        cartData.assignUnownedCart(cartId, userId);
-                    }
-                    if (Boolean.TRUE.equals(cartData.cartBelongsToUser(cartId, userId))) {
-                        return cartData.findCart(cartId);
-                    }
-                }
-            }
+        LocalDateTime now = LocalDateTime.now(clock);
+        CartDTO cart = resolveActiveCart(cartId, userId, ip, now);
+        cartData.touchCart(cart.getId(), format(now));
+        return cart;
+    }
+
+    private CartDTO resolveActiveCart(Integer cartId, Integer userId, String ip, LocalDateTime now) throws StoreException {
+        CartDTO sessionCart = findReusableSessionCart(cartId, userId, now);
+        if (userId == null) {
+            return sessionCart != null ? sessionCart : createCart(ip, now, null);
         }
-        if (userId != null) {
-            List<CartDTO> unsoldCarts = cartData.listUnsoldUserCarts(userId);
-            if (Boolean.FALSE.equals(unsoldCarts.isEmpty())) {
-                return unsoldCarts.get(0);
-            }
+        CartDTO accountCart = firstUnsoldUserCart(userId);
+        if (sessionCart == null) {
+            return accountCart != null ? accountCart : createCart(ip, now, userId);
         }
-        String createdAt = LocalDateTime.now(clock).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        if (sessionCart.getUserId() != null) {
+            return sessionCart;
+        }
+        // Sign-in with an anonymous cart: claim it when the account has none, otherwise merge its items into the account cart.
+        if (accountCart == null) {
+            cartData.assignUnownedCart(sessionCart.getId(), userId);
+            return cartData.findCart(sessionCart.getId());
+        }
+        cartData.mergeCart(sessionCart.getId(), accountCart.getId());
+        return accountCart;
+    }
+
+    /** Returns the session cart only if the visitor may use it: their own unsold cart, or an unowned cart active within the expiry period. */
+    private CartDTO findReusableSessionCart(Integer cartId, Integer userId, LocalDateTime now) throws StoreException {
+        if (cartId == null || !Boolean.TRUE.equals(cartData.cartExists(cartId)) || Boolean.TRUE.equals(cartData.isCartSold(cartId))) {
+            return null;
+        }
+        if (userId != null && Boolean.TRUE.equals(cartData.cartBelongsToUser(cartId, userId))) {
+            return cartData.findCart(cartId);
+        }
+        boolean anonymousAndFresh = Boolean.TRUE.equals(cartData.isCartUnowned(cartId))
+                && Boolean.TRUE.equals(cartData.isCartActiveSince(cartId, format(now.minus(ANONYMOUS_CART_TTL))));
+        return anonymousAndFresh ? cartData.findCart(cartId) : null;
+    }
+
+    private CartDTO firstUnsoldUserCart(Integer userId) throws StoreException {
+        List<CartDTO> unsoldCarts = cartData.listUnsoldUserCarts(userId);
+        return unsoldCarts.isEmpty() ? null : unsoldCarts.get(0);
+    }
+
+    private CartDTO createCart(String ip, LocalDateTime now, Integer userId) throws StoreException {
+        String createdAt = format(now);
         cartData.createCart(ip, createdAt, userId);
         return cartData.findCart(ip, createdAt, userId);
+    }
+
+    private static String format(LocalDateTime timestamp) {
+        return timestamp.format(TIMESTAMP_FORMAT);
     }
 
     @Override
