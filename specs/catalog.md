@@ -6,7 +6,8 @@
 - The catalog supports product search, category and subcategory selection, special filters, and pagination.
 - The storefront shows 20 items per page by default. An optional `pageSize` query parameter accepts 1–100; a missing or out-of-range value uses 20.
 - Product administration supports listing, creation, updates, deletion, and stock changes.
-- Product categories are stored in a parent/child hierarchy. The seed data has PlayStation, Xbox, and Wii roots with accessory, console, and game children.
+- Product categories are stored in a parent/child hierarchy. The seed data has PlayStation, Xbox, and Nintendo roots with accessory, console, and game children.
+- Optional development seed V14 adds 500 deterministic demonstration products: 450 game editions derived from 75 researched titles and 50 console/accessory products. Product descriptions, editions, prices, release dates, and stock are synthetic local fixtures rather than copied live offers.
 - Product images are represented by a URL or data string in the current database model.
 
 ## Requirements
@@ -18,12 +19,14 @@
 - Product name, price, description, category, and image input must be validated before persistence.
 - Names/descriptions are required and bounded to 255 characters. Images are required and capped at 4,000,000 characters. Prices are `BigDecimal` amounts rounded half-up to two decimal places before persistence; the rounded value must be non-negative and at most 999,999,999.99 to fit `DECIMAL(11,2)`; stock increments are positive. Paging accepts 1–100 items with a positive page number and a non-overflowing offset. Price filter bounds must be non-negative and ordered.
 - A product cannot be purchased beyond available stock.
+- Storefront pages must reflow without document-level horizontal scrolling at desktop, tablet, mobile, and 320-pixel-wide viewports in portrait and landscape. Wide administration tables may scroll inside their own container.
+- Navigation, filters, product cards, forms, cart/checkout content, and account/administration actions must remain visible and operable at those sizes.
 
 ## Acceptance checks
 
 - Unit tests cover filter validation, paging boundaries, price and stock rules.
 - Integration tests exercise catalog queries against a disposable MySQL database.
-- Browser tests cover search, category selection, pagination, and an unauthorized administration attempt.
+- Browser tests cover search, category selection, pagination, an unauthorized administration attempt, and horizontal-overflow checks across five representative viewports and eleven customer/administrator routes.
 
 ## Open questions
 

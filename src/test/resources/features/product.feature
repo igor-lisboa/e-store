@@ -10,5 +10,5 @@ Feature: Product creation and stock management
       | name                | price  | category               |
       | "Scenario Game"     | 149.87 | "XBOX_GAMES"           |
       | "Scenario Console"  | 266.00 | "XBOX_CONSOLES"        |
-      | "Scenario Wii Game" | 9.90   | "WII_GAMES"            |
-      | "Scenario Wii"      | 118.00 | "WII_CONSOLES"         |
+      | "Scenario Nintendo Game" | 9.90   | "NINTENDO_GAMES"    |
+      | "Scenario Nintendo"      | 118.00 | "NINTENDO_CONSOLES" |

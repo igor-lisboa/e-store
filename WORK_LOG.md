@@ -26,6 +26,14 @@ Local notes: Docker Desktop had to be started; the Compose `app` service runs `m
 
 `scripts/start.sh` now needs no variables: default MySQL host port 3316 (no clash with a MySQL on 3306), the Compose build skips tests (`-DskipTests`), and the script prints the store address first and again in a banner when the server answers (default http://localhost:8181). New `scripts/test.sh [quick|unit|contracts|openapi|mysql|legacy|failure|browser|all]` runs the checks, starts and removes a throwaway MySQL container when no `TEST_MYSQL_*` is set, and prints a summary. Verified: `start.sh -d` with no variables (migrations applied, tests skipped, banner shown), `test.sh quick mysql` (283 unit, 46 MySQL pass), `test.sh contracts openapi failure`. `test.sh legacy` and `browser` were not run through the new script (they ran earlier through the local helpers).
 
+## Follow-up 4 (2026-11-25)
+
+Uncommitted: responsive storefront layouts; a five-viewport Playwright audit covering eleven public, customer, and administrator routes; V13 category rename from Wii to Nintendo; and optional V14 development fixtures with exactly 500 additional products (450 game editions and 50 console/accessory products). Official PlayStation, Xbox, and Nintendo catalogs were used only to research product families; commercial fields are deterministic synthetic data and images remain local. Specs, README, database guidance, OpenAPI category example, and backlog were updated together.
+
+Evidence: `mvn -B clean verify` passed 283 tests and produced the WAR, runner JAR, and JaCoCo report; MySQL profile passed 283 default plus 46 integration tests while validating/reapplying all 14 migrations; legacy/Cucumber passed 42 tests; repository contracts passed 21; OpenAPI validation passed. Browser checks passed with demo checkout enabled and disabled (7 smoke, 3 shopping, 3 hostile with the expected disabled-mode skip, 5 accessibility, 1 responsive matrix, and 3 recovery). The responsive matrix passed 55 route/viewport combinations at 1440x900, 768x1024, 1024x768, 320x568, and 568x320; screenshots were visually reviewed before the final clean build.
+
+Local note: the Windows Adoptium 8u512 VM crashed in `jvm.dll` while serving the browser suite. The same packaged WAR passed when Tomcat ran in the documented Linux container runtime, with host Playwright and the disposable MySQL 8.4 container. Generated crash reports and both exact test containers were removed.
+
 ## Earlier checkpoint (2026-11-18)
 
 Updated 2026-11-18. The user authorized autonomous pending work and asked for completed/missing tracking and a commit title. Changes are uncommitted; preserve the entire working tree. No subagents were used.

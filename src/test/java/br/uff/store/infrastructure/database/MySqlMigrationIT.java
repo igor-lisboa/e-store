@@ -41,8 +41,11 @@ public class MySqlMigrationIT {
         assertEquals(0, flyway.migrate().migrationsExecuted);
         assertEquals(2, count("SELECT COUNT(*) FROM roles"));
         assertEquals(12, count("SELECT COUNT(*) FROM category"));
-        assertEquals(3, count("SELECT COUNT(*) FROM products"));
+        assertEquals(503, count("SELECT COUNT(*) FROM products"));
+        assertEquals(500, count("SELECT COUNT(*) FROM products WHERE id > 3"));
+        assertEquals(9, count("SELECT COUNT(DISTINCT category_id) FROM products"));
         assertEquals(9, count("SELECT COUNT(*) FROM vw_category"));
+        assertEquals("Nintendo", text("SELECT name FROM category WHERE id=3"));
     }
 
     @Test
@@ -143,6 +146,13 @@ public class MySqlMigrationIT {
         try (Statement statement = connection.createStatement(); ResultSet result = statement.executeQuery(sql)) {
             result.next();
             return result.getInt(1);
+        }
+    }
+
+    private String text(String sql) throws SQLException {
+        try (Statement statement = connection.createStatement(); ResultSet result = statement.executeQuery(sql)) {
+            result.next();
+            return result.getString(1);
         }
     }
 }

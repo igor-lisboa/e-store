@@ -50,7 +50,7 @@ public class RowMapperTest {
     @Test
     public void listItemKeepsExactDecimalPrices() {
         ProductListDTO item = RowMapper.productListItem(row("id", "3", "name", "Pad", "price", "19.90", "image", "x",
-                "category", "Wii", "available", "1"));
+                "category", "Nintendo", "available", "1"));
 
         assertEquals(Integer.valueOf(3), item.getId());
         assertEquals(new BigDecimal("19.90"), item.getPrice());

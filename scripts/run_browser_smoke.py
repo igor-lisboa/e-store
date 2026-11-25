@@ -47,7 +47,8 @@ def main():
             if result.returncode or environment.get('STORE_DATABASE_E2E') != '1':
                 return result.returncode
             for script in ('scripts/test_browser_store.py', 'scripts/test_browser_hostile.py',
-                           'scripts/test_browser_accessibility.py', 'scripts/test_browser_recovery.py'):
+                           'scripts/test_browser_accessibility.py', 'scripts/test_browser_responsive.py',
+                           'scripts/test_browser_recovery.py'):
                 result = subprocess.run([sys.executable, script], cwd=ROOT, env=environment, timeout=300)
                 if result.returncode:
                     return result.returncode

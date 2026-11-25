@@ -23,9 +23,9 @@ final class CatalogCategorySelection {
         String platform;
         String type = null;
         if (categoryId >= 1 && categoryId <= 3) {
-            platform = new String[] {"playstation", "xbox", "wii"}[categoryId - 1];
+            platform = new String[] {"playstation", "xbox", "nintendo"}[categoryId - 1];
         } else if (categoryId >= 4 && categoryId <= 12) {
-            platform = new String[] {"playstation", "xbox", "wii"}[(categoryId - 4) / 3];
+            platform = new String[] {"playstation", "xbox", "nintendo"}[(categoryId - 4) / 3];
             type = new String[] {"accessories", "consoles", "games"}[(categoryId - 4) % 3];
         } else {
             return;

@@ -23,6 +23,9 @@
         <link href="css/account.css" type="text/css" rel="stylesheet">
         <link href="css/account-forms.css" type="text/css" rel="stylesheet">
         <link href="css/account-profile.css" type="text/css" rel="stylesheet">
+        <link href="css/responsive-shell.css" type="text/css" rel="stylesheet">
+        <link href="css/responsive-content.css" type="text/css" rel="stylesheet">
+        <link href="css/responsive-breakpoints.css" type="text/css" rel="stylesheet">
         <script src="https://kit.fontawesome.com/24de11fb10.js" crossorigin="anonymous"></script>
     </head>
 
@@ -57,9 +60,9 @@
                         <a href="products?categoryId=7"><fmt:message key="ui.accessories"/></a>
                     </div>
                 </div>
-                <div class="dropdown wii">
-                    <button class="dropbtn" onclick="location.href = 'products?categoryId=3';">Wii</button>
-                    <div id="wii-menu" class="dropdown-content">
+                <div class="dropdown nintendo">
+                    <button class="dropbtn" onclick="location.href = 'products?categoryId=3';">Nintendo</button>
+                    <div id="nintendo-menu" class="dropdown-content">
                         <a href="products?categoryId=11"><fmt:message key="ui.consoles"/></a>
                         <a href="products?categoryId=12"><fmt:message key="ui.games"/></a>
                         <a href="products?categoryId=10"><fmt:message key="ui.accessories"/></a>

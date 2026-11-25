@@ -89,7 +89,7 @@
         <% if (!sel.equals("")) { %>
         <form action="product-admin" method="post">
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
-            <ul class="form-style-1" style="margin-left: 31px;">
+            <ul class="form-style-1">
                 <li>
                     <label for="field-quantity"><fmt:message key="ui.stockIncrement"/></label>
                     <input id="field-quantity" name="quantity" min="1" required type="number" maxlength="11" class="field-divided">

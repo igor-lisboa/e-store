@@ -1,0 +1,222 @@
+.products-main {
+    width: min(1500px, 100%);
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.products-filter {
+    position: sticky;
+    flex: 0 0 230px;
+    top: 90px;
+    width: auto;
+    margin: 24px 20px;
+}
+
+.products-item-filter input[type="search"] {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px;
+}
+
+.products-range input[type="range"] {
+    min-width: 0;
+    width: 100%;
+}
+
+.products-range input[type="number"] {
+    flex: 0 0 58px;
+    width: 58px;
+}
+
+.products-page {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    margin: 40px 24px 50px 0;
+}
+
+.products-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 24px;
+}
+
+.products-item {
+    min-width: 0;
+    margin: 0;
+}
+
+.products-item a img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0;
+    padding: 10px;
+    object-fit: contain;
+}
+
+.products-cart {
+    width: auto;
+}
+
+.container {
+    width: min(1200px, 100%);
+    gap: clamp(24px, 5vw, 72px);
+}
+
+.left-column, .right-column {
+    min-width: 0;
+}
+
+.left-column img {
+    display: block;
+    width: min(100%, 560px);
+    height: auto;
+    max-height: 560px;
+    margin: 40px auto;
+    object-fit: contain;
+}
+
+.product-description h1 {
+    overflow-wrap: anywhere;
+    font-size: clamp(32px, 5vw, 52px);
+}
+
+.product-rating {
+    gap: 32px;
+}
+
+.login-container {
+    width: min(1200px, 100%);
+    padding: clamp(16px, 4vw, 40px);
+}
+
+.login-column, .register-column {
+    min-width: 0;
+    margin: 40px 12px;
+}
+
+.sub-container {
+    padding: 10px clamp(12px, 4vw, 50px) 40px;
+}
+
+.group input, .form-style-1 .field-divided {
+    width: 100%;
+}
+
+.end-add-container, .account-details-container {
+    width: min(640px, calc(100% - 32px));
+    margin: 40px auto;
+}
+
+.end-group-container {
+    width: 100%;
+}
+
+.product-main-container {
+    width: min(1000px, calc(100% - 32px));
+    margin: 32px auto;
+    gap: clamp(24px, 5vw, 64px);
+}
+
+.product-left-container, .product-right-container {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.preview-image {
+    width: min(320px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 auto;
+}
+
+.preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.product-right-container h2, .product-left-container h2 {
+    margin: 0 0 24px;
+}
+
+.main-user-container {
+    width: min(1200px, calc(100% - 32px));
+    margin: 40px auto;
+}
+
+.right-row {
+    gap: 12px;
+}
+
+.left-row, .left-row p {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.user-info {
+    width: min(250px, 100%);
+}
+
+.end-grid, .product-grid {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 24px auto;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+}
+
+.end-grid > *, .product-grid > * {
+    min-width: 680px;
+}
+
+.orders-container {
+    margin: 24px 16px;
+}
+
+.cart-title {
+    position: static;
+    margin: 32px 5% 0;
+}
+
+.cart-product {
+    display: grid;
+    grid-template-columns: 150px minmax(180px, 1fr) repeat(4, minmax(75px, auto));
+    gap: 18px;
+}
+
+.cart-img, .cart-details {
+    width: auto;
+}
+
+.cart-img img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+}
+
+.confirma-container {
+    width: min(1100px, calc(100% - 32px));
+    margin: 40px auto;
+}
+
+.left-confirma, .right-confirma {
+    min-width: 0;
+}
+
+.radio-container {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+}
+
+.radio-container label {
+    overflow-wrap: anywhere;
+}
+
+.review-title {
+    overflow-wrap: anywhere;
+}
+

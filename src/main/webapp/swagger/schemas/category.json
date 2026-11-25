@@ -7,7 +7,9 @@
       "description": "Category ID."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "English hierarchical category label.",
+      "example": "Nintendo > Games"
     }
   }
 }

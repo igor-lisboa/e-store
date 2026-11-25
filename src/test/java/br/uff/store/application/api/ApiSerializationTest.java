@@ -51,12 +51,12 @@ public class ApiSerializationTest {
     public void categoryResponseUsesEnglishPropertyNames() {
         CategoryDTO category = new CategoryDTO();
         category.setId(5);
-        category.setName("Consoles");
+        category.setName("Nintendo > Games");
 
         JsonObject json = gson.toJsonTree(category).getAsJsonObject();
 
         assertEquals(2, json.size());
-        assertEquals("Consoles", json.get("name").getAsString());
+        assertEquals("Nintendo > Games", json.get("name").getAsString());
         assertFalse(json.has("nome"));
     }
 }

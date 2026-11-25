@@ -98,8 +98,8 @@ and open the template in the editor.
         <div class="img-btn"><a href="products?categoryId=2">Xbox</a></div>
     </div>
     <div class="sec-img">
-        <img alt="Wii" src="img/wii.jpg">
-        <div class="img-btn"><a href="products?categoryId=3">Wii</a></div>
+        <img alt="Nintendo" src="img/wii.jpg">
+        <div class="img-btn"><a href="products?categoryId=3">Nintendo</a></div>
     </div>
 </div>
 

@@ -16,12 +16,16 @@ Flyway tracks applied SQL migrations and checksums in `flyway_schema_history`. C
 - `migrations/V10__add_order_status_and_cancellation.sql`: `sales.status` (`PLACED`, `SHIPPED`, `CANCELLED`) and the `cancel_sale` procedure that restores stock.
 - `migrations/V11__add_payment_and_delivery_records.sql`: vendor-neutral `payments` and `deliveries` (with an address snapshot), the `place_order` procedure, and `checkout_cart` kept as a demo-default wrapper.
 - `migrations/V12__add_password_reset_tokens.sql`: `password_reset_tokens` (SHA-256 token hash, expiry in UTC, `used_at`, cascade delete with the account) for email password recovery (decision 4A).
+- `migrations/V13__rename_wii_category_to_nintendo.sql`: updates the legacy platform category value to `Nintendo` without changing historical migration files.
+- `dev-seeds/V14__seed_demo_catalog.sql`: adds 500 deterministic local catalog fixtures across every leaf category (450 game editions and 50 console/accessory products).
 
 Add a new `V<number>__description.sql` for each change. Never edit a migration already applied to a shared environment. SQL migrations are intentionally small and separated by responsibility. Flyway documentation describes [migration naming and execution](https://documentation.red-gate.com/fd/migrations-271585107.html).
 
 ## Local fixtures
 
 Local Compose enables development seeds. The sample emails are `admin@example.test` and `customer@example.test`; both use `development-password`. Stored values use PBKDF2 hashes. These are public test accounts, never production accounts.
+
+The expanded demonstration catalog uses official platform catalogs as title and product-family research. Editions, descriptions, prices, dates, and inventory are generated fixture values, not live commercial data. Images remain bundled local assets, so development does not depend on external hotlinks.
 
 For environments without sample accounts, configure `FLYWAY_LOCATIONS=filesystem:/flyway/sql/schema` on the migration runner before its first run. Reference data is always required; development seed data is optional.
 

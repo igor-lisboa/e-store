@@ -43,7 +43,9 @@ class StoreShoppingJourneyTest(unittest.TestCase):
                     self.assertNotIn('password', account)
                 categories = context.request.get('/api/categories/')
                 self.assertEqual(200, categories.status)
-                self.assertIn('Xbox > Games', {category['name'] for category in categories.json()})
+                category_names = {category['name'] for category in categories.json()}
+                self.assertIn('Xbox > Games', category_names)
+                self.assertIn('Nintendo > Games', category_names)
                 for path, status in {'/api/products/0': 400, '/api/products/invalid': 400,
                                      '/api/products/2147483647': 404, '/api/users/0': 400,
                                      '/api/users/2147483647': 404}.items():

@@ -39,7 +39,7 @@ public class ProductsServlet extends HttpServlet {
     private static final String ACCESSORIES_KEY = "accessories";
     private static final String GAMES_KEY = "games";
     private static final String XBOX_KEY = "xbox";
-    private static final String WII_KEY = "wii";
+    private static final String NINTENDO_KEY = "nintendo";
     private static final String PRODUCT_PAGE = "productPage";
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final String MAX_PAGE_KEY = "maxPage";
@@ -99,7 +99,7 @@ public class ProductsServlet extends HttpServlet {
 
             session.setAttribute(PLAYSTATION_KEY, (categories.contains(PLAYSTATION_KEY) ? CHECKED : ""));
             session.setAttribute(XBOX_KEY, (categories.contains(XBOX_KEY) ? CHECKED : ""));
-            session.setAttribute(WII_KEY, (categories.contains(WII_KEY) ? CHECKED : ""));
+            session.setAttribute(NINTENDO_KEY, (categories.contains(NINTENDO_KEY) ? CHECKED : ""));
             session.setAttribute(CONSOLES_KEY, (subcategories.contains(CONSOLES_KEY) ? CHECKED : ""));
             session.setAttribute(GAMES_KEY, (subcategories.contains(GAMES_KEY) ? CHECKED : ""));
             session.setAttribute(ACCESSORIES_KEY, (subcategories.contains(ACCESSORIES_KEY) ? CHECKED : ""));
@@ -169,9 +169,9 @@ public class ProductsServlet extends HttpServlet {
                 }
             }
 
-            if (session.getAttribute(WII_KEY) != null) {
-                if (session.getAttribute(WII_KEY).toString().equals(CHECKED) && !categories.contains(WII_KEY)) {
-                    categories.add(WII_KEY);
+            if (session.getAttribute(NINTENDO_KEY) != null) {
+                if (session.getAttribute(NINTENDO_KEY).toString().equals(CHECKED) && !categories.contains(NINTENDO_KEY)) {
+                    categories.add(NINTENDO_KEY);
                 }
             }
 

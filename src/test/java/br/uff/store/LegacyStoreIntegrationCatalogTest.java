@@ -43,7 +43,7 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
     public void deletingProductRemovesItFromLookupAndCatalog() throws Exception {
         products.deleteProductById(1);
         assertThrows(ResourceNotFoundException.class, () -> products.findProductById(1));
-        assertEquals(2, products.listAdminProducts().size());
+        assertEquals(502, products.listAdminProducts().size());
         assertFalse(products.listAdminProducts().stream().anyMatch(product -> product.getId() == 1));
     }
 
@@ -63,6 +63,7 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
         ProductFilterDTO filter = new ProductFilterDTO();
         filter.setPageNumber(1);
         filter.setPageSize(10);
+        filter.setSearch("boundary");
         filter.setMinimumPrice(new BigDecimal("20.10"));
         filter.setMaximumPrice(new BigDecimal("28.80"));
         List<Integer> ids = products.listStorefrontProducts(filter).getItems().stream()
@@ -84,11 +85,12 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
 
     @Test
     public void storefrontListsOutOfStockProductsMarkedUnavailable() throws Exception {
-        ProductDTO inStock = createProduct("Available item", new BigDecimal("10.00"), 3);
-        ProductDTO soldOut = createProduct("Sold out item", new BigDecimal("10.00"), 0);
+        ProductDTO inStock = createProduct("Availability fixture stocked", new BigDecimal("10.00"), 3);
+        ProductDTO soldOut = createProduct("Availability fixture sold out", new BigDecimal("10.00"), 0);
         ProductFilterDTO filter = new ProductFilterDTO();
         filter.setPageNumber(1);
         filter.setPageSize(100);
+        filter.setSearch("Availability fixture");
         Map<Integer, ProductListDTO> listed = products.listStorefrontProducts(filter).getItems().stream()
                 .collect(Collectors.toMap(ProductListDTO::getId, product -> product));
         assertTrue(listed.get(inStock.getId()).isAvailable());
@@ -102,6 +104,6 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
         assertEquals(9, categories.size());
         assertEquals("Playstation > Consoles", categories.get(5));
         assertEquals("Xbox > Games", categories.get(9));
-        assertEquals("Wii > Accessories", categories.get(10));
+        assertEquals("Nintendo > Accessories", categories.get(10));
     }
 }

@@ -8,9 +8,10 @@
 - Several operations wrap low-level failures in `StoreException`.
 - Each DAO operation now owns its connection, statement, and result set through try-with-resources. A transaction uses one private connection, rolls back on failure, and retains rollback failures as suppressed exceptions. Repository cleanup no longer overrides the original error.
 - H2-based JDBC integration tests verify commit, rollback, null mapping, and shared-DAO concurrent operations. These tests do not replace MySQL migration and stored-procedure verification.
-- The `mysql-integration` profile applies, validates, and reapplies seven migrations against an explicitly disposable MySQL schema. It verifies atomic checkout rollback, decimal totals, duplicate-sale prevention, ownership, and stock contention.
+- The `mysql-integration` profile applies, validates, and reapplies all 14 schema and development-seed migrations against an explicitly disposable MySQL schema. It verifies atomic checkout rollback, decimal totals, duplicate-sale prevention, ownership, stock contention, the Nintendo category rename, and the exact 500-product catalog expansion.
 - Legacy integration tests and Cucumber reset the disposable schema before each case. Both database profiles reject URLs whose schema is not exactly `e_store_integration`.
 - V7 renames the historical misspelled review table to `product_reviews`. Earlier applied migrations remain unchanged.
+- V13 renames the category value `Wii` to `Nintendo` without rewriting historical migrations. Optional development seed V14 inserts 500 deterministic catalog fixtures across all nine leaf categories.
 
 ## Requirements
 

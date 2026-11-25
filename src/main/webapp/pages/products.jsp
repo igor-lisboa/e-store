@@ -34,7 +34,7 @@
                 <p><fmt:message key="ui.categories"/></p>
                 <input ${playstation} onchange="document.getElementById('frmProducts').submit()" name="category" id="playstation" type="checkbox" value="playstation"><label for="playstation">Playstation</label><br>
                 <input ${xbox} onchange="document.getElementById('frmProducts').submit()" name="category" id="xbox" type="checkbox" value="xbox"><label for="xbox">Xbox</label><br>
-                <input ${wii} onchange="document.getElementById('frmProducts').submit()" name="category" id="wii" type="checkbox" value="wii"><label for="wii">Wii</label><br>
+                <input ${nintendo} onchange="document.getElementById('frmProducts').submit()" name="category" id="nintendo" type="checkbox" value="nintendo"><label for="nintendo">Nintendo</label><br>
             </div>
 
             <div class="products-item-filter">

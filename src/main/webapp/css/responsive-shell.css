@@ -1,0 +1,145 @@
+/* Final layout layer: fluid sizes and breakpoint-specific reflow for every JSP route. */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100%;
+    height: auto;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    color: #25262a;
+    background: #fff;
+}
+
+img {
+    max-width: 100%;
+}
+
+button, input, select, textarea {
+    max-width: 100%;
+    font: inherit;
+}
+
+button, a, input, select {
+    touch-action: manipulation;
+}
+
+header {
+    position: sticky;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    top: 0;
+    width: 100%;
+    padding: 14px clamp(16px, 4vw, 64px);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.fundo-branco {
+    display: none;
+}
+
+.logo-div, .ps, .nintendo {
+    width: auto;
+    margin: 0;
+}
+
+.logo-div a {
+    float: none;
+    display: inline-block;
+    font-size: 22px;
+}
+
+.dropdown-menu {
+    flex: 1 1 360px;
+    justify-content: center;
+}
+
+.dropbtn {
+    min-height: 44px;
+}
+
+.canto-header {
+    display: flex;
+    flex: 0 1 auto;
+    gap: 14px;
+}
+
+.consulta-header, .login-header, .cart-header {
+    margin: 0;
+    padding: 0;
+}
+
+#search input[type="search"] {
+    width: clamp(92px, 12vw, 180px);
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid #a8adb3;
+    border-radius: 20px;
+}
+
+.login-header a, .cart-header a {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+}
+
+.language-switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.language-switcher select {
+    min-height: 40px;
+}
+
+.store-message {
+    width: 100%;
+    padding: 10px 16px;
+    text-align: center;
+}
+
+footer {
+    position: static;
+    width: 100%;
+    margin-top: auto;
+}
+
+.lista-deitada {
+    flex-wrap: wrap;
+}
+
+.slideshow-container {
+    margin: 0;
+}
+
+.mySlides > div:first-child {
+    height: clamp(260px, 55vw, 600px) !important;
+}
+
+.sec-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 3vw, 40px);
+}
+
+.sec-img {
+    position: relative;
+    min-width: 0;
+}
+
+.sec-img img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+

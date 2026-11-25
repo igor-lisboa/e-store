@@ -1,0 +1,250 @@
+@media (max-width: 900px) {
+    header {
+        justify-content: space-between;
+    }
+
+    .dropdown-menu {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .products-filter {
+        flex-basis: 190px;
+    }
+
+    .container, .product-rating, .product-main-container, .confirma-container {
+        flex-direction: column;
+    }
+
+    .container {
+        margin-top: 0;
+    }
+
+    .left-column, .right-column, .left-rating, .right-rating,
+    .left-confirma, .right-confirma {
+        width: 100%;
+    }
+
+    .right-column {
+        margin-top: 0;
+    }
+
+    .right-confirma, .left-confirma {
+        margin: 0;
+    }
+
+    .main-user-container {
+        flex-direction: column;
+    }
+
+    .left-user-container, .right-user-container {
+        width: 100%;
+        border-right: 0;
+    }
+
+    .cart-column {
+        display: none;
+    }
+
+    .cart-product {
+        grid-template-columns: 120px 1fr repeat(2, auto);
+    }
+
+    .cart-img img {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+@media (max-width: 620px) {
+    header {
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .logo-div a {
+        font-size: 18px;
+    }
+
+    .canto-header {
+        flex: 1 1 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #search {
+        flex: 1 1 120px;
+    }
+
+    #search input[type="search"] {
+        width: 100%;
+    }
+
+    .language-switcher label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .dropdown-menu {
+        gap: 2px;
+    }
+
+    .dropdown {
+        flex: 1 1 0;
+    }
+
+    .dropbtn {
+        width: 100%;
+        padding: 10px 4px;
+        font-size: 12px;
+    }
+
+    .dropdown-content {
+        min-width: 130px;
+    }
+
+    .slideshow-container .text {
+        bottom: 16px;
+        margin-left: 16px;
+    }
+
+    .sec-container {
+        grid-template-columns: 1fr;
+        margin: 24px 16px;
+    }
+
+    .products-main {
+        display: block;
+    }
+
+    .products-filter {
+        position: static;
+        width: auto;
+        margin: 20px 16px;
+    }
+
+    .products-page {
+        margin: 24px 16px 40px;
+    }
+
+    .products-container {
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 12px;
+    }
+
+    .products-title, .products-details, .products-price, .products-unavailable {
+        overflow-wrap: anywhere;
+    }
+
+    .products-cart {
+        display: none !important;
+    }
+
+    .product-rating {
+        width: calc(100% - 32px);
+        margin: 32px 16px;
+    }
+
+    .review-list li {
+        align-items: center;
+    }
+
+    .count {
+        margin-right: 0;
+    }
+
+    .login-container {
+        flex-direction: column;
+    }
+
+    .login-column, .register-column {
+        width: 100%;
+        margin: 12px 0;
+        padding: 20px 12px;
+    }
+
+    .right-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .user-info {
+        height: 130px;
+    }
+
+    .cart-product {
+        grid-template-columns: 90px 1fr;
+        padding: 14px 0;
+    }
+
+    .cart-img img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .cart-price, .cart-qnt, .cart-remove, .cart-total {
+        margin-top: 0;
+    }
+
+    .total-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+    }
+
+    .total-item label, .total-item p, .total-item > * {
+        margin: 0;
+    }
+
+    .total-keep, .total-checkout {
+        width: 100%;
+        margin: 12px 0 0;
+    }
+
+    .form-style-1 {
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+    }
+
+    .form-style-1 li button, .standard-btn, .confirma-compra {
+        min-height: 44px;
+    }
+
+    .credit-card-img {
+        max-width: 45%;
+    }
+
+    .devs {
+        display: block;
+    }
+}
+
+@media (max-width: 359px) {
+    .language-switcher {
+        flex-basis: 100%;
+        justify-content: center;
+    }
+
+    .right-row {
+        grid-template-columns: 1fr;
+    }
+
+    .products-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    header {
+        position: relative;
+    }
+
+    .mySlides > div:first-child {
+        height: 70vh !important;
+    }
+}
+

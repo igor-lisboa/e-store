@@ -1,7 +1,6 @@
 <%@ include file="/WEB-INF/fragments/messages.jspf" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-</body>
 <footer>
 
     <span><fmt:message key="ui.credits"/></span>
@@ -20,4 +19,5 @@
         </li>
     </ul>
 </footer>
+</body>
 </html>
