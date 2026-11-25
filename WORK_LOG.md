@@ -22,6 +22,10 @@ Evidence: default 283 tests pass; MySQL profile 46 integration tests pass (8 new
 
 Local notes: Docker Desktop had to be started; the Compose `app` service runs `mvn clean package` on the bind-mounted repository, which deletes `target/`, so rebuild locally afterwards. Set `MYSQL_PORT` and `MVN_PORT` if 3306 or 8181 is taken. Reset emails from Compose are written to `./outbox` (git-ignored).
 
+## Follow-up 3 (2026-11-25)
+
+`scripts/start.sh` now needs no variables: default MySQL host port 3316 (no clash with a MySQL on 3306), the Compose build skips tests (`-DskipTests`), and the script prints the store address first and again in a banner when the server answers (default http://localhost:8181). New `scripts/test.sh [quick|unit|contracts|openapi|mysql|legacy|failure|browser|all]` runs the checks, starts and removes a throwaway MySQL container when no `TEST_MYSQL_*` is set, and prints a summary. Verified: `start.sh -d` with no variables (migrations applied, tests skipped, banner shown), `test.sh quick mysql` (283 unit, 46 MySQL pass), `test.sh contracts openapi failure`. `test.sh legacy` and `browser` were not run through the new script (they ran earlier through the local helpers).
+
 ## Earlier checkpoint (2026-11-18)
 
 Updated 2026-11-18. The user authorized autonomous pending work and asked for completed/missing tracking and a commit title. Changes are uncommitted; preserve the entire working tree. No subagents were used.

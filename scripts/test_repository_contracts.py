@@ -162,6 +162,15 @@ class RepositoryContractsTest(unittest.TestCase):
         for source in list((ROOT / 'src').rglob('*.java')):
             self.assertNotRegex(source.read_text(encoding='utf-8'), abbreviated, str(source))
 
+    def test_starting_the_store_never_runs_tests_and_has_a_separate_test_script(self):
+        compose = (ROOT / 'docker-compose.yml').read_text(encoding='utf-8')
+        self.assertIn('-DskipTests', compose)
+        start = (ROOT / 'scripts/start.sh').read_text(encoding='utf-8')
+        self.assertNotRegex(start, r'mvn|pytest|unittest')
+        self.assertTrue((ROOT / 'scripts/test.sh').exists())
+        self.assertIn('${MYSQL_PORT:-3316}', compose)
+        self.assertIn('MYSQL_PORT=3316', (ROOT / '.env.example').read_text(encoding='utf-8'))
+
     def test_every_demo_adapter_is_listed_as_not_production_ready(self):
         document = (ROOT / 'docs/non-production-readiness.md').read_text(encoding='utf-8')
         adapters = list((ROOT / 'src/main/java/br/uff/store/infrastructure/gateways').glob('*.java'))

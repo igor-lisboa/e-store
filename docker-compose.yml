@@ -5,7 +5,7 @@ services:
     image: maven:3.9-eclipse-temurin-8
     working_dir: /workspace
     command: >
-      sh -c "mvn -B clean package
+      sh -c "mvn -B -DskipTests clean package
       && java -jar target/dependency/webapp-runner.jar
       --port ${MVN_PORT:-8181} target/e-store-1.0.1.war"
     volumes:
@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
     command: --skip-log-bin
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${MYSQL_PORT:-3316}:3306"
     volumes:
       - mysql-data-v8:/var/lib/mysql
       - ./database/mycustom.cnf:/etc/mysql/conf.d/custom.cnf:ro

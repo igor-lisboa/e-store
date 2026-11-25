@@ -12,9 +12,11 @@ Install Docker Engine with Compose v2, or Docker Desktop. From a POSIX shell at 
 sh scripts/start.sh
 ```
 
-On Windows, use Git Bash or WSL with Docker integration. Open [http://localhost:8181](http://localhost:8181) after the build finishes. The script creates `.env` from `.env.example` if needed. Compose waits for MySQL health, applies migrations and local fixtures, runs default tests, builds the WAR, and starts Tomcat. Java and Maven are supplied by the container.
+On Windows, use Git Bash or WSL with Docker integration. The script prints the address, and prints it again in a banner when the server is really answering. By default that is **[http://localhost:8181](http://localhost:8181)**. The script creates `.env` from `.env.example` if needed. Compose waits for MySQL health, applies migrations and local fixtures, builds the WAR **without running tests**, and starts Tomcat. Java and Maven are supplied by the container. The first start downloads dependencies and takes several minutes; later starts are faster.
 
-Default ports are 8181 for the store and 3306 for MySQL. Change `MVN_PORT` or `MYSQL_PORT` in `.env` if occupied. Configuration passwords are local development defaults; use independent secrets for any other environment.
+Default ports are 8181 for the store and 3316 for MySQL (chosen to avoid clashing with a MySQL already using 3306). Change `MVN_PORT` or `MYSQL_PORT` in `.env`, or set them in the shell, if either is occupied; no variable is needed otherwise. Configuration passwords are local development defaults; use independent secrets for any other environment.
+
+To run the tests, use `sh scripts/test.sh` (see [Tests and build verification](#tests-and-build-verification)); starting the store never runs them.
 
 | Local account | Password | Role |
 | --- | --- | --- |
@@ -29,7 +31,7 @@ docker compose down
 docker compose run --rm migrate validate
 ```
 
-Password-reset emails are demo files: the Compose app writes them to `./outbox` (open the newest file for the link); nothing is sent. Everything that must change before real use is listed in [docs/non-production-readiness.md](docs/non-production-readiness.md). If port 3306 or 8181 is taken, set `MYSQL_PORT` or `MVN_PORT`.
+Password-reset emails are demo files: the Compose app writes them to `./outbox` (open the newest file for the link); nothing is sent. Everything that must change before real use is listed in [docs/non-production-readiness.md](docs/non-production-readiness.md). 
 
 The database persists in `mysql-data-v8`. For a disposable local reset, `docker compose down -v` deletes Compose-managed volumes, including database data and Maven cache. Start again to recreate fixtures. Existing MySQL 5.7 volumes are preserved under their old name; do not mount them directly into MySQL 8. Read [database/README.md](database/README.md) before adopting valuable data.
 
@@ -38,7 +40,7 @@ The database persists in `mysql-data-v8`. For a disposable local reset, `docker 
 Compose passes database settings through environment variables. For a host Java process, set `MYSQL_CONNECTION_STRING`, `MYSQL_USER`, and `MYSQL_PASSWORD`; for example:
 
 ```text
-jdbc:mysql://127.0.0.1:3306/e_store?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+jdbc:mysql://127.0.0.1:3316/e_store?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 ```
 
 Install Java 8, Maven 3.9.9, MySQL 8.4.13, and Flyway 9.22.3. Migrate an empty schema using `database/migrations` and optionally `database/dev-seeds`. `.env.local` is a sample for host settings; copy it to ignored `.env` and adjust it. Environment variables take precedence. Then:
@@ -54,7 +56,8 @@ Windows maintainers can optionally run `python scripts/bootstrap-local-tools.py`
 
 | Symptom | Check |
 | --- | --- |
-| Port already allocated | Change the relevant port in `.env`, then restart Compose. |
+| Port already allocated | Change `MYSQL_PORT` or `MVN_PORT` in `.env`, run `docker compose down` to remove the half-created containers, then start again. |
+| `UnknownHostException: database` from `migrate` | Stale containers or network from an earlier failed start. Run `docker compose down`, then start again. |
 | Database connection refused during host development | Confirm the published MySQL port, JDBC host, schema, and environment variables. Compose uses `database`; host Java uses `127.0.0.1`. |
 | Flyway refuses an existing schema | Follow the reviewed adoption procedure in `database/README.md`; do not enable automatic baselining for unknown data. |
 | Form returns HTTP 403 after logout or expiry | Reload the form to obtain a token for the current session. |
@@ -62,6 +65,16 @@ Windows maintainers can optionally run `python scripts/bootstrap-local-tools.py`
 | Browser executable is missing | Run the documented Playwright install command or select an installed browser channel. |
 
 ## Tests and build verification
+
+One command runs the checks. It is separate from `scripts/start.sh` on purpose:
+
+```sh
+sh scripts/test.sh              # quick: unit + contracts + openapi
+sh scripts/test.sh all          # everything below
+sh scripts/test.sh mysql legacy # pick suites: quick unit contracts openapi mysql legacy failure browser all
+```
+
+It prints a pass/fail summary and exits non-zero when anything failed or was skipped. The database suites (`mysql`, `legacy`, `browser`) need a disposable MySQL schema named `e_store_integration`. If you do not export `TEST_MYSQL_URL`, `TEST_MYSQL_USER` and `TEST_MYSQL_PASSWORD`, the script starts a throwaway MySQL container with Docker on port 3317 (`TEST_DB_PORT` changes it), uses it, and removes it. The browser suite also needs Playwright (below). The details of each suite follow.
 
 Default verification needs Java 8 and Maven:
 
