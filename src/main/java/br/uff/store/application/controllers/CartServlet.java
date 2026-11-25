@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class CartServlet extends HttpServlet {
 
             if (productId != null) {
                 cartService.addProductToCart(cartId, productId);
-                session.setAttribute("msg", "Product added to the cart.");
+                session.setAttribute("msg", FlashMessages.text("Product added to the cart.", FlashMessages.localeOf(session)));
             }
 
             if (request.getParameter("productId") != null) {
@@ -131,7 +132,7 @@ public class CartServlet extends HttpServlet {
                     }
                     
                     if (addressId == null) {
-                        session.setAttribute("msg", "Select an address.");
+                        session.setAttribute("msg", FlashMessages.text("Select an address.", FlashMessages.localeOf(session)));
                         session.setAttribute("addressId", null);
                         request.setAttribute(TOTAL_PRICE, null);
                         response.sendRedirect("cart");
@@ -155,7 +156,7 @@ public class CartServlet extends HttpServlet {
 
             request.getRequestDispatcher("pages/cart.jsp").forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect(PRODUCTS);
         }
     }

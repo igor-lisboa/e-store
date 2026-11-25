@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -17,26 +18,28 @@ import javax.servlet.http.HttpSession;
 import br.uff.store.core.dtos.PaginationDTO;
 import br.uff.store.core.dtos.SaleDTO;
 import br.uff.store.core.exceptions.StoreException;
-import br.uff.store.core.interfaces.services.ICartService;
 import br.uff.store.core.interfaces.services.IAddressService;
 import br.uff.store.core.interfaces.services.ISaleService;
-import br.uff.store.core.services.CartService;
-import br.uff.store.core.services.AddressService;
-import br.uff.store.core.services.SaleService;
 import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
     private final ISaleService saleService;
-    private final ICartService cartService;
     private final IAddressService addressService;
     private final Helper helper;
+    private final boolean demoCheckoutAllowed;
 
     public CheckoutServlet() {
-        saleService = StoreServices.sales();
-        cartService = StoreServices.carts();
-        addressService = StoreServices.addresses();
-        helper = new Helper();
+        this(StoreServices.sales(), StoreServices.addresses(), new Helper(),
+                Boolean.parseBoolean(System.getenv("ALLOW_DEMO_CHECKOUT")));
+    }
+
+    CheckoutServlet(ISaleService saleService, IAddressService addressService, Helper helper,
+            boolean demoCheckoutAllowed) {
+        this.saleService = saleService;
+        this.addressService = addressService;
+        this.helper = helper;
+        this.demoCheckoutAllowed = demoCheckoutAllowed;
     }
 
     /**
@@ -68,10 +71,6 @@ public class CheckoutServlet extends HttpServlet {
                 }
 
                 PaginationDTO<List<SaleDTO>> sales = saleService.listUserSales(userId, 5, pageNumber);
-                for(SaleDTO sale : sales.getItems()) {
-                    sale.setCartProducts(cartService.listCartProducts(sale.getCartId()));
-                    sale.setAddress(addressService.findAddressById(sale.getAddressId()));
-                }
                 request.setAttribute("sales", sales);
 
                 request.getRequestDispatcher("pages/orders.jsp").forward(request, response);
@@ -98,8 +97,12 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             switch (action) {
+                case "cancelOrder": {
+                    cancelOrder(request, response, session, userId);
+                    return;
+                }
                 case "paymentSuccess": {
-                    if (!Boolean.parseBoolean(System.getenv("ALLOW_DEMO_CHECKOUT"))) {
+                    if (!demoCheckoutAllowed) {
                         throw new StoreException("Demo checkout is disabled. Verified online payments are not configured.");
                     }
                     saleService.recordSale(userId, cartId, addressId);
@@ -122,9 +125,23 @@ public class CheckoutServlet extends HttpServlet {
 
             request.getRequestDispatcher("pages/payment.jsp").forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect("cart");
         }
+    }
+
+    private void cancelOrder(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            Integer userId) throws IOException {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+        try {
+            saleService.cancelSale(userId, helper.tryParseInteger(request.getParameter("orderId")));
+        } catch (StoreException failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
+        }
+        response.sendRedirect("checkout?history");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

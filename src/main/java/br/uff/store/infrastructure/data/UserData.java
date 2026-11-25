@@ -32,7 +32,7 @@ public class UserData implements IUserData {
             if (result.isEmpty()) {
                 throw new ResourceNotFoundException("User");
             }
-            return new UserDTO(result.get(0));
+            return RowMapper.user(result.get(0));
         } catch (ResourceNotFoundException missing) {
             throw missing;
         } catch (Exception e) {
@@ -46,7 +46,7 @@ public class UserData implements IUserData {
             Object[] bind = {};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users", bind);
             List<UserDTO> mappedResults = new ArrayList<>();
-            rows.forEach(user -> mappedResults.add(new UserDTO(user)));
+            rows.forEach(user -> mappedResults.add(RowMapper.user(user)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the user database operation.", e);
@@ -69,7 +69,7 @@ public class UserData implements IUserData {
             Object[] bind = {email};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query(
                     "SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users WHERE email=? LIMIT 1", bind);
-            return rows.isEmpty() ? null : new UserDTO(rows.get(0));
+            return rows.isEmpty() ? null : RowMapper.user(rows.get(0));
         } catch (Exception e) {
             throw new StoreException("Failed to look up account credentials.");
         }

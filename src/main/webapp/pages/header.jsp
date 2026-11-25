@@ -71,7 +71,7 @@
                 <div class="consulta-header">
                     <form id="search" method="POST" action="products">
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
-                        <input name="search" type="search" placeholder="${searchLabel}" required>
+                        <input name="search" type="search" aria-label="${searchLabel}" placeholder="${searchLabel}" required>
                     </form>
                 </div>
 

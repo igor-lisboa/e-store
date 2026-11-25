@@ -1,7 +1,6 @@
 package br.uff.store.core.dtos;
 
 import java.util.Date;
-import java.util.Map;
 
 
 public class CartDTO extends BaseDTO {
@@ -12,17 +11,6 @@ public class CartDTO extends BaseDTO {
     private Date createdAt;
 
     public CartDTO() {
-    }
-
-    public CartDTO(Map<String, Object> cart) {
-        this.setId(Integer.valueOf(String.valueOf(cart.get("id"))));
-        this.setIp(String.valueOf(cart.get("ip")));
-        if (cart.get("userId") == null) {
-            this.setUserId(null);
-        } else {
-            this.setUserId(Integer.valueOf(String.valueOf(cart.get("userId"))));
-        }
-        this.setCreatedAt(DtoValues.date(cart.get("createdAt")));
     }
 
     public void setCreatedAt(Date createdAt) {

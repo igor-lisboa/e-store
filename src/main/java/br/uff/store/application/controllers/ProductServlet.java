@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -27,9 +28,13 @@ public class ProductServlet extends HttpServlet {
     private final Helper helper;
 
     public ProductServlet() {
-        helper = new Helper();
-        productService = StoreServices.products();
-        reviewService = StoreServices.reviews();
+        this(StoreServices.products(), StoreServices.reviews(), new Helper());
+    }
+
+    ProductServlet(IProductService productService, IReviewService reviewService, Helper helper) {
+        this.productService = productService;
+        this.reviewService = reviewService;
+        this.helper = helper;
     }
 
     /**
@@ -57,7 +62,7 @@ public class ProductServlet extends HttpServlet {
             if (session.getAttribute(PRODUCT_ID) != null) {
                 productId = helper.tryParseInteger(session.getAttribute(PRODUCT_ID).toString());
             } else {
-                session.setAttribute("msg", "Please select a product.");
+                session.setAttribute("msg", FlashMessages.text("Please select a product.", FlashMessages.localeOf(session)));
                 response.sendRedirect("products");
                 return;
             }
@@ -74,7 +79,7 @@ public class ProductServlet extends HttpServlet {
                 }
 
                 if (userId == null) {
-                    session.setAttribute("msg", "Sign in to save a favorite.");
+                    session.setAttribute("msg", FlashMessages.text("Sign in to save a favorite.", FlashMessages.localeOf(session)));
                     response.sendRedirect("account?redirect=product");
                     return;
                 } else {
@@ -85,11 +90,11 @@ public class ProductServlet extends HttpServlet {
                 }
             }
             request.setAttribute("product", productService.getCustomerProduct(productId, userId));
-            request.setAttribute("avaliacoes", reviewService.listProductReviews(productId));
+            request.setAttribute("reviews", reviewService.listProductReviews(productId));
 
             request.getRequestDispatcher("pages/product.jsp").forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect("products");
         }
     }

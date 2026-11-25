@@ -19,9 +19,13 @@
     String sel = request.getParameter("selectedId");
 %>
 
+<fmt:message key="ui.pageTitle.addressDetails" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Address details"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.confirmDeleteAddress" var="js_confirmDeleteAddress"/>
+<fmt:message key="ui.js.postalNotFound" var="js_postalNotFound"/>
+<fmt:message key="ui.js.postalInvalid" var="js_postalInvalid"/>
 
 <div class="end-add-container">
     <form action="addresses" method="post">
@@ -29,52 +33,52 @@
 
         <div class="end-group-container">
             <div class="group">
-                <input value="<%= Html.escape(address.getName()) %>" name="name" required type="text" maxlength="255" />
+                <input id="field-name" value="<%= Html.escape(address.getName()) %>" name="name" required type="text" maxlength="255" />
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label><fmt:message key="ui.addressName"/></label>
+                <label for="field-name"><fmt:message key="ui.addressName"/></label>
             </div>
 
             <div class="group">
                 <input value="<%= address.getPostalCode()%>" name="zipcode" required type="number" maxlength="11" id="postalCode" onblur="lookupPostalCode(this.value);"/>
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label><fmt:message key="ui.postalCode"/></label>
+                <label for="postalCode"><fmt:message key="ui.postalCode"/></label>
             </div>
 
             <div class="group">
                 <input value="<%= Html.escape(address.getStreetAddress()) %>" name="address" required type="text" id="street" maxlength="255" />
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label><fmt:message key="ui.streetAddress"/></label>
+                <label for="street"><fmt:message key="ui.streetAddress"/></label>
             </div>
 
             <div class="group">
                 <input value="<%= Html.escape(address.getCity()) %>" name="city" required type="text" id="city"  maxlength="255" />
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label><fmt:message key="ui.city"/></label>
+                <label for="city"><fmt:message key="ui.city"/></label>
             </div>
 
             <div class="group">
                 <input value="<%= Html.escape(address.getState()) %>" name="state" required type="text" id="uf" maxlength="255" />
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label><fmt:message key="ui.state"/></label>
+                <label for="uf"><fmt:message key="ui.state"/></label>
             </div>
 
             <div class="group">
-                <input name="country" required type="text" readonly value="<%= Html.escape(address.getCountry()) %>" maxlength="255" />
+                <input id="field-country" name="country" required type="text" readonly value="<%= Html.escape(address.getCountry()) %>" maxlength="255" />
                 <span class="highlight"></span>
                 <span class="bar"></span>
-                <label></label>
+                <label for="field-country"><fmt:message key="ui.country"/></label>
             </div>
         </div>
 
         <button class="standard-btn" name="action" formnovalidate value="clear"><fmt:message key="ui.back"/></button>
         <button class="standard-btn" name="action" value="save" type="submit"><fmt:message key="ui.saveAction"/></button>
         <% if (!sel.equals("")) { %>
-        <button class="standard-btn" type="submit" name="action" value="delete" formnovalidate onclick="return confirm('Delete this address?');false;"><fmt:message key="ui.delete"/></button>
+        <button class="standard-btn" type="submit" name="action" value="delete" formnovalidate onclick="return confirm('${js_confirmDeleteAddress}');false;"><fmt:message key="ui.delete"/></button>
         <% }%>
     </form>
 </div>
@@ -97,7 +101,7 @@
         else {
 
             clearPostalAddress();
-            alert("Postal code not found.");
+            alert("${js_postalNotFound}");
         }
     }
 
@@ -125,7 +129,7 @@
             else {
 
                 clearPostalAddress();
-                alert("Invalid Brazilian postal code.");
+                alert("${js_postalInvalid}");
             }
         } //end if.
         else {

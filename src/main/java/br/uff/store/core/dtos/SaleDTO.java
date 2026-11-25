@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 public class SaleDTO extends BaseDTO {
@@ -15,19 +14,33 @@ public class SaleDTO extends BaseDTO {
     private Date createdAt;
     private Integer addressId;
     private Integer userId;
-    private List<CartItemDTO> cartProducts;
+    private List<SaleLineDTO> lines;
+    private String status = SaleStatus.PLACED;
+    private Date cancelledAt;
+    private String paymentProvider;
+    private String paymentStatus;
+    private String deliveryMethod;
+    private String trackingCode;
     private AddressDTO address;
 
     public SaleDTO() {
     }
 
-    public SaleDTO(Map<String, Object> sale) {
-        this.setId(Integer.valueOf(String.valueOf(sale.get("id"))));
-        this.setCartId(Integer.valueOf(String.valueOf(sale.get("cartId"))));
-        this.setTotalPrice(new BigDecimal(String.valueOf(sale.get("totalPrice"))));
-        this.setCreatedAt(DtoValues.date(sale.get("createdAt")));
-        this.setAddressId(Integer.valueOf(String.valueOf(sale.get("addressId"))));
-        this.setUserId(Integer.valueOf(String.valueOf(sale.get("userId"))));
+    /** Payment vendor name recorded at checkout, for example "demo". */
+    public String getPaymentProvider() {
+        return paymentProvider;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
     }
 
     public AddressDTO getAddress() {
@@ -38,12 +51,48 @@ public class SaleDTO extends BaseDTO {
         this.address = address;
     }
 
-    public void setCartProducts(List<CartItemDTO> cartProducts) {
-        this.cartProducts = cartProducts;
+    public void setLines(List<SaleLineDTO> lines) {
+        this.lines = lines;
     }
 
-    public List<CartItemDTO> getCartProducts() {
-        return cartProducts;
+    public List<SaleLineDTO> getLines() {
+        return lines;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setCancelledAt(Date cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public void setPaymentProvider(String paymentProvider) {
+        this.paymentProvider = paymentProvider;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
+    }
+
+    public Date getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public boolean isCancellable() {
+        return SaleStatus.PLACED.equals(status);
     }
 
     public Integer getCartId() {

@@ -22,7 +22,7 @@ public class AddressData implements IAddressData {
         try {
             Object[] bind = {id};
             List<HashMap<String, Object>> result = this.mysqlDAO.query("SELECT id, name AS name, user_id AS userId, zipcode AS postalCode, address AS streetAddress, city AS city, state AS state, country AS country FROM address WHERE id=?", bind);
-            return new AddressDTO(result.get(0));
+            return RowMapper.address(result.get(0));
         } catch (Exception e) {
             throw new StoreException("Unable to complete the address database operation.", e);
         }
@@ -64,7 +64,7 @@ public class AddressData implements IAddressData {
             Object[] bind = {userId};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, name AS name, user_id AS userId, zipcode AS postalCode, address AS streetAddress, city AS city, state AS state, country AS country FROM address WHERE user_id=?", bind);
             List<AddressDTO> mappedResults = new ArrayList<>();
-            rows.forEach(address -> mappedResults.add(new AddressDTO(address)));
+            rows.forEach(address -> mappedResults.add(RowMapper.address(address)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the address database operation.", e);

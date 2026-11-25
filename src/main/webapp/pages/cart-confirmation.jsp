@@ -27,8 +27,9 @@
     java.math.BigDecimal totalPrice = new java.math.BigDecimal(session.getAttribute("totalPrice").toString());
 %>
 
+<fmt:message key="ui.pageTitle.checkout" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Checkout"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
 
 <main class="confirma-container">

@@ -6,9 +6,12 @@
 <%@page import="br.uff.store.core.dtos.ProductListDTO"%>
 <%@page import="br.uff.store.core.dtos.PaginationDTO"%>
 <%@page import="java.util.List"%>
+<fmt:message key="ui.pageTitle.products" var="pageTitle"/>
+<fmt:message key="ui.searchPlaceholder" var="searchPlaceholder"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Products"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.priceRange" var="js_priceRange"/>
 <%
     PaginationDTO<List<ProductListDTO>> products = new PaginationDTO<List<ProductListDTO>>();
     if (request.getAttribute("products") != null) {
@@ -25,7 +28,7 @@
 
             <div class="products-item-filter">
                 <p><fmt:message key="ui.searchLabel"/></p>
-                <input name="search" value="${fn:escapeXml(search)}" type="search" placeholder="Search..." onchange="document.getElementById('frmProducts').submit()">
+                <input name="search" aria-label="${searchPlaceholder}" value="${fn:escapeXml(search)}" type="search" placeholder="${searchPlaceholder}" onchange="document.getElementById('frmProducts').submit()">
             </div>
             <div class="products-item-filter">
                 <p><fmt:message key="ui.categories"/></p>
@@ -43,21 +46,21 @@
 
             <div class="products-item-filter">
                 <p><fmt:message key="ui.prices"/></p>
-                <label><fmt:message key="ui.minPrice"/></label>
+                <label id="minPriceLabel" for="display_min"><fmt:message key="ui.minPrice"/></label>
                 <div class="products-range">
-                    <input value="${priceMin}" onchange="validatePrices()" type="range" min="0" max="5000" step="100" oninput="display_min.value=value" onchange="display_min.value = value">
+                    <input aria-labelledby="minPriceLabel" value="${priceMin}" onchange="validatePrices()" type="range" min="0" max="5000" step="100" oninput="display_min.value=value" onchange="display_min.value = value">
                     <input value="${priceMin}" name="price_min" type="number" readonly id="display_min"/>
                 </div>
-                <label><fmt:message key="ui.maxPrice"/></label>
+                <label id="maxPriceLabel" for="display_max"><fmt:message key="ui.maxPrice"/></label>
                 <div  class="products-range">
-                    <input value="${priceMax}" onchange="validatePrices()" type="range" min="0" max="5000" step="100" oninput="display_max.value=value" onchange="display_max.value = value">
+                    <input aria-labelledby="maxPriceLabel" value="${priceMax}" onchange="validatePrices()" type="range" min="0" max="5000" step="100" oninput="display_max.value=value" onchange="display_max.value = value">
                     <input value="${priceMax}" name="price_max" type="number" readonly id="display_max"/>
                 </div>
             </div>
 
             <div class="products-item-filter">
                 <input ${favorites} onchange="document.getElementById('frmProducts').submit()" name="special" type="checkbox" value="favorites" id="favs"><label for="favs"><fmt:message key="ui.favoritesOnly"/></label><br>
-                <input ${newReleases} onchange="document.getElementById('frmProducts').submit()" name="special" type="checkbox" value="newReleases" id="lancs"><label for="lancs"><fmt:message key="ui.newOnly"/></label><br>
+                <input ${newReleases} onchange="document.getElementById('frmProducts').submit()" name="special" type="checkbox" value="newReleases" id="newReleasesFilter"><label for="newReleasesFilter"><fmt:message key="ui.newOnly"/></label><br>
             </div>
         </div>
 
@@ -79,6 +82,9 @@
                         <div class="products-title"><%= Html.escape(product.getName()) %></div>
                         <div class="products-details"><%= Html.escape(product.getCategory()) %></div>
                         <div class="products-price"><%= new Helper((java.util.Locale) session.getAttribute("appLocale")).tryParseMoneyFormat(product.getPrice())%></div>
+                        <% if (!product.isAvailable()) { %>
+                        <div class="products-unavailable"><fmt:message key="ui.outOfStock"/></div>
+                        <% } %>
                     </a>
                 </div>
                 <%
@@ -106,7 +112,7 @@
         var price_min = document.getElementById('display_min').value;
         var price_max = document.getElementById('display_max').value;
         if (parseInt(price_min) >= parseInt(price_max)) {
-            alert("The minimum price must be lower than the maximum price.");
+            alert("${js_priceRange}");
             return false;
         } else {
             document.getElementById('frmProducts').submit();

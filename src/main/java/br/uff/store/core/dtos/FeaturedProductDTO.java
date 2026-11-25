@@ -1,6 +1,5 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class FeaturedProductDTO extends BaseDTO {
 
@@ -10,13 +9,6 @@ public class FeaturedProductDTO extends BaseDTO {
     private String image;
 
     public FeaturedProductDTO() {
-    }
-
-    public FeaturedProductDTO(Map<String, Object> product) {
-        this.setId(Integer.valueOf(String.valueOf(product.get("id"))));
-        this.setName(String.valueOf(product.get("name")));
-        this.setDescription(String.valueOf(product.get("description")));
-        this.setImage(String.valueOf(product.get("image")));
     }
 
     public String getDescription() {

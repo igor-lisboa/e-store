@@ -14,4 +14,6 @@ public interface ISaleService {
             Integer pageNumber) throws StoreException;
 
     public void recordSale(Integer userId, Integer cartId, Integer addressId) throws StoreException;
+
+    public void cancelSale(Integer userId, Integer saleId) throws StoreException;
 }

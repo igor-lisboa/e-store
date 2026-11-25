@@ -27,7 +27,7 @@ def main():
     with (ROOT / 'target/browser-server.log').open('w', encoding='utf-8') as output:
         process = subprocess.Popen(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT)
         try:
-            deadline = time.monotonic() + 45
+            deadline = time.monotonic() + 120
             while time.monotonic() < deadline:
                 if process.poll() is not None:
                     raise RuntimeError('The server exited. Inspect target/browser-server.log.')
@@ -43,8 +43,11 @@ def main():
                                     env=environment, timeout=180)
             if result.returncode or environment.get('STORE_DATABASE_E2E') != '1':
                 return result.returncode
-            return subprocess.run([sys.executable, 'scripts/test_browser_store.py'], cwd=ROOT,
-                                  env=environment, timeout=180).returncode
+            for script in ('scripts/test_browser_store.py', 'scripts/test_browser_hostile.py'):
+                result = subprocess.run([sys.executable, script], cwd=ROOT, env=environment, timeout=300)
+                if result.returncode:
+                    return result.returncode
+            return 0
         finally:
             process.terminate()
             try:

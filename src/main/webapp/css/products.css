@@ -101,6 +101,12 @@
     margin-left: 5px;
 }
 
+.products-unavailable {
+    margin: 0 5px 5px;
+    color: #b00020;
+    font-weight: bold;
+}
+
 
 .products-paging {
     text-align: center;

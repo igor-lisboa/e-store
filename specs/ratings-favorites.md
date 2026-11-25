@@ -24,8 +24,7 @@
 
 ## Open questions
 
-- Review edits are not supported; confirm whether users should be able to change a review.
 
-## Decided requirements (pending implementation)
+## Decided requirements
 
-- Customers may edit and delete their own product reviews (decision 10C). Ownership is checked on every change, and no other customer can modify or remove a review.
+- Customers may edit and delete their own product reviews (decision 10C, implemented). `ReviewServlet` accepts `updateReview` and `deleteReview` only by POST and always uses the session user; the SQL is scoped by `user_id AND product_id`, so another customer's review can never match. A change that matches no owned review is reported instead of silently succeeding. The product page shows "Edit your review" when the user already rated; the edit form is prefilled and offers deletion with a confirmation. Evidence: `ReviewOwnershipServiceTest`, `ReviewServletTest`, `ReviewOwnershipMySqlIT`; the browser journey edits and then deletes a review.

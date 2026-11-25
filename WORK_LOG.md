@@ -1,5 +1,17 @@
 # Autonomous maintenance checkpoint
 
+## Latest checkpoint (2026-11-24)
+
+The user authorized implementing every mapped, unblocked backlog item in auto mode, choosing recommended options and reporting them at the end, without committing. Everything below is uncommitted in the working tree.
+
+Implemented and verified: 30-day anonymous cart expiry with merge on sign-in (V8); out-of-stock products listed and marked unavailable; availability-only single-product API for non-administrators; order line snapshots (V9), order status and cancellation (V10); provider-agnostic payment and delivery ports, demo adapters, and records with an address snapshot (V11); customer review edit and delete; stock-increment and image-source boundaries; sanitized and localized feedback messages (`FlashMessages`, `flash` bundles); localized page titles, placeholders, and script messages; form-control accessible names; typed `RowMapper` replacing map-backed DTO construction; legacy identifier renames; tests for the five remaining controllers; hostile browser cases; infrastructure-failure check.
+
+Evidence from this checkpoint: default suite 208 tests pass (JaCoCo default-only 1,472 of 2,452 lines, 60.0%, and 544 of 866 branches, 62.8%); MySQL profile 38 integration tests pass; legacy/Cucumber 42 pass; repository contracts 17 pass; OpenAPI validates; browser runner passes in both demo modes (7 smoke, 3 shopping journeys, 3 hostile cases, one skipped when demo checkout is disabled); infrastructure-failure check 4 pass. Not verified: Docker Compose (the Docker daemon is not running), Linux/macOS startup, keyboard/focus/contrast audit.
+
+Local notes: Maven/JDK are in ignored `.local-tools/`; the packaged server startup needs up to about 2 minutes here (limits raised to 120 s), the JDK 8 JVM crashed intermittently on startup (`hs_err_pid*.log`, retried and deleted), and one MySQL connection drop occurred once during a long integration run and did not recur. Ignored helper scripts `.local-tools/run-suite.ps1` and `.local-tools/run-browser.ps1` run the suites with the test credentials.
+
+## Earlier checkpoint (2026-11-18)
+
 Updated 2026-11-18. The user authorized autonomous pending work and asked for completed/missing tracking and a commit title. Changes are uncommitted; preserve the entire working tree. No subagents were used.
 
 ## Current checkpoint

@@ -9,9 +9,11 @@
     }
 %>
 
+<fmt:message key="ui.pageTitle.login" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Login"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.passwordsMismatch" var="js_passwordsMismatch"/>
 
 <div class="login-background"></div>
 <main class="login-container">
@@ -25,17 +27,17 @@
                 <input name="redirect" style="display:none;" value="<%= Html.escape(request.getAttribute("redirect")) %>">
 
                 <div class="group">
-                    <input name="email" type="email" required value="${fn:escapeXml(cookie['loginEmail'].value)}">
+                    <input id="field-email" name="email" type="email" required value="${fn:escapeXml(cookie['loginEmail'].value)}">
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>E-mail</label>
+                    <label for="field-email">E-mail</label>
                 </div>
 
                 <div class="group">
-                    <input name="password" type="password" required maxlength="255" autocomplete="current-password">
+                    <input id="field-password" name="password" type="password" required maxlength="255" autocomplete="current-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label><fmt:message key="ui.password"/></label>
+                    <label for="field-password"><fmt:message key="ui.password"/></label>
                 </div>
 
                 <div class="forgot-pswrd">
@@ -61,38 +63,38 @@
                 <input name="redirect" style="display:none;" value="<%= Html.escape(request.getAttribute("redirect")) %>">
 
                 <div class="group">
-                    <input name="name" type="text" required>
+                    <input id="field-name" name="name" type="text" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label><fmt:message key="ui.fullName"/></label>
+                    <label for="field-name"><fmt:message key="ui.fullName"/></label>
                 </div>
 
                 <div class="group">
-                    <input name="email" type="email" required>
+                    <input id="field-email-2" name="email" type="email" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label>E-mail</label>
+                    <label for="field-email-2">E-mail</label>
                 </div>
 
                 <div class="group">
-                    <input name="password" id="registrationPassword" type="password" required maxlength="255" autocomplete="new-password">
+                    <input name="password" id="registrationPassword" type="password" required minlength="8" maxlength="255" autocomplete="new-password">
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label><fmt:message key="ui.password"/></label>
+                    <label for="registrationPassword"><fmt:message key="ui.password"/></label>
                 </div>
 
                 <div class="group">
                     <input id="confirmationPassword" type="password" required>
                     <span class="highlight"></span>
                     <span class="bar"></span>
-                    <label><fmt:message key="ui.confirmPassword"/></label>
+                    <label for="confirmationPassword"><fmt:message key="ui.confirmPassword"/></label>
                 </div>
                 <script>
                     function validatePasswords() {
                         var password = document.getElementById("registrationPassword");
                         var conf = document.getElementById("confirmationPassword");
                         if (password.value != conf.value) {
-                            alert("The passwords do not match.");
+                            alert("${js_passwordsMismatch}");
                             return false;
                         } else {
                             return true;

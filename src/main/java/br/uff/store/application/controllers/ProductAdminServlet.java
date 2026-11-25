@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -107,18 +108,18 @@ public class ProductAdminServlet extends HttpServlet {
                         } else {
                             productService.updateProductById(sel, productDto);
                         }
-                        session.setAttribute("msg", "Product saved.");
+                        session.setAttribute("msg", FlashMessages.text("Product saved.", FlashMessages.localeOf(session)));
 
                         break;
                     }
                     case "addStock": {
                         productService.addProductStock(sel, helper.tryParseInteger(request.getParameter("quantity")));
-                        session.setAttribute("msg", "Stock increased.");
+                        session.setAttribute("msg", FlashMessages.text("Stock increased.", FlashMessages.localeOf(session)));
                         break;
                     }
                     case "delete": {
                         productService.deleteProductById(sel);
-                        session.setAttribute("msg", "Product deleted.");
+                        session.setAttribute("msg", FlashMessages.text("Product deleted.", FlashMessages.localeOf(session)));
                         break;
                     }
                     case "clear": {
@@ -138,7 +139,7 @@ public class ProductAdminServlet extends HttpServlet {
 
             request.getRequestDispatcher("pages/product-admin.jsp").forward(request, response);
         } catch (Exception e) {
-            session.setAttribute("msg", e.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(e, FlashMessages.localeOf(session)));
             response.sendRedirect("account");
         }
 

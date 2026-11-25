@@ -83,6 +83,19 @@ public class LegacyStoreIntegrationCatalogTest extends StoreIntegrationFixture {
     }
 
     @Test
+    public void storefrontListsOutOfStockProductsMarkedUnavailable() throws Exception {
+        ProductDTO inStock = createProduct("Available item", new BigDecimal("10.00"), 3);
+        ProductDTO soldOut = createProduct("Sold out item", new BigDecimal("10.00"), 0);
+        ProductFilterDTO filter = new ProductFilterDTO();
+        filter.setPageNumber(1);
+        filter.setPageSize(100);
+        Map<Integer, ProductListDTO> listed = products.listStorefrontProducts(filter).getItems().stream()
+                .collect(Collectors.toMap(ProductListDTO::getId, product -> product));
+        assertTrue(listed.get(inStock.getId()).isAvailable());
+        assertFalse(listed.get(soldOut.getId()).isAvailable());
+    }
+
+    @Test
     public void referenceCategoriesRetainEnglishHierarchy() throws Exception {
         Map<Integer, String> categories = StoreServices.categories().categories().stream()
                 .collect(Collectors.toMap(CategoryDTO::getId, CategoryDTO::getName));

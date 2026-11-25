@@ -27,6 +27,30 @@ public class ReviewService implements IReviewService {
         throw new StoreException("This user has already reviewed this product.");
     }
 
+    @Override
+    public ProductReviewInputDTO findUserReview(Integer userId, Integer productId) throws StoreException {
+        InputRules.positiveId(userId, "User ID");
+        InputRules.positiveId(productId, "Product ID");
+        return reviewData.findUserReview(userId, productId);
+    }
+
+    @Override
+    public void updateReview(ProductReviewInputDTO review) throws StoreException {
+        validate(review);
+        if (reviewData.updateProductReview(review) == 0) {
+            throw new StoreException("You have no review of this product to change.");
+        }
+    }
+
+    @Override
+    public void deleteReview(Integer userId, Integer productId) throws StoreException {
+        InputRules.positiveId(userId, "User ID");
+        InputRules.positiveId(productId, "Product ID");
+        if (reviewData.deleteProductReview(userId, productId) == 0) {
+            throw new StoreException("You have no review of this product to delete.");
+        }
+    }
+
     private void validate(ProductReviewInputDTO review) throws StoreException {
         if (review == null || review.getUserId() == null || review.getUserId() <= 0
                 || review.getProductId() == null || review.getProductId() <= 0) {

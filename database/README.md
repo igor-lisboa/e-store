@@ -12,6 +12,9 @@ Flyway tracks applied SQL migrations and checksums in `flyway_schema_history`. C
 - `migrations/V6__make_checkout_atomic.sql`: transactional checkout with ownership checks, stock locking, decimal totals, and rollback.
 - `migrations/V7__rename_product_reviews_table.sql`: English review-table naming without rewriting migration history.
 - `migrations/V8__track_cart_activity.sql`: `carts.last_activity_at` for anonymous cart expiry, backfilled from `created_at`.
+- `migrations/V9__snapshot_sale_lines.sql`: `sale_lines` keeps product name, unit price, and quantity paid; backfills older sales; `checkout_cart` records the lines.
+- `migrations/V10__add_order_status_and_cancellation.sql`: `sales.status` (`PLACED`, `SHIPPED`, `CANCELLED`) and the `cancel_sale` procedure that restores stock.
+- `migrations/V11__add_payment_and_delivery_records.sql`: vendor-neutral `payments` and `deliveries` (with an address snapshot), the `place_order` procedure, and `checkout_cart` kept as a demo-default wrapper.
 
 Add a new `V<number>__description.sql` for each change. Never edit a migration already applied to a shared environment. SQL migrations are intentionally small and separated by responsibility. Flyway documentation describes [migration naming and execution](https://documentation.red-gate.com/fd/migrations-271585107.html).
 

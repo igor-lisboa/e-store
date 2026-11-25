@@ -18,6 +18,19 @@ public final class InputRules {
         }
     }
 
+    /**
+     * Product images are shown through an img tag, so only the sources the admin form produces are accepted:
+     * an uploaded data:image URI, a bundled img/ path, or an http(s) address. Anything else is rejected.
+     */
+    public static void imageSource(String value, String label) throws StoreException {
+        String source = value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT);
+        boolean allowed = source.startsWith("data:image/") || source.startsWith("img/")
+                || source.startsWith("http://") || source.startsWith("https://");
+        if (!allowed) {
+            throw new StoreException(label + " must be an uploaded image, a bundled img/ path, or an http(s) address.");
+        }
+    }
+
     public static void page(Integer size, Integer number) throws StoreException {
         if (size == null || size < 1 || size > 100 || number == null || number < 1) {
             throw new StoreException("Page size must be between 1 and 100 and page number must be positive.");

@@ -16,10 +16,10 @@
     }
 
     CustomerProductDTO product = new CustomerProductDTO();
-    List<ProductReviewListDTO> avaliacoes = new ArrayList<ProductReviewListDTO>();
+    List<ProductReviewListDTO> reviews = new ArrayList<ProductReviewListDTO>();
     if (request.getAttribute("product") != null) {
         product = (CustomerProductDTO) request.getAttribute("product");
-        avaliacoes = (List<ProductReviewListDTO>) request.getAttribute("avaliacoes");
+        reviews = (List<ProductReviewListDTO>) request.getAttribute("reviews");
     } else {
         session.setAttribute("msg", "Select a product.");
         response.sendRedirect("products");
@@ -54,7 +54,11 @@
             <form action="cart" method="post">
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
                 <input type="hidden" name="addProductId" value="<%= product.getId()%>">
+                <% if (product.getQuantity() != null && product.getQuantity() > 0) { %>
                 <button class="cart-btn" type="submit"><fmt:message key="ui.addToCart"/></button>
+                <% } else { %>
+                <button class="cart-btn" type="button" disabled><fmt:message key="ui.outOfStock"/></button>
+                <% } %>
             </form>
 
             <form action="product" method="post">
@@ -133,7 +137,7 @@
     <div class="right-rating">
 
         <%
-            for (ProductReviewListDTO rating : avaliacoes) {
+            for (ProductReviewListDTO rating : reviews) {
         %>
 
         <div class="review-star">
@@ -157,6 +161,11 @@
 
         <div class="review-btn">
             <a href="reviews?productId=<%= product.getId()%>"><fmt:message key="ui.addReview"/></a>
+        </div>
+        <% } else {%>
+
+        <div class="review-btn">
+            <a href="reviews?productId=<%= product.getId()%>&edit=1"><fmt:message key="ui.editReview"/></a>
         </div>
         <% }%>
     </div>

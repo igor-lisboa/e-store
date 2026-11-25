@@ -17,9 +17,11 @@
     }
 %>
 
+<fmt:message key="ui.pageTitle.myAccount" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="My account"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.confirmSignOut" var="js_confirmSignOut"/>
 
 <h2 class="order-history-title"><fmt:message key="ui.myAccount"/></h2>
 <div class="main-user-container">
@@ -82,7 +84,7 @@
                     <p>
                     <form method="post" action="account">
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
-                        <button onclick="return confirm('Sign out?');false;" type="submit" id="logout-btn" name="action" value="logout" formnovalidate><fmt:message key="ui.logout"/></button>
+                        <button onclick="return confirm('${js_confirmSignOut}');false;" type="submit" id="logout-btn" name="action" value="logout" formnovalidate><fmt:message key="ui.logout"/></button>
                     </form>
                     </p>
                 </div>

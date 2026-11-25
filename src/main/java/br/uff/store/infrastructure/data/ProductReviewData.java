@@ -15,7 +15,50 @@ public class ProductReviewData implements IProductReviewData {
     private final MySQLDAO mysqlDAO;
 
     public ProductReviewData() {
-        this.mysqlDAO = new MySQLDAO();
+        this(new MySQLDAO());
+    }
+
+    public ProductReviewData(MySQLDAO mysqlDAO) {
+        this.mysqlDAO = mysqlDAO;
+    }
+
+    @Override
+    public ProductReviewInputDTO findUserReview(Integer userId, Integer productId) throws StoreException {
+        try {
+            Object[] bind = {userId, productId};
+            List<HashMap<String, Object>> rows = this.mysqlDAO.query(
+                    "SELECT rating, description, title FROM product_reviews WHERE user_id=? AND product_id=?", bind);
+            if (rows.isEmpty()) {
+                return null;
+            }
+            HashMap<String, Object> row = rows.get(0);
+            return new ProductReviewInputDTO(userId, productId, Integer.valueOf(String.valueOf(row.get("rating"))),
+                    (String) row.get("description"), (String) row.get("title"));
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the product review database operation.", e);
+        }
+    }
+
+    @Override
+    public int updateProductReview(ProductReviewInputDTO reviewInput) throws StoreException {
+        try {
+            Object[] bind = {reviewInput.getRating(), reviewInput.getDescription(), reviewInput.getTitle(),
+                reviewInput.getUserId(), reviewInput.getProductId()};
+            return this.mysqlDAO.executeUpdate(
+                    "UPDATE product_reviews SET rating=?, description=?, title=? WHERE user_id=? AND product_id=?", bind);
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the product review database operation.", e);
+        }
+    }
+
+    @Override
+    public int deleteProductReview(Integer userId, Integer productId) throws StoreException {
+        try {
+            Object[] bind = {userId, productId};
+            return this.mysqlDAO.executeUpdate("DELETE FROM product_reviews WHERE user_id=? AND product_id=?", bind);
+        } catch (Exception e) {
+            throw new StoreException("Unable to complete the product review database operation.", e);
+        }
     }
 
     @Override
@@ -45,7 +88,7 @@ public class ProductReviewData implements IProductReviewData {
             Object[] bind = {productId};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT  u.`name` AS reviewer,  r.title AS title,  r.rating AS rating,  r.description AS description,  DATE_FORMAT(r.created_at, '%M %d, %Y') AS displayDate,  DATE_FORMAT(r.created_at, '%d/%m/%Y') AS shortDate  FROM  product_reviews r  LEFT JOIN users u ON (r.user_id = u.id)  WHERE  r.product_id = ?  ORDER BY  r.created_at", bind);
             List<ProductReviewListDTO> mappedResults = new ArrayList<>();
-            rows.forEach(rating -> mappedResults.add(new ProductReviewListDTO(rating)));
+            rows.forEach(rating -> mappedResults.add(RowMapper.review(rating)));
             return mappedResults;
         } catch (Exception ex) {
             throw new StoreException("Unable to complete the product review database operation.", ex);

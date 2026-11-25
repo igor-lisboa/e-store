@@ -26,8 +26,10 @@
     }
 %>
 
+<fmt:message key="ui.pageTitle.accountDetails" var="pageTitle"/>
+<fmt:message key="ui.passwordKeepPlaceholder" var="keepPasswordPlaceholder"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Account details"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
 
 <div class="account-details-container">
@@ -38,21 +40,21 @@
 
         <ul class="form-style-1">
             <li>
-                <label><fmt:message key="ui.fullName"/></label>
-                <input class="field-long" name="name" required type="text" maxlength="255" value="<%= Html.escape(user.getName()) %>">
+                <label for="field-name"><fmt:message key="ui.fullName"/></label>
+                <input id="field-name" class="field-long" name="name" required type="text" maxlength="255" value="<%= Html.escape(user.getName()) %>">
             </li>
             <li>
-                <label>E-mail </label>
-                <input class="field-long" name="email" required type="email" maxlength="255" value="<%= Html.escape(user.getEmail()) %>">
+                <label for="field-email">E-mail </label>
+                <input id="field-email" class="field-long" name="email" required type="email" maxlength="255" value="<%= Html.escape(user.getEmail()) %>">
             </li>
             <li>
-                <label><fmt:message key="ui.password"/></label>
-                <input class="field-long" name="password" type="password" maxlength="255" autocomplete="new-password" placeholder="Leave blank to keep the current password">
+                <label for="field-password"><fmt:message key="ui.password"/></label>
+                <input id="field-password" class="field-long" name="password" type="password" minlength="8" maxlength="255" autocomplete="new-password" placeholder="${keepPasswordPlaceholder}">
             </li>
             <% if (session.getAttribute("userRole").equals(UserRole.ADMIN.getId())) { %>
             <li>
-                <label><fmt:message key="ui.role"/></label>
-                <select name="roleId" required>
+                <label for="field-roleId"><fmt:message key="ui.role"/></label>
+                <select id="field-roleId" name="roleId" required>
                     <% for (RoleDTO role : roles) {%>
                     <option value="<%= role.getId()%>" <%= (role.getId() == user.getRoleId() ? "selected" : "")%>><%= Html.escape(role.getName()) %></option>
                     <% } %>

@@ -1,6 +1,5 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class ProductReviewListDTO extends BaseDTO {
 
@@ -12,15 +11,6 @@ public class ProductReviewListDTO extends BaseDTO {
     private String shortDate;
 
     public ProductReviewListDTO() {
-    }
-
-    public ProductReviewListDTO(Map<String, Object> rating) {
-        this.setReviewer(String.valueOf(rating.get("reviewer")));
-        this.setTitle(String.valueOf(rating.get("title")));
-        this.setRating(String.valueOf(rating.get("rating")));
-        this.setDescription(String.valueOf(rating.get("description")));
-        this.setDisplayDate(String.valueOf(rating.get("displayDate")));
-        this.setShortDate(String.valueOf(rating.get("shortDate")));
     }
 
     public void setShortDate(String shortDate) {

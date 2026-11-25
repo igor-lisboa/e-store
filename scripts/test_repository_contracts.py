@@ -42,6 +42,51 @@ class RepositoryContractsTest(unittest.TestCase):
             for route in re.findall(r'@WebServlet\("([^"]+)"\)', source.read_text(encoding='utf-8')):
                 self.assertNotRegex(route.lstrip('/').removeprefix('api/'), legacy)
 
+    def test_visitor_facing_page_text_is_localized_not_hard_coded(self):
+        patterns = {
+            'literal alert': r'alert\("[^"$]+"\)',
+            'literal confirm': r"confirm\('[^'$<]+'\)",
+            'literal page title': r'<jsp:param name="title" value="[A-Za-z][^"$<]*"',
+            'literal placeholder': r'placeholder="[A-Za-z][^"$<]*"',
+        }
+        for page in (ROOT / 'src/main/webapp/pages').glob('*.jsp'):
+            source = page.read_text(encoding='utf-8')
+            for label, pattern in patterns.items():
+                self.assertIsNone(re.search(pattern, source), f'{page.name}: {label}')
+
+    def test_form_controls_have_an_accessible_name_and_labels_point_at_real_controls(self):
+        tag = r'<(?:input|textarea|select)\b(?:<%.*?%>|[^>])*>'
+        skipped_types = ('hidden', 'submit', 'button', 'radio', 'checkbox', 'range', 'image')
+        for page in (ROOT / 'src/main/webapp/pages').glob('*.jsp'):
+            source = page.read_text(encoding='utf-8')
+            ids = set(re.findall(r'\bid="([^"]+)"', source))
+            for target in re.findall(r'<label\b[^>]*\bfor="([^"$<]+)"', source):
+                self.assertIn(target, ids, f'{page.name}: label points at missing id {target}')
+            labelled = set(re.findall(r'<label\b[^>]*\bfor="([^"]+)"', source))
+            for control in re.findall(tag, source, re.S):
+                kind = re.search(r'\btype="([^"]+)"', control)
+                if (kind and kind.group(1) in skipped_types) or 'display:none' in control:
+                    continue
+                identifier = re.search(r'\bid="([^"]+)"', control)
+                named = 'aria-label=' in control or 'aria-labelledby=' in control
+                associated = identifier is not None and identifier.group(1) in labelled
+                self.assertTrue(named or associated, f'{page.name}: unlabeled control {control[:90]}')
+
+    def test_password_fields_enforce_the_documented_minimum_length_in_the_browser(self):
+        for page in ('login.jsp', 'account-edit.jsp'):
+            source = (ROOT / 'src/main/webapp/pages' / page).read_text(encoding='utf-8')
+            new_password = re.search(r'<input[^>]*autocomplete="new-password"[^>]*>', source).group(0)
+            self.assertIn('minlength="8"', new_password, page)
+
+    def test_core_does_not_know_the_shape_of_database_rows(self):
+        for source in (ROOT / 'src/main/java/br/uff/store/core').rglob('*.java'):
+            self.assertNotIn('Map<String, Object>', source.read_text(encoding='utf-8'), str(source))
+
+    def test_renamed_legacy_identifiers_do_not_return(self):
+        legacy = re.compile(r'(avaliacoes|espParameter|durMes|ckEmail|lancs|MAXPAGSTR|COUNTSTRING)')
+        for source in list((ROOT / 'src').rglob('*.java')) + list((ROOT / 'src/main/webapp').rglob('*.jsp')):
+            self.assertIsNone(legacy.search(source.read_text(encoding='utf-8')), str(source))
+
     def test_java_files_stay_below_300_lines(self):
         for source in (ROOT / 'src').rglob('*.java'):
             self.assertLess(len(source.read_text(encoding='utf-8').splitlines()), 300, str(source))

@@ -16,8 +16,9 @@
     }
 %>
 
+<fmt:message key="ui.pageTitle.addresses" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Addresses"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
 <table class="end-grid">
     <caption><fmt:message key="ui.addresses"/></caption>

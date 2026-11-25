@@ -2,7 +2,6 @@ package br.uff.store.core.dtos;
 
 import java.math.BigDecimal;
 
-import java.util.Map;
 
 public class CustomerProductDTO extends BaseDTO {
 
@@ -33,24 +32,8 @@ public class CustomerProductDTO extends BaseDTO {
     public CustomerProductDTO() {
     }
 
-    public CustomerProductDTO(Map<String, Object> product) {
-        this.setId(Integer.valueOf(String.valueOf(product.get("id"))));
-        this.setName(String.valueOf(product.get("name")));
-        this.setPrice(new BigDecimal(String.valueOf(product.get("price"))));
-        this.setDescription(String.valueOf(product.get("description")));
-        this.setImage(String.valueOf(product.get("image")));
-        this.setCategory(String.valueOf(product.get("category")));
-        this.setQuantity(Integer.valueOf(String.valueOf(product.get("quantity"))));
-        this.setFavorite(Integer.valueOf(String.valueOf(product.get("favorite"))) > 0);
-        this.setUserRating(DtoValues.optionalInteger(product.get("userRating")));
-        this.setRatingCount(Integer.valueOf(String.valueOf(product.get("ratingCount"))));
-        this.setRatingSum(Integer.valueOf(String.valueOf(product.get("ratingSum"))));
-        this.setRatingCount1(Integer.valueOf(String.valueOf(product.get("ratingCount1"))));
-        this.setRatingCount2(Integer.valueOf(String.valueOf(product.get("ratingCount2"))));
-        this.setRatingCount3(Integer.valueOf(String.valueOf(product.get("ratingCount3"))));
-        this.setRatingCount4(Integer.valueOf(String.valueOf(product.get("ratingCount4"))));
-        this.setRatingCount5(Integer.valueOf(String.valueOf(product.get("ratingCount5"))));
-
+    /** Fills the average and the per-star percentages from the stored counts; all zero without ratings. */
+    public void calculateRatingSummary() {
         if (this.getRatingCount() > 0) {
             this.setAverageRating(Double.valueOf(this.ratingSum) / Double.valueOf(this.ratingCount));
             this.setRatingBar1(Double.valueOf((this.ratingCount1 * 100.0) / this.ratingCount));

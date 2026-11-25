@@ -20,6 +20,8 @@ public class ProductService implements IProductService {
     /** Matches the DECIMAL(11,2) product price column. */
     private static final BigDecimal MAXIMUM_PRICE = new BigDecimal("999999999.99");
 
+    private static final int MAXIMUM_STOCK_INCREMENT = 1000000;
+
     private final IProductData productData;
 
     public ProductService(IProductData productData) {
@@ -51,6 +53,9 @@ public class ProductService implements IProductService {
     public void addProductStock(Integer id, Integer quantity) throws StoreException {
         InputRules.positiveId(id, "Product ID");
         InputRules.positiveId(quantity, "Stock increment");
+        if (quantity > MAXIMUM_STOCK_INCREMENT) {
+            throw new StoreException("Stock increment must not exceed " + MAXIMUM_STOCK_INCREMENT + " units.");
+        }
         productData.addProductStock(id, quantity);
     }
 
@@ -114,6 +119,7 @@ public class ProductService implements IProductService {
         InputRules.requiredText(product.getName(), 255, "Product name");
         InputRules.requiredText(product.getDescription(), 255, "Product description");
         InputRules.requiredText(product.getImage(), 4000000, "Product image");
+        InputRules.imageSource(product.getImage(), "Product image");
         InputRules.positiveId(product.getCategoryId(), "Category ID");
         BigDecimal rounded = product.getPrice() == null ? null : product.getPrice().setScale(2, RoundingMode.HALF_UP);
         if (!isValidPrice(rounded)) {

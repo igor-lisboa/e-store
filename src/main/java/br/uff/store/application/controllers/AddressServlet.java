@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import br.uff.store.core.dtos.AddressDTO;
+import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.services.IAddressService;
 import br.uff.store.core.services.AddressService;
 import br.uff.store.infrastructure.shared.Helper;
@@ -61,7 +63,7 @@ public class AddressServlet extends HttpServlet {
                 if(selectedAddressId != null) {
                     address = addressService.findAddressById(selectedAddressId);
                     if (!addressService.addressBelongsToUser(selectedAddressId, userId)) {
-                        throw new IllegalArgumentException("The address does not belong to this account.");
+                        throw new StoreException("The address does not belong to this account.");
                     }
                 }
                 request.setAttribute("addresses", address);
@@ -104,13 +106,13 @@ public class AddressServlet extends HttpServlet {
                         addressService.insertAddress(addressDto);
                     }
 
-                    session.setAttribute("msg", "Address saved.");
+                    session.setAttribute("msg", FlashMessages.text("Address saved.", FlashMessages.localeOf(session)));
                     break;
                 }
                 case "delete": {
                     addressService.deleteAddressById(selectedAddressId, userId);
 
-                    session.setAttribute("msg", "Address deleted.");
+                    session.setAttribute("msg", FlashMessages.text("Address deleted.", FlashMessages.localeOf(session)));
                     break;
                 }
                 case "clear": {
@@ -127,7 +129,7 @@ public class AddressServlet extends HttpServlet {
 
             request.getRequestDispatcher("pages/addresses.jsp").forward(request, response);
         } catch (Exception e) {
-            session.setAttribute("msg", e.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(e, FlashMessages.localeOf(session)));
             response.sendRedirect("account");
         }
     }

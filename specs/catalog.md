@@ -27,9 +27,9 @@
 
 ## Open questions
 
-- Resolved: the page size is 20 by default with an optional `pageSize` parameter (decision 9C). Out-of-stock products stay visible and marked unavailable (decision 2A, pending implementation).
+- Resolved: the page size is 20 by default with an optional `pageSize` parameter (decision 9C). Out-of-stock products stay visible and marked unavailable (decision 2A, implemented for the storefront and product page).
 
 ## Decided requirements (pending implementation)
 
-- Single-product API (decision 1B): anonymous and customer callers see only whether a product is available. Administrators see the exact stock quantity. The current public API returns exact quantity.
-- Out-of-stock products (decision 2A): stay listed and show as unavailable on the storefront, the product page, and the featured list. The current listing query excludes products with zero stock.
+- Single-product API (decision 1B): anonymous and customer callers see only whether a product is available. Administrators see the exact stock quantity. Implemented in `ProductApiServlet` with `PublicProductView`; evidence: servlet unit tests for anonymous, customer, and administrator callers and OpenAPI validation. Browser journeys read exact stock through a separate administrator session and confirm the public response has no `quantity`.
+- Out-of-stock products (decision 2A): stay listed and show as "Out of stock" on the storefront listing; the product page disables add-to-cart. The featured home list intentionally keeps only in-stock products (promoting unavailable items is not useful). Evidence: `ProductListDTOTest`, `LegacyStoreIntegrationCatalogTest.storefrontListsOutOfStockProductsMarkedUnavailable`; the browser journey confirms the label, the disabled add-to-cart button, and their removal after stock is added.

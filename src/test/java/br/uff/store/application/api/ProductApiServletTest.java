@@ -3,6 +3,7 @@ package br.uff.store.application.api;
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -80,17 +81,48 @@ public class ProductApiServletTest {
         assertEquals("{\"error\":\"Product was not found.\"}", responseBody.toString());
     }
 
+    private ProductDTO productWithStock(int quantity) {
+        return new ProductDTO(4, "Public Product", new BigDecimal("9.50"), "Description", "img.png", 1, quantity);
+    }
+
     @Test
-    public void singleProductLookupRemainsAvailableWithoutSignIn() throws Exception {
+    public void anonymousLookupShowsAvailabilityButNeverTheStockCount() throws Exception {
         when(request.getPathInfo()).thenReturn("/4");
         when(request.getSession(false)).thenReturn(null);
-        when(productService.findProductById(4))
-                .thenReturn(new ProductDTO(4, "Public Product", new BigDecimal("9.50"), "Description", "img.png", 1, 3));
+        when(productService.findProductById(4)).thenReturn(productWithStock(3));
 
         servlet.doGet(request, response);
 
-        verify(productService).findProductById(4);
-        assertTrue(responseBody.toString().contains("\"name\":\"Public Product\""));
+        String body = responseBody.toString();
+        assertTrue(body.contains("\"name\":\"Public Product\""));
+        assertTrue(body.contains("\"available\":true"));
+        assertFalse(body.contains("quantity"));
+    }
+
+    @Test
+    public void customerLookupOfSoldOutProductIsUnavailableWithoutStockCount() throws Exception {
+        when(request.getPathInfo()).thenReturn("/4");
+        when(session.getAttribute("userId")).thenReturn(CUSTOMER_ID);
+        when(userService.isAdmin(CUSTOMER_ID)).thenReturn(false);
+        when(productService.findProductById(4)).thenReturn(productWithStock(0));
+
+        servlet.doGet(request, response);
+
+        String body = responseBody.toString();
+        assertTrue(body.contains("\"available\":false"));
+        assertFalse(body.contains("quantity"));
+    }
+
+    @Test
+    public void administratorLookupKeepsTheExactStockQuantity() throws Exception {
+        when(request.getPathInfo()).thenReturn("/4");
+        when(session.getAttribute("userId")).thenReturn(ADMIN_ID);
+        when(userService.isAdmin(ADMIN_ID)).thenReturn(true);
+        when(productService.findProductById(4)).thenReturn(productWithStock(3));
+
+        servlet.doGet(request, response);
+
+        assertTrue(responseBody.toString().contains("\"quantity\":3"));
     }
 
     @Test

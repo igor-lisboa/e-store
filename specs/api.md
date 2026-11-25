@@ -4,10 +4,10 @@
 
 - Servlet endpoints exist for products, users, and categories under `/api`.
 - Product lookup serializes a product DTO as JSON. Swagger UI is served at `/swagger/` and the OpenAPI 3.0.3 contract at `/swagger/openapi.json`.
-- `GET /api/products/{productId}` returns availability only to anonymous and customer callers; administrators receive exact quantity (decision 1B, pending implementation). The current behavior returns exact quantity to everyone.
-- `GET /api/products/` lists every product with stock quantities and descriptions; it requires an administrator session (401 when signed out, 403 for customers). Single-product lookup stays public until decision 1B is implemented.
+- `GET /api/products/{productId}` returns availability only to anonymous and customer callers; administrators receive exact quantity (decision 1B). Non-admin responses use the `PublicProduct` schema (`available` boolean, no `quantity`).
+- `GET /api/products/` lists every product with stock quantities and descriptions; it requires an administrator session (401 when signed out, 403 for customers). Single-product lookup stays public but hides the stock count from non-administrators.
 - User API errors use a generic JSON error object and do not serialize exceptions.
-- All API error responses use an `error` string. Product/account lookups return 404 for absent records, while infrastructure failures remain generic 500 errors. API versioning remains pending.
+- All API error responses use an `error` string. Product/account lookups return 404 for absent records, while infrastructure failures remain generic 500 errors. `scripts/run_infrastructure_failure_check.py` starts the packaged WAR with an unreachable database and verifies that the API answers 500 with only the generic error, requests that need no database still succeed, and pages show no stack traces or JDBC details. API versioning remains pending.
 - JSON properties are English, including product `name`, `price`, `description`, `image`, `categoryId`, `quantity`, `category`, and account `name`, `email`, `roleId`. Java DTO fields and accessors also use English names.
 - Swagger UI is bundled as a WebJar and loads the local OpenAPI document; it does not depend on a runtime CDN. The setup follows the [Swagger UI installation guide](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/).
 

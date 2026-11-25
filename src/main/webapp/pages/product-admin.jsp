@@ -17,8 +17,9 @@
     }
 %>
 
+<fmt:message key="ui.pageTitle.productAdmin" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Product administration"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
 
 <table class="product-grid">

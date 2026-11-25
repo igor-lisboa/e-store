@@ -6,9 +6,12 @@
 <%@page import="java.util.List"%>
 <%@page import="br.uff.store.infrastructure.shared.Helper"%>
 
+<fmt:message key="ui.pageTitle.cart" var="pageTitle"/>
+<fmt:message key="ui.quantity" var="quantityLabel"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Cart"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.quantityRange" var="js_quantityRange"/>
 <%
     java.math.BigDecimal totalPrice = java.math.BigDecimal.ZERO;
     if (request.getAttribute("totalPrice") != null) {
@@ -55,7 +58,7 @@
     <div class="cart-qnt">
         <form action="cart?productId=<%= product.getProductId()%>&action=changeQuantity" method="post" id="quantityForm<%= product.getProductId()%>">
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
-            <input style="width:50px;" type="number" min="1" max="<%= product.getAvailableStock()%>" value="<%= product.getQuantity()%>" name="quantity" onchange="updateQuantity('quantityForm<%= product.getProductId()%>')"/>
+            <input aria-label="${quantityLabel}: <%= Html.escape(product.getName()) %>" style="width:50px;" type="number" min="1" max="<%= product.getAvailableStock()%>" value="<%= product.getQuantity()%>" name="quantity" onchange="updateQuantity('quantityForm<%= product.getProductId()%>')"/>
         </form>
     </div>
     <div class="cart-remove">
@@ -113,7 +116,7 @@
         if (isValidForm) {
             form.submit();
         } else {
-            alert("Enter a quantity between one and the available stock.");
+            alert("${js_quantityRange}");
             return false;
         }
     }

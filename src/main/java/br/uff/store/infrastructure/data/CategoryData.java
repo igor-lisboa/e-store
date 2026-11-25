@@ -23,7 +23,7 @@ public class CategoryData implements ICategoryData {
             Object[] bind = {};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, category_name AS name FROM vw_category", bind);
             List<CategoryDTO> mappedResults = new ArrayList<>();
-            rows.forEach(category -> mappedResults.add(new CategoryDTO(category)));
+            rows.forEach(category -> mappedResults.add(RowMapper.category(category)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the category database operation.", e);

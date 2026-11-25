@@ -19,7 +19,7 @@
 
 The session switch, header, and 94 shared page labels use message bundles for all four locales. Currency remains BRL and is formatted using the selected locale. Order and review dates use localized formatting with UTC as the explicit date-time zone. Tests verify complete bundle keys, representative currency/date output, and sign-in labels in all four locales through a real browser.
 
-Page titles, JavaScript confirmations, placeholders, and dynamic server feedback still need complete bundle coverage. Catalog content and stored account/address data are not automatically translated. ViaCEP uses Portuguese response keys because they are defined by that external service.
+Page titles, placeholders, and every JavaScript alert or confirmation are localized through `ui.pageTitle.*`, `ui.js.*` and related keys; a repository contract test rejects hard-coded versions, and a unit test verifies that strings placed inside JavaScript quotes contain no quote, backslash, or markup characters. Fixed server feedback (confirmations and `StoreException` sentences, 59 in all) is translated through the `flash` bundles by `FlashMessages`; a unit test scans the source and fails when a literal message lacks a translation in any locale. Feedback sentences that embed values (for example cart or product IDs) and some service-layer validation messages with dynamic text still appear in English. Catalog content and stored account/address data are not automatically translated. Property bundles must contain only ASCII and `\uXXXX` escapes because Java 8 reads them as ISO-8859-1; a test enforces this. ViaCEP uses Portuguese response keys because they are defined by that external service.
 
 ## Acceptance checks
 

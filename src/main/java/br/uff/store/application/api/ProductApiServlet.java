@@ -45,13 +45,23 @@ public class ProductApiServlet extends HttpServlet {
         }
         try {
             ProductDTO product = productService.findProductById(productId);
-            ApiResponses.writeJson(response, product);
+            if (isAdministrator(request)) {
+                ApiResponses.writeJson(response, product);
+            } else {
+                ApiResponses.writeJson(response, new PublicProductView(product));
+            }
         } catch (ResourceNotFoundException missing) {
             ApiResponses.writeError(response, HttpServletResponse.SC_NOT_FOUND, "Product was not found.");
         } catch (Exception exception) {
             ApiResponses.writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "The request could not be completed.");
         }
+    }
+
+    private boolean isAdministrator(HttpServletRequest request) throws Exception {
+        HttpSession session = request.getSession(false);
+        Integer userId = session == null ? null : helper.tryParseInteger(String.valueOf(session.getAttribute("userId")));
+        return userId != null && Boolean.TRUE.equals(userService.isAdmin(userId));
     }
 
     private void listAllProducts(HttpServletRequest request, HttpServletResponse response) throws IOException {

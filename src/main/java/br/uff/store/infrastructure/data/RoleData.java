@@ -23,7 +23,7 @@ public class RoleData implements IRoleData {
             Object[] bind = {};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, name AS name FROM roles", bind);
             List<RoleDTO> mappedResults = new ArrayList<>();
-            rows.forEach(role -> mappedResults.add(new RoleDTO(role)));
+            rows.forEach(role -> mappedResults.add(RowMapper.role(role)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the role database operation.", e);

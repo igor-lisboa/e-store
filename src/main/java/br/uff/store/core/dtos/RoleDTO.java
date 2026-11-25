@@ -1,6 +1,5 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class RoleDTO {
 
@@ -24,10 +23,5 @@ public class RoleDTO {
     }
 
     public RoleDTO() {
-    }
-
-    public RoleDTO(Map<String, Object> role) {
-        this.setId(Integer.valueOf(String.valueOf(role.get("id"))));
-        this.setName(String.valueOf(role.get("name")));
     }
 }

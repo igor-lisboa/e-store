@@ -4,7 +4,7 @@
 
 - MySQL stores users, roles, addresses, products, categories, carts, cart items, sales, ratings, and favorites.
 - `database/migrations` contains versioned tables, views, routines, and reference data. `database/dev-seeds` contains optional local fixtures. Flyway records applied versions and checksums.
-- Data access classes issue SQL through `MySQLDAO`; DAOs return map-backed DTOs.
+- Data access classes issue SQL through `MySQLDAO`; DAOs map rows to typed DTOs through `RowMapper` in infrastructure; core DTOs never see a `Map`, and a repository contract test enforces that. Required columns that are missing fail loudly; optional ones map to null.
 - Several operations wrap low-level failures in `StoreException`.
 - Each DAO operation now owns its connection, statement, and result set through try-with-resources. A transaction uses one private connection, rolls back on failure, and retains rollback failures as suppressed exceptions. Repository cleanup no longer overrides the original error.
 - H2-based JDBC integration tests verify commit, rollback, null mapping, and shared-DAO concurrent operations. These tests do not replace MySQL migration and stored-procedure verification.

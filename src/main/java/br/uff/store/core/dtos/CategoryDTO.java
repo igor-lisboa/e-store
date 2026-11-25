@@ -1,6 +1,5 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class CategoryDTO {
 
@@ -24,10 +23,5 @@ public class CategoryDTO {
     }
 
     public CategoryDTO() {
-    }
-
-    public CategoryDTO(Map<String, Object> category) {
-        this.setId(Integer.valueOf(String.valueOf(category.get("id"))));
-        this.setName(String.valueOf(category.get("name")));
     }
 }

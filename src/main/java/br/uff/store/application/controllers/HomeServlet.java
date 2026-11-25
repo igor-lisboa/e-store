@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class HomeServlet extends HttpServlet {
         try {
             jogosVitrine = productService.listFeaturedProducts();
         } catch (Exception e) {
-            session.setAttribute("msg", e.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(e, FlashMessages.localeOf(session)));
         }
 
         request.setAttribute("jogosVitrine", jogosVitrine);

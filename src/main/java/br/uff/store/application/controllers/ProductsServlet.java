@@ -2,6 +2,7 @@ package br.uff.store.application.controllers;
 
 import java.math.BigDecimal;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -30,22 +31,26 @@ public class ProductsServlet extends HttpServlet {
     private final IProductService productService;
     private final Helper helper;
     private static final String SEARCH_KEY = "search";
-    private static final String PLAYSTATIONSTR = "playstation";
-    private static final String CHECKEDSTR = "checked";
-    private static final String CONSOLESSTR = "consoles";
+    private static final String PLAYSTATION_KEY = "playstation";
+    private static final String CHECKED = "checked";
+    private static final String CONSOLES_KEY = "consoles";
     private static final String NEW_RELEASES_KEY = "newReleases";
     private static final String FAVORITES_KEY = "favorites";
     private static final String ACCESSORIES_KEY = "accessories";
     private static final String GAMES_KEY = "games";
-    private static final String XBOXSTR = "xbox";
-    private static final String WIISTR = "wii";
+    private static final String XBOX_KEY = "xbox";
+    private static final String WII_KEY = "wii";
     private static final String PRODUCT_PAGE = "productPage";
     private static final int DEFAULT_PAGE_SIZE = 20;
-    private static final String MAXPAGSTR = "maxPage";
+    private static final String MAX_PAGE_KEY = "maxPage";
 
     public ProductsServlet() {
-        helper = new Helper();
-        productService = StoreServices.products();
+        this(StoreServices.products(), new Helper());
+    }
+
+    ProductsServlet(IProductService productService, Helper helper) {
+        this.productService = productService;
+        this.helper = helper;
     }
 
     /** Uses the optional pageSize query value when it is within 1-100; otherwise the storefront default. */
@@ -92,14 +97,14 @@ public class ProductsServlet extends HttpServlet {
                 specials = new ArrayList<>(Arrays.asList(specialValues));
             }
 
-            session.setAttribute(PLAYSTATIONSTR, (categories.contains(PLAYSTATIONSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(XBOXSTR, (categories.contains(XBOXSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(WIISTR, (categories.contains(WIISTR) ? CHECKEDSTR : ""));
-            session.setAttribute(CONSOLESSTR, (subcategories.contains(CONSOLESSTR) ? CHECKEDSTR : ""));
-            session.setAttribute(GAMES_KEY, (subcategories.contains(GAMES_KEY) ? CHECKEDSTR : ""));
-            session.setAttribute(ACCESSORIES_KEY, (subcategories.contains(ACCESSORIES_KEY) ? CHECKEDSTR : ""));
-            session.setAttribute(FAVORITES_KEY, (specials.contains(FAVORITES_KEY) ? CHECKEDSTR : ""));
-            session.setAttribute(NEW_RELEASES_KEY, (specials.contains(NEW_RELEASES_KEY) ? CHECKEDSTR : ""));
+            session.setAttribute(PLAYSTATION_KEY, (categories.contains(PLAYSTATION_KEY) ? CHECKED : ""));
+            session.setAttribute(XBOX_KEY, (categories.contains(XBOX_KEY) ? CHECKED : ""));
+            session.setAttribute(WII_KEY, (categories.contains(WII_KEY) ? CHECKED : ""));
+            session.setAttribute(CONSOLES_KEY, (subcategories.contains(CONSOLES_KEY) ? CHECKED : ""));
+            session.setAttribute(GAMES_KEY, (subcategories.contains(GAMES_KEY) ? CHECKED : ""));
+            session.setAttribute(ACCESSORIES_KEY, (subcategories.contains(ACCESSORIES_KEY) ? CHECKED : ""));
+            session.setAttribute(FAVORITES_KEY, (specials.contains(FAVORITES_KEY) ? CHECKED : ""));
+            session.setAttribute(NEW_RELEASES_KEY, (specials.contains(NEW_RELEASES_KEY) ? CHECKED : ""));
 
             CatalogCategorySelection.apply(request, session, categories, subcategories);
 
@@ -111,62 +116,62 @@ public class ProductsServlet extends HttpServlet {
                 filter.setSubcategories(subcategories);
             }
 
-            String espParameter = "";
+            String specialParameter = "";
             if (request.getParameter("special") != null) {
-                espParameter = request.getParameter("special");
+                specialParameter = request.getParameter("special");
             }
 
-            if (espParameter.equals(NEW_RELEASES_KEY)) {
-                session.setAttribute(NEW_RELEASES_KEY, CHECKEDSTR);
-            } else if (espParameter.equals(FAVORITES_KEY)) {
-                session.setAttribute(FAVORITES_KEY, CHECKEDSTR);
+            if (specialParameter.equals(NEW_RELEASES_KEY)) {
+                session.setAttribute(NEW_RELEASES_KEY, CHECKED);
+            } else if (specialParameter.equals(FAVORITES_KEY)) {
+                session.setAttribute(FAVORITES_KEY, CHECKED);
             }
 
             if (session.getAttribute(NEW_RELEASES_KEY) != null) {
-                if (session.getAttribute(NEW_RELEASES_KEY).toString().equals(CHECKEDSTR) && !specials.contains(NEW_RELEASES_KEY)) {
+                if (session.getAttribute(NEW_RELEASES_KEY).toString().equals(CHECKED) && !specials.contains(NEW_RELEASES_KEY)) {
                     specials.add(NEW_RELEASES_KEY);
                 }
             }
 
             if (session.getAttribute(FAVORITES_KEY) != null) {
-                if (session.getAttribute(FAVORITES_KEY).toString().equals(CHECKEDSTR) && !specials.contains(FAVORITES_KEY)) {
+                if (session.getAttribute(FAVORITES_KEY).toString().equals(CHECKED) && !specials.contains(FAVORITES_KEY)) {
                     specials.add(FAVORITES_KEY);
                 }
             }
 
-            if (session.getAttribute(CONSOLESSTR) != null) {
-                if (session.getAttribute(CONSOLESSTR).toString().equals(CHECKEDSTR) && !subcategories.contains(CONSOLESSTR)) {
-                    subcategories.add(CONSOLESSTR);
+            if (session.getAttribute(CONSOLES_KEY) != null) {
+                if (session.getAttribute(CONSOLES_KEY).toString().equals(CHECKED) && !subcategories.contains(CONSOLES_KEY)) {
+                    subcategories.add(CONSOLES_KEY);
                 }
             }
 
             if (session.getAttribute(GAMES_KEY) != null) {
-                if (session.getAttribute(GAMES_KEY).toString().equals(CHECKEDSTR) && !subcategories.contains(GAMES_KEY)) {
+                if (session.getAttribute(GAMES_KEY).toString().equals(CHECKED) && !subcategories.contains(GAMES_KEY)) {
                     subcategories.add(GAMES_KEY);
                 }
             }
 
             if (session.getAttribute(ACCESSORIES_KEY) != null) {
-                if (session.getAttribute(ACCESSORIES_KEY).toString().equals(CHECKEDSTR) && !subcategories.contains(ACCESSORIES_KEY)) {
+                if (session.getAttribute(ACCESSORIES_KEY).toString().equals(CHECKED) && !subcategories.contains(ACCESSORIES_KEY)) {
                     subcategories.add(ACCESSORIES_KEY);
                 }
             }
 
-            if (session.getAttribute(PLAYSTATIONSTR) != null) {
-                if (session.getAttribute(PLAYSTATIONSTR).toString().equals(CHECKEDSTR) && !categories.contains(PLAYSTATIONSTR)) {
-                    categories.add(PLAYSTATIONSTR);
+            if (session.getAttribute(PLAYSTATION_KEY) != null) {
+                if (session.getAttribute(PLAYSTATION_KEY).toString().equals(CHECKED) && !categories.contains(PLAYSTATION_KEY)) {
+                    categories.add(PLAYSTATION_KEY);
                 }
             }
 
-            if (session.getAttribute(XBOXSTR) != null) {
-                if (session.getAttribute(XBOXSTR).toString().equals(CHECKEDSTR) && !categories.contains(XBOXSTR)) {
-                    categories.add(XBOXSTR);
+            if (session.getAttribute(XBOX_KEY) != null) {
+                if (session.getAttribute(XBOX_KEY).toString().equals(CHECKED) && !categories.contains(XBOX_KEY)) {
+                    categories.add(XBOX_KEY);
                 }
             }
 
-            if (session.getAttribute(WIISTR) != null) {
-                if (session.getAttribute(WIISTR).toString().equals(CHECKEDSTR) && !categories.contains(WIISTR)) {
-                    categories.add(WIISTR);
+            if (session.getAttribute(WII_KEY) != null) {
+                if (session.getAttribute(WII_KEY).toString().equals(CHECKED) && !categories.contains(WII_KEY)) {
+                    categories.add(WII_KEY);
                 }
             }
 
@@ -176,7 +181,7 @@ public class ProductsServlet extends HttpServlet {
                     filter.setUserId(helper.tryParseInteger(session.getAttribute("userId").toString()));
                     filter.setFavoritesOnly(true);
                 } else {
-                    session.setAttribute("msg", "Sign in to view your favorites.");
+                    session.setAttribute("msg", FlashMessages.text("Sign in to view your favorites.", FlashMessages.localeOf(session)));
                     response.sendRedirect("account?redirect=products");
                     return;
                 }
@@ -214,7 +219,7 @@ public class ProductsServlet extends HttpServlet {
 
             switch (action) {
                 case "previous": {
-                    productPage = productPage - 1;
+                    productPage = Math.max(1, productPage - 1);
                     break;
                 }
                 case "next": {
@@ -230,13 +235,13 @@ public class ProductsServlet extends HttpServlet {
 
             PaginationDTO<List<ProductListDTO>> pagedProducts = productService.listStorefrontProducts(filter);
             
-            session.setAttribute(MAXPAGSTR, pagedProducts.getLastPage());
+            session.setAttribute(MAX_PAGE_KEY, pagedProducts.getLastPage());
             session.setAttribute(PRODUCT_PAGE, pagedProducts.getPageNumber());
 
             request.setAttribute("products", pagedProducts);
             request.getRequestDispatcher("pages/products.jsp").forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect("");
         }
     }

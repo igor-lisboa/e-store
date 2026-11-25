@@ -29,7 +29,7 @@
     "quantity": {
       "type": "integer",
       "format": "int32",
-      "description": "Available stock."
+      "description": "Exact available stock (returned to administrators only)."
     },
     "category": {
       "type": "string"

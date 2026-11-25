@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -14,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import br.uff.store.core.dtos.ProductReviewInputDTO;
+import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.services.IReviewService;
-import br.uff.store.core.services.ReviewService;
 import br.uff.store.infrastructure.shared.Helper;
 
 @WebServlet("/reviews")
@@ -26,8 +27,12 @@ public class ReviewServlet extends HttpServlet {
     private final Helper helper;
 
     public ReviewServlet() {
-        reviewService = StoreServices.reviews();
-        helper = new Helper();
+        this(StoreServices.reviews(), new Helper());
+    }
+
+    ReviewServlet(IReviewService reviewService, Helper helper) {
+        this.reviewService = reviewService;
+        this.helper = helper;
     }
 
     /**
@@ -54,7 +59,7 @@ public class ReviewServlet extends HttpServlet {
 
             Integer userId = null;
             if (session.getAttribute("userId") == null) {
-                session.setAttribute("msg", "Sign in to review a product.");
+                session.setAttribute("msg", FlashMessages.text("Sign in to review a product.", FlashMessages.localeOf(session)));
                 response.sendRedirect("account?redirect=reviews");
                 return;
             } else {
@@ -65,7 +70,7 @@ public class ReviewServlet extends HttpServlet {
             if (session.getAttribute(PRODUCT_ID) != null) {
                 productId = helper.tryParseInteger(session.getAttribute(PRODUCT_ID).toString());
             } else {
-                session.setAttribute("msg", "Please select a product.");
+                session.setAttribute("msg", FlashMessages.text("Please select a product.", FlashMessages.localeOf(session)));
                 response.sendRedirect("products");
                 return;
             }
@@ -88,11 +93,42 @@ public class ReviewServlet extends HttpServlet {
                 return;
             }
 
+            if (action.equals("updateReview") || action.equals("deleteReview")) {
+                if (!"POST".equalsIgnoreCase(request.getMethod())) {
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                    return;
+                }
+                changeOwnReview(request, action, userId, productId);
+                session.setAttribute(RATING, null);
+                response.sendRedirect("product");
+                return;
+            }
+
+            if (request.getParameter("edit") != null) {
+                ProductReviewInputDTO existing = reviewService.findUserReview(userId, productId);
+                if (existing == null) {
+                    throw new StoreException("You have no review of this product to change.");
+                }
+                request.setAttribute("review", existing);
+            }
+
             request.getRequestDispatcher("pages/product-review.jsp").forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect("product");
         }
+    }
+
+    /** The user ID always comes from the session, so a customer can only ever touch their own review. */
+    private void changeOwnReview(HttpServletRequest request, String action, Integer userId, Integer productId)
+            throws StoreException {
+        if (action.equals("deleteReview")) {
+            reviewService.deleteReview(userId, productId);
+            return;
+        }
+        reviewService.updateReview(new ProductReviewInputDTO(userId, productId,
+                helper.tryParseInteger(request.getParameter(RATING)), request.getParameter("description"),
+                request.getParameter("title")));
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

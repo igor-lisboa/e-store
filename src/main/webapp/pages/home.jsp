@@ -16,8 +16,9 @@ and open the template in the editor.
     }
 %>
 
+<fmt:message key="ui.pageTitle.home" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Home"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
 <%
     if (jogosVitrine.size() > 0) {

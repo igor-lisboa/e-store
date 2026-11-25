@@ -36,7 +36,7 @@ public class ProductData implements IProductData {
             if (result.isEmpty()) {
                 throw new ResourceNotFoundException("Product");
             }
-            return new ProductDTO(result.get(0));
+            return RowMapper.product(result.get(0));
         } catch (ResourceNotFoundException missing) {
             throw missing;
         } catch (Exception e) {
@@ -69,8 +69,15 @@ public class ProductData implements IProductData {
     @Override
     public void addProductStock(Integer id, Integer quantity) throws StoreException {
         try {
-            Object[] bind = { quantity, id };
-            this.mysqlDAO.executeUpdate("UPDATE products SET quantity = quantity + ? WHERE id=?", bind);
+            Object[] bind = { quantity, id, quantity };
+            // The comparison is done in BIGINT, so it cannot overflow the INT stock column.
+            Integer changed = this.mysqlDAO.executeUpdate(
+                    "UPDATE products SET quantity = quantity + ? WHERE id=? AND quantity + ? <= 2147483647", bind);
+            if (changed == 0) {
+                throw new StoreException("The product does not exist or the stock would exceed the supported maximum.");
+            }
+        } catch (StoreException rejected) {
+            throw rejected;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the product database operation.", e);
         }
@@ -95,7 +102,7 @@ public class ProductData implements IProductData {
             Object[] bind = {};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query(PRODUCT_QUERY, bind);
             List<ProductDTO> mappedResults = new ArrayList<>();
-            rows.forEach(product -> mappedResults.add(new ProductDTO(product)));
+            rows.forEach(product -> mappedResults.add(RowMapper.product(product)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the product database operation.", e);
@@ -111,7 +118,7 @@ public class ProductData implements IProductData {
             }
 
             ArrayList<Object> bind = new ArrayList<>();
-            String query = "SELECT p.id AS id,p.name AS name,p.price AS price,p.img AS image,c.category_name AS category FROM products p LEFT JOIN vw_category c on(p.category_id=c.id) ";
+            String query = "SELECT p.id AS id,p.name AS name,p.price AS price,p.img AS image,c.category_name AS category,(p.quantity>0) AS available FROM products p LEFT JOIN vw_category c on(p.category_id=c.id) ";
 
             String filter = "";
             String limit = " LIMIT " + productFilter.getPageSize() + " ";
@@ -167,8 +174,6 @@ public class ProductData implements IProductData {
                         + " (UPPER(p.name) LIKE ? OR UPPER(p.description) LIKE ?) ";
             }
 
-            filter += (filter.equals("") ? whereTxt : andTXT) + " p.quantity>0 ";
-
             if (productFilter.getMinimumPrice() != null) {
                 bind.add(productFilter.getMinimumPrice());
                 filter += (filter.equals("") ? whereTxt : andTXT) + " p.price >= ? ";
@@ -188,7 +193,7 @@ public class ProductData implements IProductData {
             List<HashMap<String, Object>> rows = this.mysqlDAO
                     .query(query + filter + limit + offset, bind.toArray());
             List<ProductListDTO> mappedResults = new ArrayList<>();
-            rows.forEach(product -> mappedResults.add(new ProductListDTO(product)));
+            rows.forEach(product -> mappedResults.add(RowMapper.productListItem(product)));
 
             Integer lastPage = Integer.valueOf(
                     String.valueOf(this.mysqlDAO.scalar("ceil(count(*)/" + productFilter.getPageSize() + ")",
@@ -218,7 +223,7 @@ public class ProductData implements IProductData {
             List<HashMap<String, Object>> result = this.mysqlDAO.query(
                     "SELECT p.id, p.name AS name, p.quantity AS quantity, p.description AS description, p.price AS price, p.img AS image, c.category_name AS category, (SELECT count(*) FROM favorite_products f WHERE f.product_id = p.id AND f.user_id=?) favorite, (SELECT f.rating FROM product_reviews f WHERE f.product_id = p.id AND f.user_id=?) userRating, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id) ratingCount, (SELECT COALESCE(sum(f.rating),0) FROM product_reviews f WHERE f.product_id = p.id) ratingSum, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='1') ratingCount1, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='2') ratingCount2, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='3') ratingCount3, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='4') ratingCount4, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='5') ratingCount5 FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id) WHERE p.id=?",
                     bind);
-            return new CustomerProductDTO(result.get(0));
+            return RowMapper.customerProduct(result.get(0));
         } catch (Exception e) {
             throw new StoreException("Unable to complete the product database operation.", e);
         }
@@ -263,7 +268,7 @@ public class ProductData implements IProductData {
                     "SELECT id, name AS name, description AS description, img AS image FROM products WHERE quantity > 0 ORDER BY quantity DESC LIMIT 3",
                     bind);
             List<FeaturedProductDTO> mappedResults = new ArrayList<>();
-            rows.forEach(product -> mappedResults.add(new FeaturedProductDTO(product)));
+            rows.forEach(product -> mappedResults.add(RowMapper.featuredProduct(product)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the product database operation.", e);

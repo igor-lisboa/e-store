@@ -2,7 +2,6 @@ package br.uff.store.core.dtos;
 
 import java.math.BigDecimal;
 
-import java.util.Map;
 
 public class CartItemDTO extends BaseDTO {
 
@@ -17,18 +16,6 @@ public class CartItemDTO extends BaseDTO {
     private BigDecimal totalPrice;
 
     public CartItemDTO() {
-    }
-
-    public CartItemDTO(Map<String, Object> cartProduct) {
-        this.setId(Integer.valueOf(String.valueOf(cartProduct.get("id"))));
-        this.setProductId(Integer.valueOf(String.valueOf(cartProduct.get("productId"))));
-        this.setName(String.valueOf(cartProduct.get("name")));
-        this.setDescription(String.valueOf(cartProduct.get("description")));
-        this.setImage(String.valueOf(cartProduct.get("image")));
-        this.setPrice(new BigDecimal(String.valueOf(cartProduct.get("price"))));
-        this.setAvailableStock(Integer.valueOf(String.valueOf(cartProduct.get("availableStock"))));
-        this.setQuantity(Integer.valueOf(String.valueOf(cartProduct.get("quantity"))));
-        this.setTotalPrice(new BigDecimal(String.valueOf(cartProduct.get("totalPrice"))));
     }
 
     public void setProductId(Integer productId) {

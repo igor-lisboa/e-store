@@ -66,11 +66,18 @@
         "summary": "Find a product",
         "responses": {
           "200": {
-            "description": "Successful request.",
+            "description": "Successful request. Administrators receive the exact stock quantity (Product); everyone else receives availability only (PublicProduct).",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Product"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicProduct"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  ]
                 }
               }
             }
@@ -224,6 +231,9 @@
     "schemas": {
       "Product": {
         "$ref": "schemas/product.json"
+      },
+      "PublicProduct": {
+        "$ref": "schemas/public-product.json"
       },
       "User": {
         "$ref": "schemas/user.json"

@@ -28,9 +28,12 @@
     String sel = request.getParameter("selectedId");
 %>
 
+<fmt:message key="ui.pageTitle.productDetails" var="pageTitle"/>
 <jsp:include page="header.jsp">
-    <jsp:param name="title" value="Product details"/>
+    <jsp:param name="title" value="${pageTitle}"/>
 </jsp:include>
+<fmt:message key="ui.js.confirmDeleteProduct" var="js_confirmDeleteProduct"/>
+<fmt:message key="ui.js.imageTooLarge" var="js_imageTooLarge"/>
 
 <div class="product-main-container">
 
@@ -42,34 +45,34 @@
 
             <ul class="form-style-1">
                 <li>
-                    <label><fmt:message key="ui.name"/></label>
-                    <input value="<%= Html.escape(product.getName()) %>" class="field-long" name="name" required type="text" maxlength="255" />
+                    <label for="field-input0"><fmt:message key="ui.name"/></label>
+                    <input id="field-input0" value="<%= Html.escape(product.getName()) %>" class="field-long" name="name" required type="text" maxlength="255" />
                 </li>
                 <li>
-                    <label><fmt:message key="ui.price"/></label>
-                    <input value="<%= product.getPrice()%>" class="field-long" name="price" required type="number" max="5000" min="0.01" step="0.01" maxlength="255" />
+                    <label for="field-input1"><fmt:message key="ui.price"/></label>
+                    <input id="field-input1" value="<%= product.getPrice()%>" class="field-long" name="price" required type="number" max="5000" min="0.01" step="0.01" maxlength="255" />
                 </li>
                 <li>
-                    <label><fmt:message key="ui.description"/></label>
-                    <textarea class="field-long field-textarea" name="description" required maxlength="255"><%= Html.escape(product.getDescription()) %></textarea>
+                    <label for="field-description"><fmt:message key="ui.description"/></label>
+                    <textarea id="field-description" class="field-long field-textarea" name="description" required maxlength="255"><%= Html.escape(product.getDescription()) %></textarea>
                 </li>
                 <li>
-                    <label><fmt:message key="ui.category"/></label>
-                    <select required name="categoryId">
+                    <label for="field-categoryId"><fmt:message key="ui.category"/></label>
+                    <select id="field-categoryId" required name="categoryId">
                         <% for (CategoryDTO category : categories) {%>
                         <option <%= (product.getCategoryId() == category.getId() ? "selected" : "")%> value="<%= category.getId()%>"><%= Html.escape(category.getName()) %></option>
                         <% } %>
                     </select>
                 </li>
                 <li>
-                    <label><fmt:message key="ui.image"/></label><input name="img" id="img" accept="image/*" <% if (sel.equals("")) { %>required<% }%> type="file"/>
+                    <label for="img"><fmt:message key="ui.image"/></label><input name="img" id="img" accept="image/*" <% if (sel.equals("")) { %>required<% }%> type="file"/>
                     <input value="<%= Html.escape(product.getImage()) %>" style="display:none;" name="src" readonly type="text"/>
                 </li>
                 <li class="center">
                     <button name="action" formnovalidate value="clear"><fmt:message key="ui.back"/></button>
                     <button type="submit" name="action" value="save"><fmt:message key="ui.save"/></button>
                     <% if (!sel.equals("")) { %>
-                    <button type="submit" name="action" value="delete" formnovalidate onclick="return confirm('Delete this product?');false;"><fmt:message key="ui.delete"/></button>
+                    <button type="submit" name="action" value="delete" formnovalidate onclick="return confirm('${js_confirmDeleteProduct}');false;"><fmt:message key="ui.delete"/></button>
                     <% }%>
                 </li>
             </ul>
@@ -88,8 +91,8 @@
         <%@ include file="/WEB-INF/fragments/csrf.jspf" %>
             <ul class="form-style-1" style="margin-left: 31px;">
                 <li>
-                    <label><fmt:message key="ui.stockIncrement"/></label>
-                    <input name="quantity" min="1" required type="number" maxlength="11" class="field-divided">
+                    <label for="field-quantity"><fmt:message key="ui.stockIncrement"/></label>
+                    <input id="field-quantity" name="quantity" min="1" required type="number" maxlength="11" class="field-divided">
                 </li>
                 <li class="center">
                     <button type="submit" name="action" value="addStock"><fmt:message key="ui.insert"/></button>
@@ -121,7 +124,7 @@
     document.querySelector('#img').addEventListener('change', function () {
         var maxAllowedSize = 1 * 1024 * 1024;
         if (this.files[0].size > maxAllowedSize) {
-            alert("The image file is too large. Choose a smaller file.");
+            alert("${js_imageTooLarge}");
             this.value = "";
         } else {
             updateImagePreview();

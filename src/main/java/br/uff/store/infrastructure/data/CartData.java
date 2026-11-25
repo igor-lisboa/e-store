@@ -18,9 +18,9 @@ public class CartData implements ICartData {
 
     private final MySQLDAO mysqlDAO;
 
-    private static final String COUNTSTRING = "count(*)";
-    private static final String CARTTABLESTRING = "carts";
-    private static final String CARTSPRODUCTSTABLESTRING = "carts_products";
+    private static final String COUNT_ALL = "count(*)";
+    private static final String CARTS_TABLE = "carts";
+    private static final String CARTS_PRODUCTS_TABLE = "carts_products";
     private static final String CART_ERROR_PREFIX = "Unable to verify cart ID ";
     private static final String CART_ERROR_CONTEXT = " in cart ID ";
     private static final String CART_PRODUCTS_QUERY = "SELECT c.cart_id AS id, p.id AS productId, p.name AS name, p.description AS description, p.img AS image, p.price AS price, p.quantity AS availableStock, c.quantity AS quantity, p.price * c.quantity AS totalPrice FROM carts_products c LEFT JOIN products p ON (c.product_id = p.id) WHERE c.cart_id=?";
@@ -38,7 +38,7 @@ public class CartData implements ICartData {
         try {
             Object[] bind = {id};
             List<HashMap<String, Object>> result = this.mysqlDAO.query("SELECT id, user_id AS userId, created_at AS createdAt, ip FROM carts WHERE id=?", bind);
-            return new CartDTO(result.get(0));
+            return RowMapper.cart(result.get(0));
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -50,7 +50,7 @@ public class CartData implements ICartData {
             Object[] bind = {userId};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query("SELECT id, user_id AS userId, created_at AS createdAt, ip FROM carts WHERE user_id=? AND id NOT IN (SELECT cart_id FROM sales) ORDER BY id DESC", bind);
             List<CartDTO> mappedResults = new ArrayList<>();
-            rows.forEach(cart -> mappedResults.add(new CartDTO(cart)));
+            rows.forEach(cart -> mappedResults.add(RowMapper.cart(cart)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
@@ -61,7 +61,7 @@ public class CartData implements ICartData {
     public Boolean isCartSold(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=? AND id IN (SELECT cart_id FROM sales)", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_TABLE, "id=? AND id IN (SELECT cart_id FROM sales)", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -81,7 +81,7 @@ public class CartData implements ICartData {
     public Boolean isCartUnowned(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=? AND user_id IS NULL", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_TABLE, "id=? AND user_id IS NULL", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -91,7 +91,7 @@ public class CartData implements ICartData {
     public Boolean cartBelongsToUser(Integer id, Integer userId) throws StoreException {
         try {
             Object[] bind = {id, userId};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=? AND user_id=?", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_TABLE, "id=? AND user_id=?", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -101,7 +101,7 @@ public class CartData implements ICartData {
     public Boolean cartExists(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=?", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_TABLE, "id=?", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -111,7 +111,7 @@ public class CartData implements ICartData {
     public Integer cartItemCount(Integer id) throws StoreException {
         try {
             Object[] bind = {id};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTSPRODUCTSTABLESTRING, "cart_id=?", bind)));
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_PRODUCTS_TABLE, "cart_id=?", bind)));
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -121,7 +121,7 @@ public class CartData implements ICartData {
     public Integer productQuantityInCart(Integer id, Integer productId) throws StoreException {
         try {
             Object[] bind = {productId, id};
-            String quantity = String.valueOf(this.mysqlDAO.scalar("quantity", CARTSPRODUCTSTABLESTRING, "product_id=? AND cart_id=?", bind));
+            String quantity = String.valueOf(this.mysqlDAO.scalar("quantity", CARTS_PRODUCTS_TABLE, "product_id=? AND cart_id=?", bind));
             return Integer.valueOf(quantity.equals("null") ? "0" : quantity);
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
@@ -146,7 +146,7 @@ public class CartData implements ICartData {
                 bind.add(userId);
             }
             List<HashMap<String, Object>> result = this.mysqlDAO.query("SELECT id, user_id AS userId, created_at AS createdAt, ip FROM carts WHERE ip=? AND created_at=? AND user_id" + (userId == null ? " IS NULL " : "=?") + " ORDER BY id DESC LIMIT 1", bind.toArray());
-            return new CartDTO(result.get(0));
+            return RowMapper.cart(result.get(0));
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -158,7 +158,7 @@ public class CartData implements ICartData {
             Object[] bind = {id};
             List<HashMap<String, Object>> rows = this.mysqlDAO.query(CART_PRODUCTS_QUERY, bind);
             List<CartItemDTO> mappedResults = new ArrayList<>();
-            rows.forEach(cart -> mappedResults.add(new CartItemDTO(cart)));
+            rows.forEach(cart -> mappedResults.add(RowMapper.cartItem(cart)));
             return mappedResults;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
@@ -169,7 +169,7 @@ public class CartData implements ICartData {
     public Boolean containsProduct(Integer id, Integer productId) throws StoreException {
         try {
             Object[] bind = {productId, id};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTSPRODUCTSTABLESTRING, "product_id=? AND cart_id=?", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_PRODUCTS_TABLE, "product_id=? AND cart_id=?", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -230,7 +230,7 @@ public class CartData implements ICartData {
     public Boolean isCartActiveSince(Integer id, String since) throws StoreException {
         try {
             Object[] bind = {id, since};
-            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNTSTRING, CARTTABLESTRING, "id=? AND last_activity_at>=?", bind))) > 0;
+            return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar(COUNT_ALL, CARTS_TABLE, "id=? AND last_activity_at>=?", bind))) > 0;
         } catch (Exception e) {
             throw new StoreException("Unable to complete the cart database operation.", e);
         }
@@ -276,7 +276,7 @@ public class CartData implements ICartData {
 
             List<HashMap<String, Object>> rows = this.mysqlDAO.query(CART_PRODUCTS_QUERY + limit + offset, bind);
             List<CartItemDTO> mappedResults = new ArrayList<>();
-            rows.forEach(cart -> mappedResults.add(new CartItemDTO(cart)));
+            rows.forEach(cart -> mappedResults.add(RowMapper.cartItem(cart)));
 
             Integer lastPage = Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("ceil(count(*)/" + pageSize + ")", CART_PRODUCTS_QUERY, "", bind)));
 

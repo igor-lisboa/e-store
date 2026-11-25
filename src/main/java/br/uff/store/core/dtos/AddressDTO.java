@@ -1,21 +1,9 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class AddressDTO extends BaseDTO {
 
     public AddressDTO() {
-    }
-
-    public AddressDTO(Map<String, Object> address) {
-        this.setId(Integer.valueOf(String.valueOf(address.get("id"))));
-        this.setUserId(Integer.valueOf(String.valueOf(address.get("userId"))));
-        this.setName(String.valueOf(address.get("name")));
-        this.setPostalCode(Integer.valueOf(String.valueOf(address.get("postalCode"))));
-        this.setStreetAddress(String.valueOf(address.get("streetAddress")));
-        this.setState(String.valueOf(address.get("state")));
-        this.setCity(String.valueOf(address.get("city")));
-        this.setCountry(String.valueOf(address.get("country")));
     }
 
     public AddressDTO(String name, Integer userId, Integer postalCode, String streetAddress, String city, String state, String country) {

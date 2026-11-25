@@ -1,5 +1,6 @@
 package br.uff.store.application.controllers;
 
+import br.uff.store.application.FlashMessages;
 import br.uff.store.application.StoreServices;
 
 import java.io.IOException;
@@ -40,9 +41,13 @@ public class UserServlet extends HttpServlet {
     private final Helper helper;
 
     public UserServlet() {
-        userService = StoreServices.users();
-        roleService = StoreServices.roles();
-        helper = new Helper();
+        this(StoreServices.users(), StoreServices.roles(), new Helper());
+    }
+
+    UserServlet(IUserService userService, IRoleService roleService, Helper helper) {
+        this.userService = userService;
+        this.roleService = roleService;
+        this.helper = helper;
     }
 
     /**
@@ -104,7 +109,7 @@ public class UserServlet extends HttpServlet {
 
                     session.setAttribute(USERID, null);
                     session.setAttribute(USERROLE, null);
-                    session.setAttribute("msg", "Signed out successfully.");
+                    session.setAttribute("msg", FlashMessages.text("Signed out successfully.", FlashMessages.localeOf(session)));
 
                     session.invalidate();
                     response.sendRedirect("");
@@ -116,17 +121,17 @@ public class UserServlet extends HttpServlet {
                         request.changeSessionId();
                         session.setAttribute(USERID, userDto.getId());
                             session.setAttribute(USERROLE, userDto.getRoleId());
-                            session.setAttribute("msg", "Welcome, " + userDto.getName() + "!");
+                            session.setAttribute("msg", FlashMessages.welcome(userDto.getName(), FlashMessages.localeOf(session)));
                             // Remember the email only; never persist a password in a browser cookie.
                             if (request.getParameter("remember") != null) {
-                                int durMes = 2592000;
-                                Cookie ckEmail = new Cookie("loginEmail", email);
-                                ckEmail.setMaxAge(durMes);
-                                ckEmail.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
-                                response.addCookie(ckEmail);
+                                int rememberEmailSeconds = 2592000;
+                                Cookie emailCookie = new Cookie("loginEmail", email);
+                                emailCookie.setMaxAge(rememberEmailSeconds);
+                                emailCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+                                response.addCookie(emailCookie);
                             }
                     } catch (Exception el) {
-                        session.setAttribute("msg", el.getMessage());
+                        session.setAttribute("msg", FlashMessages.forFailure(el, FlashMessages.localeOf(session)));
                     }
 
                     break;
@@ -142,7 +147,7 @@ public class UserServlet extends HttpServlet {
                     request.changeSessionId();
                     session.setAttribute(USERID, userDto.getId());
                     session.setAttribute(USERROLE, userDto.getRoleId());
-                    session.setAttribute("msg", "Welcome, " + userDto.getName() + "!");
+                    session.setAttribute("msg", FlashMessages.welcome(userDto.getName(), FlashMessages.localeOf(session)));
                     break;
                 }
                 case "clear": {
@@ -203,7 +208,7 @@ public class UserServlet extends HttpServlet {
 
             request.getRequestDispatcher(redirect).forward(request, response);
         } catch (Exception ex) {
-            session.setAttribute("msg", ex.getMessage());
+            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
             response.sendRedirect("");
         }
     }

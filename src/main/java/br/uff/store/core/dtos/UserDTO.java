@@ -1,6 +1,5 @@
 package br.uff.store.core.dtos;
 
-import java.util.Map;
 
 public class UserDTO extends BaseDTO {
 
@@ -25,14 +24,6 @@ public class UserDTO extends BaseDTO {
         this.setEmail(email);
         this.setPassword(password);
         this.setRoleId(roleId);
-    }
-
-    public UserDTO(Map<String, Object> user) {
-        this.setId(Integer.valueOf(String.valueOf(user.get("id"))));
-        this.setName(String.valueOf(user.get("name")));
-        this.setEmail(String.valueOf(user.get("email")));
-        this.setPassword(String.valueOf(user.get("password")));
-        this.setRoleId(Integer.valueOf(String.valueOf(user.get("roleId"))));
     }
 
     public void setEmail(String email) {

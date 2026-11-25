@@ -36,3 +36,9 @@
 - E2E smoke journeys cover sign-in, catalog, cart, and checkout.
 - Changes to a feature update its spec, tests, and translation keys.
 - Track any remaining >300-line files in the backlog until split safely.
+
+## Accessibility baseline
+
+- Every visible form control has an accessible name: a `label for` that points at a real id, or an `aria-label`/`aria-labelledby`. A repository contract test scans every page and fails on an unlabeled control or a label that points at a missing id. The rating stars form a labelled radio group, the price sliders are named by their visible labels, and the cart quantity boxes include the product name.
+- Registration and new-password fields enforce the 8-character minimum in the browser as well as on the server.
+- Keyboard order, focus visibility, and colour contrast have not been audited with a tool; they remain open in the backlog.

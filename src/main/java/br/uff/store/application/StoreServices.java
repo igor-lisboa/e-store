@@ -16,6 +16,8 @@ import br.uff.store.infrastructure.data.CategoryData;
 import br.uff.store.infrastructure.data.RoleData;
 import br.uff.store.infrastructure.data.ProductReviewData;
 import br.uff.store.infrastructure.data.SaleData;
+import br.uff.store.infrastructure.gateways.DemoDeliveryGateway;
+import br.uff.store.infrastructure.gateways.DemoPaymentGateway;
 import br.uff.store.infrastructure.security.Pbkdf2PasswordHasher;
 
 /** The application boundary wires concrete adapters into framework-independent use cases. */
@@ -51,6 +53,7 @@ public final class StoreServices {
     }
 
     public static SaleService sales() {
-        return new SaleService(new SaleData(), carts(), addresses());
+        return new SaleService(new SaleData(), carts(), addresses(), new DemoPaymentGateway(),
+                new DemoDeliveryGateway());
     }
 }
