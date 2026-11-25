@@ -39,8 +39,8 @@ public class ProductData implements IProductData {
             return RowMapper.product(result.get(0));
         } catch (ResourceNotFoundException missing) {
             throw missing;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -49,8 +49,8 @@ public class ProductData implements IProductData {
         try {
             Object[] bind = { id };
             this.mysqlDAO.executeUpdate("DELETE FROM products WHERE id=?", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -61,8 +61,8 @@ public class ProductData implements IProductData {
                     product.getCategoryId(), id };
             this.mysqlDAO.executeUpdate("UPDATE products SET name=?, price=?, description=?, img=?, category_id=? WHERE id=?",
                     bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -78,8 +78,8 @@ public class ProductData implements IProductData {
             }
         } catch (StoreException rejected) {
             throw rejected;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -91,8 +91,8 @@ public class ProductData implements IProductData {
             this.mysqlDAO.executeUpdate(
                     "INSERT INTO products (name,price,description,img,category_id,created_at,quantity) VALUES (?,?,?,?,?,SYSDATE(),0)",
                     bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -104,8 +104,8 @@ public class ProductData implements IProductData {
             List<ProductDTO> mappedResults = new ArrayList<>();
             rows.forEach(product -> mappedResults.add(RowMapper.product(product)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -210,8 +210,8 @@ public class ProductData implements IProductData {
             }
 
             return new PaginationDTO<>(productFilter.getPageNumber(), mappedResults, lastPage);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -224,8 +224,8 @@ public class ProductData implements IProductData {
                     "SELECT p.id, p.name AS name, p.quantity AS quantity, p.description AS description, p.price AS price, p.img AS image, c.category_name AS category, (SELECT count(*) FROM favorite_products f WHERE f.product_id = p.id AND f.user_id=?) favorite, (SELECT f.rating FROM product_reviews f WHERE f.product_id = p.id AND f.user_id=?) userRating, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id) ratingCount, (SELECT COALESCE(sum(f.rating),0) FROM product_reviews f WHERE f.product_id = p.id) ratingSum, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='1') ratingCount1, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='2') ratingCount2, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='3') ratingCount3, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='4') ratingCount4, (SELECT count(*) FROM product_reviews f WHERE f.product_id = p.id AND f.rating='5') ratingCount5 FROM products p LEFT JOIN vw_category c ON (p.category_id = c.id) WHERE p.id=?",
                     bind);
             return RowMapper.customerProduct(result.get(0));
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -235,8 +235,8 @@ public class ProductData implements IProductData {
             Object[] bind = { productId, userId };
             return Integer.valueOf(String.valueOf(
                     this.mysqlDAO.scalar("count(*)", "favorite_products", "product_id=? AND user_id=?", bind))) > 0;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -245,8 +245,8 @@ public class ProductData implements IProductData {
         try {
             Object[] bind = { productId, userId };
             this.mysqlDAO.executeUpdate("DELETE FROM favorite_products WHERE product_id=? AND user_id=?", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -255,8 +255,8 @@ public class ProductData implements IProductData {
         try {
             Object[] bind = { productId, userId };
             this.mysqlDAO.executeUpdate("INSERT INTO favorite_products (product_id,user_id) VALUES (?,?)", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 
@@ -270,8 +270,8 @@ public class ProductData implements IProductData {
             List<FeaturedProductDTO> mappedResults = new ArrayList<>();
             rows.forEach(product -> mappedResults.add(RowMapper.featuredProduct(product)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product database operation.", failure);
         }
     }
 }

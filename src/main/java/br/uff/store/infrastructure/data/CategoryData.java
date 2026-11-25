@@ -25,8 +25,8 @@ public class CategoryData implements ICategoryData {
             List<CategoryDTO> mappedResults = new ArrayList<>();
             rows.forEach(category -> mappedResults.add(RowMapper.category(category)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the category database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the category database operation.", failure);
         }
     }
 

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import br.uff.store.core.dtos.UserDTO;
+import br.uff.store.core.exceptions.PasswordResetRequiredException;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.IUserData;
 import br.uff.store.core.interfaces.services.IPasswordHasher;
@@ -23,18 +26,20 @@ public class UserServiceTest {
     private final UserService service = new UserService(userData, passwordHasher);
 
     @Test
-    public void successfulLegacyLoginRehashesPasswordAndClearsItFromReturnedUser() throws Exception {
+    public void anAccountWithALegacyHashMustResetItsPasswordEvenWhenThePasswordMatches() throws Exception {
         UserDTO user = new UserDTO(5, "Customer", "customer@example.test", "legacy", 2);
         when(userData.findUserByEmail("customer@example.test")).thenReturn(user);
         when(passwordHasher.matches("legacy", "legacy")).thenReturn(true);
         when(passwordHasher.isEncoded("legacy")).thenReturn(false);
-        when(passwordHasher.hash("legacy")).thenReturn("encoded-value");
 
-        UserDTO result = service.login("customer@example.test", "legacy");
+        try {
+            service.login("customer@example.test", "legacy");
+            fail("A legacy hash must never sign anybody in.");
+        } catch (PasswordResetRequiredException required) {
+            assertEquals("customer@example.test", required.getEmail());
+        }
 
-        verify(userData).updatePassword(5, "encoded-value");
-        assertSame(user, result);
-        assertNull(result.getPassword());
+        verify(userData, never()).updatePassword(any(), any());
     }
 
     @Test

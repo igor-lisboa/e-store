@@ -35,8 +35,8 @@ public class UserData implements IUserData {
             return RowMapper.user(result.get(0));
         } catch (ResourceNotFoundException missing) {
             throw missing;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 
@@ -48,8 +48,8 @@ public class UserData implements IUserData {
             List<UserDTO> mappedResults = new ArrayList<>();
             rows.forEach(user -> mappedResults.add(RowMapper.user(user)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 
@@ -58,8 +58,8 @@ public class UserData implements IUserData {
         try {
             Object[] bind = {user.getName(), user.getEmail(), user.getPassword(), user.getRoleId(), id};
             this.mysqlDAO.executeUpdate("UPDATE users SET name=?,email=?,password=?,role_id=? WHERE id=?", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 
@@ -70,7 +70,7 @@ public class UserData implements IUserData {
             List<HashMap<String, Object>> rows = this.mysqlDAO.query(
                     "SELECT id, name AS name, email, password AS password, role_id AS roleId FROM users WHERE email=? LIMIT 1", bind);
             return rows.isEmpty() ? null : RowMapper.user(rows.get(0));
-        } catch (Exception e) {
+        } catch (Exception failure) {
             throw new StoreException("Failed to look up account credentials.");
         }
     }
@@ -80,7 +80,7 @@ public class UserData implements IUserData {
         try {
             Object[] bind = {password, id};
             this.mysqlDAO.executeUpdate("UPDATE users SET password=? WHERE id=?", bind);
-        } catch (Exception e) {
+        } catch (Exception failure) {
             throw new StoreException("Failed to update account credentials.");
         }
     }
@@ -90,8 +90,8 @@ public class UserData implements IUserData {
         try {
             Object[] bind = {user.getName(), user.getEmail(), user.getPassword(), user.getRoleId()};
             this.mysqlDAO.executeUpdate("INSERT INTO users (name,email,password,role_id) VALUES (?,?,?,?)", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 
@@ -100,8 +100,8 @@ public class UserData implements IUserData {
         try {
             Object[] bind = {id, UserRole.ADMIN.getId()};
             return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", this.tableUsers, "id=? AND role_id=?", bind))) > 0;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 
@@ -112,8 +112,8 @@ public class UserData implements IUserData {
             Object[] bind = creating ? new Object[] {email} : new Object[] {email, Integer.valueOf(ignoredUserId)};
             String filter = creating ? "email=?" : "email=? AND id<>?";
             return Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", this.tableUsers, filter, bind))) > 0;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the user database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the user database operation.", failure);
         }
     }
 

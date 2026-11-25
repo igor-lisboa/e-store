@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import br.uff.store.core.dtos.UserDTO;
 import br.uff.store.core.exceptions.StoreException;
+import br.uff.store.core.interfaces.services.IPasswordResetService;
 import br.uff.store.core.interfaces.services.IRoleService;
 import br.uff.store.core.interfaces.services.IUserService;
 import br.uff.store.infrastructure.shared.Helper;
@@ -40,7 +41,7 @@ public class UserServletTest {
     public void setUp() throws Exception {
         userService = mock(IUserService.class);
         roleService = mock(IRoleService.class);
-        servlet = new UserServlet(userService, roleService, new Helper());
+        servlet = new UserServlet(userService, roleService, new Helper(), mock(IPasswordResetService.class), "");
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         session = mock(HttpSession.class);

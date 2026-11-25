@@ -44,8 +44,8 @@ public class HomeServlet extends HttpServlet {
 
         try {
             jogosVitrine = productService.listFeaturedProducts();
-        } catch (Exception e) {
-            session.setAttribute("msg", FlashMessages.forFailure(e, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
         }
 
         request.setAttribute("jogosVitrine", jogosVitrine);
@@ -64,8 +64,8 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(HomeServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(HomeServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

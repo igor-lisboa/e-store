@@ -36,8 +36,8 @@ public class SaleData implements ISaleData {
             List<SaleLineDTO> lines = new ArrayList<>();
             this.mysqlDAO.query(SALE_LINES_QUERY, bind).forEach(line -> lines.add(RowMapper.saleLine(line)));
             return lines;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the sale database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the sale database operation.", failure);
         }
     }
 
@@ -46,8 +46,8 @@ public class SaleData implements ISaleData {
         try {
             Object[] bind = {saleId, userId};
             this.mysqlDAO.executeUpdate("CALL cancel_sale(?, ?)", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to cancel the order. It may not exist or may no longer be cancellable.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to cancel the order. It may not exist or may no longer be cancellable.", failure);
         }
     }
 
@@ -59,8 +59,8 @@ public class SaleData implements ISaleData {
             List<SaleDTO> mappedResults = new ArrayList<>();
             rows.forEach(sale -> mappedResults.add(RowMapper.sale(sale)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the sale database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the sale database operation.", failure);
         }
     }
 
@@ -72,8 +72,8 @@ public class SaleData implements ISaleData {
                 payment.getStatus(), payment.getRawResponseRef(), delivery.getProvider(), delivery.getMethod(),
                 delivery.getTrackingCode(), delivery.getStatus(), delivery.getRawResponseRef()};
             this.mysqlDAO.executeUpdate("CALL place_order(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the sale database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the sale database operation.", failure);
         }
     }
 
@@ -97,8 +97,8 @@ public class SaleData implements ISaleData {
             Integer lastPage = Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("ceil(count(*)/" + pageSize + ")", USER_SALES_QUERY, "", bind)));
 
             return new PaginationDTO<>(pageNumber, mappedResults, lastPage);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the sale database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the sale database operation.", failure);
         }
     }
 }

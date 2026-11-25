@@ -138,8 +138,8 @@ public class ProductAdminServlet extends HttpServlet {
             request.setAttribute("grid", productService.listAdminProducts());
 
             request.getRequestDispatcher("pages/product-admin.jsp").forward(request, response);
-        } catch (Exception e) {
-            session.setAttribute("msg", FlashMessages.forFailure(e, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
             response.sendRedirect("account");
         }
 
@@ -158,8 +158,8 @@ public class ProductAdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(ProductAdminServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(ProductAdminServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 
@@ -175,8 +175,8 @@ public class ProductAdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(ProductAdminServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(ProductAdminServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

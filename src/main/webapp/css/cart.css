@@ -70,7 +70,7 @@
 }
 
 .cart-remove-btn {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     color: #FFFFFF;
     font-size: 12px;
     padding: 3px;
@@ -114,7 +114,7 @@
 }
 
 .total-keep {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 16px;
     color: #FFFFFF;
@@ -132,7 +132,7 @@
 }
 
 .total-checkout {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 16px;
     color: #FFFFFF;

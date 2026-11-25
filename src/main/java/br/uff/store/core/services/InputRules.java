@@ -31,6 +31,13 @@ public final class InputRules {
         }
     }
 
+    /** A new or replacement password needs at least eight characters and no other composition rule. */
+    public static void newPassword(String password) throws StoreException {
+        if (password == null || password.length() < 8) {
+            throw new StoreException("Password must be at least 8 characters.");
+        }
+    }
+
     public static void page(Integer size, Integer number) throws StoreException {
         if (size == null || size < 1 || size > 100 || number == null || number < 1) {
             throw new StoreException("Page size must be between 1 and 100 and page number must be positive.");

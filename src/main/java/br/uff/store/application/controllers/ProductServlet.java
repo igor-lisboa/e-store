@@ -93,8 +93,8 @@ public class ProductServlet extends HttpServlet {
             request.setAttribute("reviews", reviewService.listProductReviews(productId));
 
             request.getRequestDispatcher("pages/product.jsp").forward(request, response);
-        } catch (Exception ex) {
-            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
             response.sendRedirect("products");
         }
     }
@@ -112,8 +112,8 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 
@@ -129,8 +129,8 @@ public class ProductServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(ProductServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

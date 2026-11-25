@@ -40,3 +40,6 @@ build/
 .local-tools/
 
 .env.local
+
+# Demo email outbox written by the Compose app service
+outbox/

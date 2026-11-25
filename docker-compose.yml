@@ -18,6 +18,8 @@ services:
       MYSQL_USER: ${MYSQL_USER:-e_store}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
       ALLOW_DEMO_CHECKOUT: "true"
+      # Demo email adapter: reset links are written as text files here (not production ready).
+      EMAIL_OUTBOX_DIR: /workspace/outbox
     depends_on:
       migrate:
         condition: service_completed_successfully

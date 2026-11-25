@@ -1,6 +1,7 @@
 """Start a disposable servlet-container process and run browser security smoke tests."""
 from pathlib import Path
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -16,7 +17,9 @@ def main():
     with socket.socket() as listener:
         listener.bind(('127.0.0.1', 0))
         port = listener.getsockname()[1]
-    environment = dict(os.environ, STORE_BASE_URL=f'http://127.0.0.1:{port}')
+    outbox = ROOT / 'target/email-outbox'
+    shutil.rmtree(outbox, ignore_errors=True)
+    environment = dict(os.environ, STORE_BASE_URL=f'http://127.0.0.1:{port}', EMAIL_OUTBOX_DIR=str(outbox))
     if environment.get('STORE_DATABASE_E2E') == '1':
         database_url = environment.get('MYSQL_CONNECTION_STRING', '')
         if not database_url.startswith('jdbc:') or urlsplit(database_url[5:]).path != '/e_store_integration':
@@ -25,7 +28,7 @@ def main():
     command = [java, '-jar', 'target/dependency/webapp-runner.jar', '--port', str(port),
                'target/e-store-1.0.1.war']
     with (ROOT / 'target/browser-server.log').open('w', encoding='utf-8') as output:
-        process = subprocess.Popen(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=output, stderr=subprocess.STDOUT)
         try:
             deadline = time.monotonic() + 120
             while time.monotonic() < deadline:
@@ -43,7 +46,8 @@ def main():
                                     env=environment, timeout=180)
             if result.returncode or environment.get('STORE_DATABASE_E2E') != '1':
                 return result.returncode
-            for script in ('scripts/test_browser_store.py', 'scripts/test_browser_hostile.py'):
+            for script in ('scripts/test_browser_store.py', 'scripts/test_browser_hostile.py',
+                           'scripts/test_browser_accessibility.py', 'scripts/test_browser_recovery.py'):
                 result = subprocess.run([sys.executable, script], cwd=ROOT, env=environment, timeout=300)
                 if result.returncode:
                     return result.returncode

@@ -40,7 +40,7 @@
 }
 
 .end-link:hover {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .end-add-new {
@@ -60,7 +60,7 @@
 }
 
 .standard-btn {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 15px;
     color: #FFFFFF;
@@ -109,7 +109,7 @@
 }
 
 .product-data td a:hover {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .product-data-add {

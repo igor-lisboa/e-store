@@ -2,6 +2,10 @@ package br.uff.store.application;
 
 import br.uff.store.core.services.ProductService;
 import br.uff.store.core.services.UserService;
+import br.uff.store.core.services.PasswordResetService;
+import br.uff.store.infrastructure.data.PasswordResetData;
+import br.uff.store.infrastructure.gateways.FileEmailOutbox;
+import br.uff.store.infrastructure.security.SecureTokenGenerator;
 import br.uff.store.core.services.AddressService;
 import br.uff.store.core.services.CartService;
 import br.uff.store.core.services.CategoryService;
@@ -30,6 +34,12 @@ public final class StoreServices {
 
     public static UserService users() {
         return new UserService(new UserData(), new Pbkdf2PasswordHasher());
+    }
+
+    /** NOT PRODUCTION READY: the email adapter only writes files; swap FileEmailOutbox for a real provider adapter. */
+    public static PasswordResetService passwordResets() {
+        return new PasswordResetService(new UserData(), new PasswordResetData(), new Pbkdf2PasswordHasher(),
+                new FileEmailOutbox(), new SecureTokenGenerator());
     }
 
     public static AddressService addresses() {

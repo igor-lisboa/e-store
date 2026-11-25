@@ -70,7 +70,6 @@ footer {
     -webkit-box-sizing: content-box;
     font-family: inherit;
     font-size: 100%;
-    outline: none;
 }
 
 #search-box input::-webkit-search-decoration, #search-box input::-webkit-search-cancel-button {
@@ -192,7 +191,7 @@ footer {
 }
 
 .dropdown:hover .dropbtn {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .ps {
@@ -237,4 +236,14 @@ footer {
 
 .fundo-paisagem1 {
     background-image: url('https://i.pinimg.com/originals/bc/c0/86/bcc0860537b4030e6e62fa0a38ef907b.jpg')
+}
+
+/* Keyboard users must always see which control has focus; no stylesheet may remove this ring. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #1a4fa0;
+    outline-offset: 2px;
 }

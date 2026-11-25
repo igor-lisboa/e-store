@@ -27,7 +27,7 @@ public class Helper implements IHelper {
     public Date convertStringToDate(String format, String date) {
         try {
             return new SimpleDateFormat(format).parse(date);
-        } catch (Exception e) {
+        } catch (Exception failure) {
             return null;
         }
     }
@@ -35,7 +35,7 @@ public class Helper implements IHelper {
     public String convertDateToString(String format, Date date) {
         try {
             return new SimpleDateFormat(format).format(date);
-        } catch (Exception e) {
+        } catch (Exception failure) {
             return null;
         }
     }
@@ -43,7 +43,7 @@ public class Helper implements IHelper {
     public Integer tryParseInteger(String intStr) {
         try {
             return Integer.valueOf(intStr);
-        } catch (Exception ec) {
+        } catch (NumberFormatException notANumber) {
             return null;
         }
     }
@@ -67,7 +67,7 @@ public class Helper implements IHelper {
     public BigDecimal tryParseDecimal(String intStr) {
         try {
             return new BigDecimal(intStr);
-        } catch (Exception ec) {
+        } catch (NumberFormatException notANumber) {
             return null;
         }
     }

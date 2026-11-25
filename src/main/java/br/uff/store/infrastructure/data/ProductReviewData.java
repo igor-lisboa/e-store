@@ -34,8 +34,8 @@ public class ProductReviewData implements IProductReviewData {
             HashMap<String, Object> row = rows.get(0);
             return new ProductReviewInputDTO(userId, productId, Integer.valueOf(String.valueOf(row.get("rating"))),
                     (String) row.get("description"), (String) row.get("title"));
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product review database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 
@@ -46,8 +46,8 @@ public class ProductReviewData implements IProductReviewData {
                 reviewInput.getUserId(), reviewInput.getProductId()};
             return this.mysqlDAO.executeUpdate(
                     "UPDATE product_reviews SET rating=?, description=?, title=? WHERE user_id=? AND product_id=?", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product review database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 
@@ -56,8 +56,8 @@ public class ProductReviewData implements IProductReviewData {
         try {
             Object[] bind = {userId, productId};
             return this.mysqlDAO.executeUpdate("DELETE FROM product_reviews WHERE user_id=? AND product_id=?", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product review database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 
@@ -67,8 +67,8 @@ public class ProductReviewData implements IProductReviewData {
             Object[] bind = {userId, productId};
             Integer reviewCount = Integer.valueOf(String.valueOf(this.mysqlDAO.scalar("count(*)", "product_reviews", "user_id=? AND product_id=?", bind)));
             return reviewCount > 0;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product review database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 
@@ -77,8 +77,8 @@ public class ProductReviewData implements IProductReviewData {
         try {
             Object[] bind = {reviewInput.getUserId(), reviewInput.getProductId(), reviewInput.getRating(), reviewInput.getDescription(), reviewInput.getTitle()};
             this.mysqlDAO.executeUpdate("INSERT INTO product_reviews (user_id,product_id,rating,description,title,created_at) VALUES (?,?,?,?,?,SYSDATE())", bind);
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the product review database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 
@@ -90,8 +90,8 @@ public class ProductReviewData implements IProductReviewData {
             List<ProductReviewListDTO> mappedResults = new ArrayList<>();
             rows.forEach(rating -> mappedResults.add(RowMapper.review(rating)));
             return mappedResults;
-        } catch (Exception ex) {
-            throw new StoreException("Unable to complete the product review database operation.", ex);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the product review database operation.", failure);
         }
     }
 }

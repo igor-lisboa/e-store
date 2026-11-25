@@ -1,6 +1,7 @@
 package br.uff.store.core.services;
 
 import br.uff.store.core.dtos.UserDTO;
+import br.uff.store.core.exceptions.PasswordResetRequiredException;
 import br.uff.store.core.exceptions.StoreException;
 import br.uff.store.core.interfaces.data.IUserData;
 import br.uff.store.core.interfaces.services.IPasswordHasher;
@@ -8,8 +9,6 @@ import br.uff.store.core.interfaces.services.IUserService;
 import java.util.List;
 
 public class UserService implements IUserService {
-    private static final int MINIMUM_PASSWORD_LENGTH = 8;
-
     private final IUserData userData;
     private final IPasswordHasher passwordHasher;
 
@@ -28,11 +27,15 @@ public class UserService implements IUserService {
         }
         email = email.trim();
         UserDTO user = userData.findUserByEmail(email);
-        if (user == null || !passwordHasher.matches(password, user.getPassword())) {
+        if (user == null) {
             throw new StoreException("Invalid email or password.");
         }
         if (!passwordHasher.isEncoded(user.getPassword())) {
-            userData.updatePassword(user.getId(), passwordHasher.hash(password));
+            // A legacy hash is never accepted again: the owner must prove email access and choose a new password.
+            throw new PasswordResetRequiredException(user.getEmail());
+        }
+        if (!passwordHasher.matches(password, user.getPassword())) {
+            throw new StoreException("Invalid email or password.");
         }
         user.setPassword(null);
         return user;
@@ -113,8 +116,8 @@ public class UserService implements IUserService {
             throw new StoreException("A password is required for new accounts.");
         }
         boolean changesPassword = user.getId() == null || (password != null && !password.trim().isEmpty());
-        if (changesPassword && password.length() < MINIMUM_PASSWORD_LENGTH) {
-            throw new StoreException("Password must be at least 8 characters.");
+        if (changesPassword) {
+            InputRules.newPassword(password);
         }
     }
 }

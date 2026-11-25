@@ -42,7 +42,7 @@ html, body {
 }
 .product-description span {
     font-size: 12px;
-    color: #358ED7;
+    color: #1f6fb5;
     letter-spacing: 1px;
     text-transform: uppercase;
     text-decoration: none;
@@ -56,7 +56,7 @@ html, body {
 .product-description p {
     font-size: 16px;
     font-weight: 300;
-    color: #86939E;
+    color: #5f6b76;
     line-height: 24px;
     text-align: justify;
     margin-bottom: 20px;
@@ -81,7 +81,7 @@ html, body {
 
 .cart-btn {
     display: inline-block;
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 16px;
     color: #FFFFFF;
@@ -101,7 +101,7 @@ html, body {
 }
 
 [for='toggle-heart'] {
-    color: #aab8c2;
+    color: #6b7a86;
 }
 
 [id='toggle-heart']:checked + label {
@@ -198,7 +198,7 @@ html, body {
 
 .percentage-full {
     height: 100%;
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 4px;
 }
 
@@ -250,7 +250,7 @@ html, body {
 }
 
 .review-btn a {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 16px;
     color: #FFFFFF;

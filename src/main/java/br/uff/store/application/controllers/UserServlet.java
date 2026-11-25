@@ -24,6 +24,9 @@ import br.uff.store.core.interfaces.services.IRoleService;
 import br.uff.store.core.interfaces.services.IUserService;
 import br.uff.store.core.services.RoleService;
 import br.uff.store.core.services.UserService;
+import br.uff.store.core.exceptions.PasswordResetRequiredException;
+import br.uff.store.core.interfaces.services.IPasswordResetService;
+import br.uff.store.application.ResetLinks;
 import br.uff.store.core.services.AccountAuthorization;
 import br.uff.store.application.security.AccountRedirects;
 import br.uff.store.infrastructure.shared.Helper;
@@ -39,15 +42,21 @@ public class UserServlet extends HttpServlet {
     private final IUserService userService;
     private final IRoleService roleService;
     private final Helper helper;
+    private final IPasswordResetService resetService;
+    private final String configuredBaseUrl;
 
     public UserServlet() {
-        this(StoreServices.users(), StoreServices.roles(), new Helper());
+        this(StoreServices.users(), StoreServices.roles(), new Helper(), StoreServices.passwordResets(),
+                System.getenv("PUBLIC_BASE_URL"));
     }
 
-    UserServlet(IUserService userService, IRoleService roleService, Helper helper) {
+    UserServlet(IUserService userService, IRoleService roleService, Helper helper,
+            IPasswordResetService resetService, String configuredBaseUrl) {
         this.userService = userService;
         this.roleService = roleService;
         this.helper = helper;
+        this.resetService = resetService;
+        this.configuredBaseUrl = configuredBaseUrl;
     }
 
     /**
@@ -130,8 +139,16 @@ public class UserServlet extends HttpServlet {
                                 emailCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
                                 response.addCookie(emailCookie);
                             }
-                    } catch (Exception el) {
-                        session.setAttribute("msg", FlashMessages.forFailure(el, FlashMessages.localeOf(session)));
+                    } catch (PasswordResetRequiredException legacyAccount) {
+                        // Decision 4A: an account with a legacy password hash must choose a new password by email.
+                        try {
+                            resetService.requestReset(legacyAccount.getEmail(), ResetLinks.pageUrl(request, configuredBaseUrl));
+                            session.setAttribute("msg", FlashMessages.forFailure(legacyAccount, FlashMessages.localeOf(session)));
+                        } catch (Exception failure) {
+                            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
+                        }
+                    } catch (Exception failure) {
+                        session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
                     }
 
                     break;
@@ -207,8 +224,8 @@ public class UserServlet extends HttpServlet {
             }
 
             request.getRequestDispatcher(redirect).forward(request, response);
-        } catch (Exception ex) {
-            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
             response.sendRedirect("");
         }
     }
@@ -233,8 +250,8 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 
@@ -250,8 +267,8 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(UserServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

@@ -130,6 +130,86 @@ public class FlashMessagesTest {
         }
     }
 
+    @Test
+    public void sentencesWithEmbeddedValuesAreTranslatedAndKeepTheirValues() {
+        assertEquals("No se pudo agregar el producto ID 12 al carrito ID 345.",
+                FlashMessages.text("Unable to add product ID 12 in cart ID 345.", SPANISH));
+        assertEquals("O carrinho ID 9 é inválido, está vazio, já foi vendido ou pertence a outro utilizador.",
+                FlashMessages.text("Cart ID 9 is invalid, empty, sold, or owned by another user.", PORTUGUESE_PORTUGAL));
+        assertEquals("O aumento de estoque não deve ultrapassar 1000000 unidades.",
+                FlashMessages.text("Stock increment must not exceed 1000000 units.", PORTUGUESE_BRAZIL));
+        assertEquals("Unable to add product ID 12 in cart ID 345.",
+                FlashMessages.text("Unable to add product ID 12 in cart ID 345.", Locale.ENGLISH));
+    }
+
+    @Test
+    public void fieldNamesInsideASentenceAreTranslatedToo() {
+        assertEquals("ID del producto debe ser un entero positivo.", FlashMessages.text("Product ID must be a positive integer.", SPANISH));
+        assertEquals("Cidade é obrigatório e não deve ultrapassar 100 caracteres.",
+                FlashMessages.text("City is required and must not exceed 100 characters.", PORTUGUESE_BRAZIL));
+        assertEquals("Unknown field must be a positive integer.", FlashMessages.text("Unknown field must be a positive integer.", Locale.ENGLISH));
+    }
+
+    @Test
+    public void aSentenceThatMatchesNoTemplateStaysEnglishInsteadOfBeingGuessed() {
+        assertEquals("Something else entirely.", FlashMessages.text("Something else entirely.", SPANISH));
+        assertEquals("Cart ID 7 is invalid.", FlashMessages.text("Cart ID 7 is invalid.", SPANISH));
+    }
+
+    @Test
+    public void everyTemplateAndFieldNameHasATranslationInEveryLocale() throws IOException {
+        List<String> keys = new ArrayList<>(FlashMessages.TEMPLATES);
+        keys.addAll(fieldNames());
+        assertTrue("expected to find the field names used by InputRules callers", keys.size() > FlashMessages.TEMPLATES.size() + 10);
+        ResourceBundle.Control noFallback = ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES);
+        for (Locale locale : new Locale[] {Locale.ENGLISH, SPANISH, PORTUGUESE_BRAZIL, PORTUGUESE_PORTUGAL}) {
+            ResourceBundle bundle = ResourceBundle.getBundle("flash", locale, noFallback);
+            for (String sentence : keys) {
+                assertTrue(locale + " lacks a translation for: " + sentence, bundle.containsKey(FlashMessages.key(sentence)));
+                if (!Locale.ENGLISH.equals(locale)) {
+                    assertNotEquals(locale + " repeats English: " + sentence, sentence, bundle.getString(FlashMessages.key(sentence)));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void everySentenceBuiltFromAnEnglishPrefixMatchesARegisteredTemplate() throws IOException {
+        Pattern prefix = Pattern.compile("new StoreException\\(\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\+");
+        int checked = 0;
+        try (Stream<Path> files = Files.walk(Paths.get("src/main/java"))) {
+            for (Path file : (Iterable<Path>) files.filter(path -> path.toString().endsWith(".java"))::iterator) {
+                Matcher matcher = prefix.matcher(new String(Files.readAllBytes(file), StandardCharsets.UTF_8));
+                while (matcher.find()) {
+                    checked++;
+                    boolean registered = false;
+                    for (String template : FlashMessages.TEMPLATES) {
+                        registered |= template.startsWith(matcher.group(1));
+                    }
+                    assertTrue("No translation template starts with: " + matcher.group(1), registered);
+                }
+            }
+        }
+        assertTrue("expected to find concatenated messages", checked >= 8);
+    }
+
+    /** Field names passed to InputRules, which are spliced into messages such as "{0} must be a positive integer." */
+    private static List<String> fieldNames() throws IOException {
+        Pattern label = Pattern.compile("InputRules\\.(?:requiredText|positiveId|imageSource)\\([^;]*?\"([A-Z][A-Za-z ]+)\"\\)");
+        List<String> names = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(Paths.get("src/main/java"))) {
+            for (Path file : (Iterable<Path>) files.filter(path -> path.toString().endsWith(".java"))::iterator) {
+                Matcher matcher = label.matcher(new String(Files.readAllBytes(file), StandardCharsets.UTF_8));
+                while (matcher.find()) {
+                    if (!names.contains(matcher.group(1))) {
+                        names.add(matcher.group(1));
+                    }
+                }
+            }
+        }
+        return names;
+    }
+
     /** Fixed sentences the code can show: StoreException literals, controller confirmations, and the generic failure. */
     private static List<String> literalMessages() throws IOException {
         Pattern thrown = Pattern.compile("new StoreException\\(\"((?:[^\"\\\\]|\\\\.)*)\"\\s*[,)]");
@@ -137,6 +217,7 @@ public class FlashMessagesTest {
         List<String> found = new ArrayList<>();
         found.add(FlashMessages.GENERIC_FAILURE);
         found.add("Welcome, {0}!");
+        found.add(br.uff.store.core.exceptions.PasswordResetRequiredException.MESSAGE);
         try (Stream<Path> files = Files.walk(Paths.get("src/main/java"))) {
             for (Path file : (Iterable<Path>) files.filter(path -> path.toString().endsWith(".java"))::iterator) {
                 String source = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);

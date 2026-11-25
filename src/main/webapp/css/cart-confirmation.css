@@ -29,7 +29,7 @@
 }
 
 .confirma-novoend a:hover {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .confirma-radio {
@@ -70,12 +70,12 @@
 }
 
 .confirma-radio a:hover {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .confirma-compra {
     margin: 20px 0px 0px 5px;
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 16px;
     color: #FFFFFF;
@@ -150,7 +150,7 @@
 }
 
 .back-details a:hover {
-    color: #358ED7;
+    color: #1f6fb5;
 }
 
 .address-details {

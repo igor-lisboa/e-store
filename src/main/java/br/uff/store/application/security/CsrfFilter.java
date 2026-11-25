@@ -13,7 +13,7 @@ import javax.servlet.ServletResponse;
 
 /** Validate before a controller can authenticate a user or change session/data state. */
 @WebFilter(urlPatterns = {"/", "/account", "/addresses", "/product-admin", "/product",
-        "/products", "/cart", "/checkout", "/reviews", "/language", "/pages/*"})
+        "/products", "/cart", "/checkout", "/reviews", "/language", "/password-reset", "/pages/*"})
 public class CsrfFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) { }

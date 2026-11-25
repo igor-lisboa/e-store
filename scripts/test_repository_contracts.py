@@ -157,6 +157,22 @@ class RepositoryContractsTest(unittest.TestCase):
                 self.assertIn(route or '/', protected, str(source))
         self.assertIn('/pages/*', protected)
 
+    def test_caught_exceptions_have_descriptive_variable_names(self):
+        abbreviated = re.compile(r'catch \([\w. |]+? (?:e|ex|el|e1|e2|exc|ie|nfe)\)')
+        for source in list((ROOT / 'src').rglob('*.java')):
+            self.assertNotRegex(source.read_text(encoding='utf-8'), abbreviated, str(source))
+
+    def test_every_demo_adapter_is_listed_as_not_production_ready(self):
+        document = (ROOT / 'docs/non-production-readiness.md').read_text(encoding='utf-8')
+        adapters = list((ROOT / 'src/main/java/br/uff/store/infrastructure/gateways').glob('*.java'))
+        self.assertTrue(adapters)
+        for adapter in adapters:
+            self.assertIn(adapter.stem, document, f'{adapter.name} must be listed in docs/non-production-readiness.md')
+
+    def test_stylesheets_never_remove_the_keyboard_focus_ring(self):
+        for sheet in (ROOT / 'src/main/webapp/css').glob('*.css'):
+            self.assertNotRegex(sheet.read_text(encoding='utf-8'), r'outline\s*:\s*(?:none|0)\s*[;}]', str(sheet))
+
     def test_core_cannot_import_outer_layers_or_frameworks(self):
         forbidden = re.compile(r'import (?:br\.uff\.store\.(?:application|infrastructure)|'
                                r'javax\.servlet|com\.google\.gson)')

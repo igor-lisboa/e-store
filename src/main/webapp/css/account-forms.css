@@ -37,7 +37,6 @@ select{
     -moz-transition: all 0.30s ease-in-out;
     -ms-transition: all 0.30s ease-in-out;
     -o-transition: all 0.30s ease-in-out;
-    outline: none;
 }
 .form-style-1 input[type=text]:focus,
 .form-style-1 input[type=date]:focus,
@@ -89,7 +88,7 @@ select{
 }
 
 .form-style-1 li button {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 13px;
     color: #FFFFFF;
@@ -131,7 +130,7 @@ select{
 }
 
 .center a {
-    background-color: #358ED7;
+    background-color: #1f6fb5;
     border-radius: 6px;
     font-size: 13px;
     color: #FFFFFF;

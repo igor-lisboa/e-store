@@ -10,6 +10,18 @@ Evidence from this checkpoint: default suite 208 tests pass (JaCoCo default-only
 
 Local notes: Maven/JDK are in ignored `.local-tools/`; the packaged server startup needs up to about 2 minutes here (limits raised to 120 s), the JDK 8 JVM crashed intermittently on startup (`hs_err_pid*.log`, retried and deleted), and one MySQL connection drop occurred once during a long integration run and did not recur. Ignored helper scripts `.local-tools/run-suite.ps1` and `.local-tools/run-browser.ps1` run the suites with the test credentials.
 
+## Follow-up (2026-11-25)
+
+Uncommitted, on top of the checkpoint above: sentences with embedded values are now localized (`FlashMessages.TEMPLATES`, 11 templates and 17 field names in four bundles, source-scan tests); tool-assisted accessibility check `scripts/test_browser_accessibility.py` (focus visibility, tab order, WCAG AA contrast on solid backgrounds, control names, validation messages) found and drove fixes: removed `outline: none` rules and added a global `:focus-visible` ring, darkened low-contrast colours (`#999` labels, `#358ED7`/`#64af3d` buttons and links, heart and muted text), and backed the carousel arrows; a contract test forbids removing the focus ring. Default suite 213 tests; browser journeys include the 5 accessibility checks.
+
+## Follow-up 2 (2026-11-25)
+
+Uncommitted: Compose and Linux verification; generic email, payment, and delivery ports with `docs/non-production-readiness.md`; password recovery by email (V12, `PasswordResetService`, `/password-reset`, demo `FileEmailOutbox`, legacy-hash forced reset); identifier cleanup (68 caught-exception variables renamed, contract-tested); more meaningful default tests (cart rules, cart and product-admin actions, user rules, account API).
+
+Evidence: default 283 tests pass; MySQL profile 46 integration tests pass (8 new in `PasswordResetMySqlIT`); legacy 42; contracts 20; Docker Compose (Linux containers, ports 3316 and 8191): `migrate` applied V1 to V12 to a fresh database, the `app` container built the WAR running all 235 tests then present, served the journeys (smoke 7, shopping 3, hostile 3, accessibility 5, recovery 3), and shut down cleanly. Native macOS and Linux hosts were not available; only the Linux container was exercised.
+
+Local notes: Docker Desktop had to be started; the Compose `app` service runs `mvn clean package` on the bind-mounted repository, which deletes `target/`, so rebuild locally afterwards. Set `MYSQL_PORT` and `MVN_PORT` if 3306 or 8181 is taken. Reset emails from Compose are written to `./outbox` (git-ignored).
+
 ## Earlier checkpoint (2026-11-18)
 
 Updated 2026-11-18. The user authorized autonomous pending work and asked for completed/missing tracking and a commit title. Changes are uncommitted; preserve the entire working tree. No subagents were used.

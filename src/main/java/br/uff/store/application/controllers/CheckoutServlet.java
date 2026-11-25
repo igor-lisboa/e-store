@@ -124,8 +124,8 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             request.getRequestDispatcher("pages/payment.jsp").forward(request, response);
-        } catch (Exception ex) {
-            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
             response.sendRedirect("cart");
         }
     }
@@ -157,8 +157,8 @@ public class CheckoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(CheckoutServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(CheckoutServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 
@@ -174,8 +174,8 @@ public class CheckoutServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(CheckoutServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(CheckoutServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

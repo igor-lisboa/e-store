@@ -44,6 +44,7 @@
                     <input value="1" name="remember" id="remember" type="checkbox">
                     <label for="remember"><fmt:message key="ui.rememberEmail"/></label>
                 </div>
+                <p class="forgot-link"><a href="password-reset"><fmt:message key="ui.forgotPassword"/></a></p>
 
                 <div class="login-btn">
                     <button type="submit" name="action" value="login"><fmt:message key="ui.signIn"/></button>

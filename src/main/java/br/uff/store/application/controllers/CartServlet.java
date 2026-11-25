@@ -155,13 +155,14 @@ public class CartServlet extends HttpServlet {
             request.setAttribute(TOTAL_PRICE, cartService.getCartTotal(cartId));
 
             request.getRequestDispatcher("pages/cart.jsp").forward(request, response);
-        } catch (Exception ex) {
-            session.setAttribute("msg", FlashMessages.forFailure(ex, FlashMessages.localeOf(session)));
+        } catch (Exception failure) {
+            session.setAttribute("msg", FlashMessages.forFailure(failure, FlashMessages.localeOf(session)));
             response.sendRedirect(PRODUCTS);
         }
     }
 
     private void clearLegacyCartCookie(HttpServletRequest request, HttpServletResponse response) {
+        // Name of the cookie older releases set; kept only so browsers holding it get it expired.
         Cookie cartCookie = new Cookie("carrinhoId", "");
         cartCookie.setMaxAge(0);
         cartCookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
@@ -181,8 +182,8 @@ public class CartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(CartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(CartServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 
@@ -198,8 +199,8 @@ public class CartServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             processRequest(request, response);
-        } catch (Exception ex) {
-            Logger.getLogger(CartServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception failure) {
+            Logger.getLogger(CartServlet.class.getName()).log(Level.SEVERE, null, failure);
         }
     }
 

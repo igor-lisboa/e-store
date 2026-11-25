@@ -25,8 +25,8 @@ public class RoleData implements IRoleData {
             List<RoleDTO> mappedResults = new ArrayList<>();
             rows.forEach(role -> mappedResults.add(RowMapper.role(role)));
             return mappedResults;
-        } catch (Exception e) {
-            throw new StoreException("Unable to complete the role database operation.", e);
+        } catch (Exception failure) {
+            throw new StoreException("Unable to complete the role database operation.", failure);
         }
     }
 

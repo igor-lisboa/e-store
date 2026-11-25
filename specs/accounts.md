@@ -37,10 +37,12 @@
 
 ## Open questions
 
-- Registration and password-reset flows are not clearly specified by the current tests.
+- Registration is covered by browser tests; password recovery is specified below.
 - Define supported password policy and account recovery requirements before implementation.
 
 ## Decided requirements
 
 - Passwords set on account creation or replaced on edit must have at least 8 characters (decision 11A). No other composition rules apply. Accounts that keep their password on edit are not re-checked, and existing hashes are not rewritten by this rule.
-- Dormant accounts with legacy password hashes are reset by a forced email reset on their next sign-in attempt (decision 4A). Pending: no email delivery provider exists yet.
+- Password recovery (decision 4A) works through the `/password-reset` page. A visitor enters an email address and always sees the same answer, whether or not the account exists. For a known account, a random 256-bit token is created; only its SHA-256 hash is stored (`password_reset_tokens`, V12) with a 60-minute expiry, and any earlier unused token of that account is discarded. The emailed link opens a form that needs a new password of at least 8 characters; a rejected password does not use up the link. A token works once (a conditional update makes simultaneous uses race safely), cannot reset any other account, and never works after it expires.
+- An account whose stored password is not a PBKDF2 hash (a legacy value) can no longer sign in, even with the right password: the attempt is refused with a message and a reset email is sent. The legacy value is not silently upgraded.
+- Email goes through the `IEmailSender` port. The only adapter, `FileEmailOutbox`, writes files to `EMAIL_OUTBOX_DIR` and is not production ready (see `docs/non-production-readiness.md`). `PUBLIC_BASE_URL` sets the address used in links; without it the request's own address is used, which is only acceptable for local demos.
