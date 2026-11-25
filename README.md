@@ -58,6 +58,7 @@ Windows maintainers can optionally run `python scripts/bootstrap-local-tools.py`
 
 | Symptom | Check |
 | --- | --- |
+| Slow startup or loading page at http://localhost:8181 | First builds download dependencies (5–10 min). Watch `docker compose logs -f app` to see build progress. Check Docker system resources (memory, disk). Subsequent starts are faster. Use `docker compose down -v` and start fresh if you suspect stale containers. |
 | Port already allocated | Change `MYSQL_PORT` or `MVN_PORT` in `.env`, run `docker compose down` to remove the half-created containers, then start again. |
 | `UnknownHostException: database` from `migrate` | Stale containers or network from an earlier failed start. Run `docker compose down`, then start again. |
 | Database connection refused during host development | Confirm the published MySQL port, JDBC host, schema, and environment variables. Compose uses `database`; host Java uses `127.0.0.1`. |

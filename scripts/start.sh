@@ -16,13 +16,22 @@ store_url="http://localhost:${store_port}"
 
 echo "Starting e-store. When it is ready, open: ${store_url}"
 echo "(The first start builds the application and can take several minutes.)"
+echo ""
+echo "Startup stages:"
+echo "  1. Database initialization (20-60s)"
+echo "  2. Schema migration (Flyway)"
+echo "  3. Maven build & package (2-10 min on first run, 30-60s thereafter)"
+echo "  4. Webapp server startup"
+echo ""
 
 # Print the address again when the server really answers, so it is not lost in the build output.
 announce_when_ready() {
     command -v curl >/dev/null 2>&1 || return 0
     attempts=0
+    # Check both webapp startup and app readiness. /products is public and returns 200 (not a redirect).
     while [ "$attempts" -lt 360 ]; do
-        if curl -fs -o /dev/null "${store_url}/account"; then
+        # Try /products (no auth needed); if it responds 200, app is ready.
+        if curl -fs -o /dev/null "${store_url}/products"; then
             echo ""
             echo "=============================================================="
             echo " e-store is ready: ${store_url}"
@@ -32,8 +41,16 @@ announce_when_ready() {
             return 0
         fi
         attempts=$((attempts + 1))
+        # Print progress every 30 seconds (6 attempts × 5s)
+        if [ $((attempts % 6)) -eq 0 ]; then
+            echo "Still starting... (waiting $(($attempts * 5))s)"
+        fi
         sleep 5
     done
+    echo ""
+    echo "⚠ App did not respond after $(($attempts * 5))s. Check logs:"
+    echo "  docker compose logs -f app"
+    return 1
 }
 
 announce_when_ready &
